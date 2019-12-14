@@ -37,8 +37,7 @@ function preinstall()
 {
     sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
     systemctl restart sshd
-    echo "更新系统..."
-    yum update -y
+    
     echo "安装必要软件"
     yum install -y epel-release telnet nginx wget vim net-tools >> /dev/null
     systemctl enable nginx
@@ -47,6 +46,8 @@ function preinstall()
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config >> /dev/null 2>&1
         setenforce 0
     fi
+    echo "更新系统..."
+    yum update -y
 }
 
 function _install()
