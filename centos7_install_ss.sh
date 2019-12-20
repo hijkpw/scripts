@@ -40,7 +40,7 @@ function preinstall()
     
     echo "安装必要软件"
     yum install -y epel-release telnet nginx wget vim net-tools >> /dev/null
-    systemctl enable nginx
+    systemctl enable nginx && systemctl start nginx
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config >> /dev/null 2>&1
@@ -166,12 +166,10 @@ function config()
 {
     "server":"0.0.0.0",
     "server_port":${port},
-    "local_address":"127.0.0.1",
     "local_port":1080,
     "password":"${password}",
     "timeout":600,
     "method":"${method}",
-    "fast_open":true,
     "nameserver":"8.8.8.8",
     "mode":"tcp_and_udp"
 }
