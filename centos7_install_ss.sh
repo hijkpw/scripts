@@ -37,17 +37,21 @@ function preinstall()
 {
     sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
     systemctl restart sshd
+    ret=`nginx -t`
+    if [ "$ret" != "0" ]; then
+        echo "更新系统..."
+        yum update -y
+    fi
     
     echo "安装必要软件"
-    yum install -y epel-release telnet nginx wget vim net-tools >> /dev/null
+    yum install -y epel-release telnet wget vim net-tools
+    yum install -y nginx
     systemctl enable nginx && systemctl start nginx
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
-        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config >> /dev/null 2>&1
+        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
         setenforce 0
     fi
-    echo "更新系统..."
-    yum update -y
 }
 
 function _install()
@@ -55,9 +59,9 @@ function _install()
     echo 安装SS...
     wget -O /etc/yum.repos.d/librehat-shadowsocks-epel-7.repo 'https://copr.fedorainfracloud.org/coprs/librehat/shadowsocks/repo/epel-7/librehat-shadowsocks-epel-7.repo' >> /dev/null 2>&1
     yum install -y shadowsocks-libev
-    systemctl enable shadowsocks-libev  >> /dev/null 2>&1
+    systemctl enable shadowsocks-libev
 
-    read -p "请输入SS的密码（不输入则随机生成）:" password
+    read -p "请设置SS的密码（不输入则随机生成）:" password
     [ -z "$password" ] && password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
     echo "密码： $password"
@@ -174,7 +178,7 @@ function config()
     "mode":"tcp_and_udp"
 }
 EOF
-    systemctl start shadowsocks-libev >> /dev/null
+    systemctl start shadowsocks-libev
 }
 
 function setFirewall()
