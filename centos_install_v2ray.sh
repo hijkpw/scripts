@@ -85,6 +85,7 @@ function _install()
     sed -i '1a"log": {"loglevel": "info", "access": "/var/log/v2ray/access.log","error": "/var/log/v2ray/error.log"},' /etc/v2ray/config.json
     alterid=`cat /etc/v2ray/config.json| grep alterId | cut -d: -f2 | tr -d ' '`
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
+    systemctl enable v2ray && systemctl restart v2ray
     echo "安装成功！"
 }
 
