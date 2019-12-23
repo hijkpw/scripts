@@ -47,9 +47,9 @@ function preinstall()
         yum update -y
     fi
     echo "安装必要软件"
-    yum install -y epel-release telnet curl wget vim net-tools libsodium python openssl
+    yum install -y epel-release telnet curl wget vim net-tools libsodium openssl
     if [ $main -eq 8 ]; then
-        ln -s ln -s /usr/bin/python /usr/bin/python3
+        ln -s /usr/bin/python /usr/bin/python3
     fi
     yum install -y nginx
     systemctl enable nginx && systemctl start nginx
