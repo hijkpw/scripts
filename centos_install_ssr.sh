@@ -31,7 +31,7 @@ function checkSystem()
     
     result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
     main=${result%%.*}
-    if [ "$main" != "7" ]; then
+    if [ $main -lt 7 ]; then
         echo "不受支持的CentOS版本"
         exit 1
     fi
