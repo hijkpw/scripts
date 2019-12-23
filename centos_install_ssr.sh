@@ -113,9 +113,9 @@ function _install()
     echo "13)salsa20"
     echo "14)chacha20-ietf"
     echo "15)chacha20"
-    read -p "请选择加密方式（默认none）" answer
+    read -p "请选择加密方式（默认aes-256-cfb）" answer
     if [ -z "$answer" ]; then
-        method="none"
+        method="aes-256-cfb"
     else
         case $answer in
         0)
@@ -168,7 +168,7 @@ function _install()
             ;;
         *)
             echo "无效的选择，使用默认加密方式"
-            method="none"
+            method="aes-256-cfb"
         esac
     fi
     echo ""
