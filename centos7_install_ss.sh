@@ -75,7 +75,7 @@ function _install()
     
     while true
     do
-        read -p "请输入SS的端口号[1-65535]:" port
+        read -p "请设置SS的端口号[1-65535]:" port
         [ -z "$port" ] && port="12345"
         expr $port + 0 &>/dev/null
         if [ $? -eq 0 ]; then
