@@ -137,6 +137,7 @@ function showTip()
     echo -e " id：${red}${uid}${plain}"
     echo -e " 额外id： ${red}${alterid}${plain}"
     echo -e " 加密方式： ${red}auto${plain}"
+    echo -e " 传输协议： ${red}tcp${plain}"
     echo    
     echo -e "v2ray配置文件：${red}/etc/v2ray/config.json${plain}，请按照自己需要进行修改"         
     echo  
