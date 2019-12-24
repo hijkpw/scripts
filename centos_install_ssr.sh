@@ -47,11 +47,17 @@ function preinstall()
         yum update -y
     fi
     echo "安装必要软件"
-    yum install -y epel-release telnet curl wget vim net-tools libsodium openssl
+    yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip
     if [ $main -eq 8 ]; then
         ln -s /usr/bin/python /usr/bin/python3
     fi
     yum install -y nginx
+    wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
+    unzip theme.zip
+    rm -rf __MACOSX/
+    mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
+    mv Flatfy\ V3/* /usr/share/nginx/html/
+    rm -rf theme.zip Flatfy\ V3
     systemctl enable nginx && systemctl start nginx
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
