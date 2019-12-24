@@ -51,6 +51,7 @@ function preinstall()
     rm -rf __MACOSX/
     mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
     mv Flatfy\ V3/* /usr/share/nginx/html/
+    rm -rf theme.zip Flatfy\ V3
     systemctl enable nginx && systemctl start nginx
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
