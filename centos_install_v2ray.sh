@@ -130,6 +130,7 @@ function showTip()
     echo -e " 端口：${red}${port}${plain}"
     echo -e " id：${red}${uid}${plain}"
     echo -e " 额外id： ${red}${alterid}${plain}"
+    echo -e " 加密方式： ${red}auto${plain}"
     echo    
     echo -e "v2ray配置文件：${red}/etc/v2ray/config.json${plain}，请按照自己需要进行修改"         
     echo  
