@@ -43,7 +43,8 @@ function preinstall()
         yum update -y
     fi
     echo "安装必要软件"
-    yum install -y epel-release telnet nginx wget vim net-tools
+    yum install -y epel-release telnet wget vim net-tools
+    yum install -y nginx
     systemctl enable nginx && systemctl start nginx
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
