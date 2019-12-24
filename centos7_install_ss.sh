@@ -44,8 +44,13 @@ function preinstall()
     fi
     
     echo "安装必要软件"
-    yum install -y epel-release telnet wget vim net-tools
+    yum install -y epel-release telnet wget vim net-tools unzip
     yum install -y nginx
+    wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
+    unzip theme.zip
+    rm -rf __MACOSX/
+    mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
+    mv Flatfy\ V3/* /usr/share/nginx/html/
     systemctl enable nginx && systemctl start nginx
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
