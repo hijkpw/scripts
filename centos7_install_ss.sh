@@ -75,20 +75,20 @@ function _install()
     
     while true
     do
-        read -p "请设置SS的端口号[1-65535]:" port
+        read -p "请设置SS的端口号[1025-65535]:" port
         [ -z "$port" ] && port="12345"
         expr $port + 0 &>/dev/null
         if [ $? -eq 0 ]; then
-            if [ $port -ge 1 ] && [ $port -le 65535 ]; then
+            if [ $port -ge 1025 ] && [ $port -le 65535 ]; then
                 echo ""
                 echo "端口号： $port"
                 echo ""
                 break
             else
-                echo "输入错误，端口号为1-65535的数字"
+                echo "输入错误，端口号为1025-65535的数字"
             fi
         else
-            echo "输入错误，端口号为1-65535的数字"
+            echo "输入错误，端口号为1025-65535的数字"
         fi
     done
     echo "请选择SS的加密方式:" 
