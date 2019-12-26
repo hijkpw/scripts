@@ -49,14 +49,14 @@ function preinstall()
     echo "安装必要软件"
     yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip
     if [ $main -eq 8 ]; then
-        ln -s /usr/bin/python /usr/bin/python3
+        ln -s /usr/bin/python3 /usr/bin/python
     fi
     yum install -y nginx
     wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
     unzip theme.zip
     rm -rf __MACOSX/
     res=`diff Flatfy\ V3/index.html /usr/share/nginx/html/index.html`
-    if [ "$res" <> "" ]; then
+    if [ "$res" != "" ]; then
         mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
         mv Flatfy\ V3/* /usr/share/nginx/html/
     fi
