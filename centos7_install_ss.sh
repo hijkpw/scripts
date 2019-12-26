@@ -50,7 +50,7 @@ function preinstall()
     unzip theme.zip
     rm -rf __MACOSX/
     res=`diff Flatfy\ V3/index.html /usr/share/nginx/html/index.html`
-    if [ "$res" <> "" ]; then
+    if [ "$res" != "" ]; then
         mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
         mv Flatfy\ V3/* /usr/share/nginx/html/
     fi
