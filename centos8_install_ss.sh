@@ -274,7 +274,7 @@ function uninstall()
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
         systemctl stop shadowsocks-libev && systemctl disable shadowsocks-libev
         rm -rf /usr/lib/systemd/system/shadowsocks-libev.service
-        cd /usr/bin/local && rm -rf ss-local ss-manager ss-nat ss-redir ss-server ss-tunnel
+        cd /usr/local/bin && rm -rf ss-local ss-manager ss-nat ss-redir ss-server ss-tunnel
         rm -rf /usr/lib64/libshadowsocks-libev*
         rm -rf /usr/share/doc/shadowsocks-libev
         rm -rf /usr/share/man/man1/ss-*.1.gz
