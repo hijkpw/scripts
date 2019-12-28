@@ -234,6 +234,8 @@ function showTip()
     echo -e "SS配置文件：${red}/etc/shadowsocks-libev/config.json${plain}，请按照自己需要进行修改"         
     echo  
     echo  如果连接不成功，请注意查看安全组/防火墙是否已放行端口
+    echo 
+    echo  如有其他问题，请到 https://www.hijk.pw 留言反馈
 
     if [ "${bbr}" == "false" ]; then
         echo  
