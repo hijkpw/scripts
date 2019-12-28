@@ -68,7 +68,6 @@ function _install()
     echo 安装SS...
     wget -O /etc/yum.repos.d/librehat-shadowsocks-epel-7.repo 'https://copr.fedorainfracloud.org/coprs/librehat/shadowsocks/repo/epel-7/librehat-shadowsocks-epel-7.repo' >> /dev/null 2>&1
     yum install -y shadowsocks-libev
-    systemctl enable shadowsocks-libev
 
     read -p "请设置SS的密码（不输入则随机生成）:" password
     [ -z "$password" ] && password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
@@ -187,6 +186,7 @@ function config()
     "mode":"tcp_and_udp"
 }
 EOF
+    systemctl enable shadowsocks-libev
     systemctl start shadowsocks-libev
 }
 
