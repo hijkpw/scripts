@@ -304,10 +304,8 @@ function config()
     "workers":1
 }
 EOF
-}
 
-function autostart() {
-    cat > /usr/lib/systemd/system/shadowsocksR.service <<-EOF
+cat > /usr/lib/systemd/system/shadowsocksR.service <<-EOF
 [Unit]
 Description=shadowsocksR
 Documentation=https://www.hijk.pw/
@@ -324,8 +322,9 @@ ExecStop=/bin/kill -s TERM $MAINPID
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl daemon-reload
-systemctl enable shadowsocksR && systemctl start shadowsocksR
+
+    systemctl daemon-reload
+    systemctl enable shadowsocksR && systemctl start shadowsocksR
 }
 
 function setFirewall()
@@ -401,7 +400,6 @@ function install()
     _install
     config
     setFirewall
-    autostart
 
     showTip
     cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
