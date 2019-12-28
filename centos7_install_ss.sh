@@ -270,7 +270,7 @@ function uninstall()
     [ -z ${answer} ] && answer="n"
 
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
-        yum remove --purge shadowsocks-libev
+        yum remove shadowsocks-libev
         echo "SS卸载完成"
     fi
 }
