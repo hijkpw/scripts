@@ -47,6 +47,8 @@
 
 [Bitvise连接Linux服务器教程](https://www.hijk.pw/bitvise-connect-linux-server-tutorial/)
 
+[Mac电脑连接Linux教程](https://www.hijk.pw/mac-connect-to-linux-tutorial/)
+
 [通过国内服务器转发流量](https://www.hijk.pw/forward-traffic-via-internal-vps/)
 
 ## 其他
