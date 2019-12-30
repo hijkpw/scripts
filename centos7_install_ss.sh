@@ -235,7 +235,7 @@ function showTip()
     echo  
     echo  如果连接不成功，请注意查看安全组/防火墙是否已放行端口
     echo 
-    echo  如有其他问题，请到 https://www.hijk.pw 留言反馈
+    echo  -e "如有其他问题，请到 ${red}https://www.hijk.pw${plain} 留言反馈
 
     if [ "${bbr}" == "false" ]; then
         echo  
