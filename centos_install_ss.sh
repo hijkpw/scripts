@@ -33,6 +33,8 @@ function checkSystem()
     fi
 }
 
+checkSystem
+
 action=$1
 [ -z $1 ] && action=install
 case "$action" in
