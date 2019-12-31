@@ -336,7 +336,16 @@ function installBBR()
     if [ "$result" != "" ]; then
         echo BBR模块已安装
         bbr=true
-        return;
+        return
+    fi
+    
+    if [ $main -eq 8 ]; then
+        echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+        echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+        echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+        sysctl -p
+        bbr=true
+        return
     fi
 
     echo 安装BBR模块...
