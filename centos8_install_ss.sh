@@ -121,9 +121,9 @@ function _install()
     echo "10)camellia-128-cfb"
     echo "11)camellia-192-cfb"
     echo "12)camellia-256-cfb"
-    echo "13)chacha20-ietf-poly1305"
-    echo "14)chacha20-ietf"
-    echo "15)chacha20"
+    echo "13)chacha20-ietf"
+    echo "14)chacha20-ietf-poly1305"
+    echo "15)xchacha20-ietf-poly1305"
     read -p "请选择（默认aes-256-cfb）" answer
     if [ -z "$answer" ]; then
         method="aes-256-cfb"
@@ -166,13 +166,13 @@ function _install()
             method="camellia-256-cfb"
             ;;
         13)
-            method="chacha20-ietf-poly1305"
-            ;;
-        14)
             method="chacha20-ietf"
             ;;
+        14)
+            method="chacha20-ietf-poly1305"
+            ;;
         15)
-            method="chacha20"
+            method="xchacha20-ietf--poly1305"
             ;;
         *)
             echo "无效的选择，使用默认的aes-256-cfb"
