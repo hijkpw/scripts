@@ -92,9 +92,15 @@ function _install()
     fi
 
     sed -i -e "s/port\":.*[0-9]*,/port\": ${port},/" /etc/v2ray/config.json
-    sed -i '1a"log": {"loglevel": "info", "access": "/var/log/v2ray/access.log","error": "/var/log/v2ray/error.log"},' /etc/v2ray/config.json
+    logsetting=`cat /etc/v2ray/config.json|grep loglevel`
+    if [ "logsetting" = "" ]; then
+        sed -i '1a"log": {"loglevel": "info", "access": "/var/log/v2ray/access.log","error": "/var/log/v2ray/error.log"},' /etc/v2ray/config.json
+    fi
     alterid=`cat /etc/v2ray/config.json| grep alterId | cut -d: -f2 | tr -d ' '`
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
+    rm -f /etc/localtime
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+    ntpdate -u time.nist.gov
     systemctl enable v2ray && systemctl restart v2ray
     echo "安装成功！"
 }
