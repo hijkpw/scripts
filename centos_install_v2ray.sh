@@ -93,7 +93,7 @@ function _install()
 
     sed -i -e "s/port\":.*[0-9]*,/port\": ${port},/" /etc/v2ray/config.json
     logsetting=`cat /etc/v2ray/config.json|grep loglevel`
-    if [ "logsetting" = "" ]; then
+    if [ "${logsetting}" = "" ]; then
         sed -i '1a"log": {"loglevel": "info", "access": "/var/log/v2ray/access.log","error": "/var/log/v2ray/error.log"},' /etc/v2ray/config.json
     fi
     alterid=`cat /etc/v2ray/config.json| grep alterId | cut -d: -f2 | tr -d ' '`
