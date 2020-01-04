@@ -186,6 +186,8 @@ function _install()
 
 function config()
 {
+    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
     if [ ! -d /etc/shadowsocks-libev ];then
         mkdir /etc/shadowsocks-libev
     fi
@@ -198,7 +200,8 @@ function config()
     "timeout":600,
     "method":"${method}",
     "nameserver":"8.8.8.8",
-    "mode":"tcp_and_udp"
+    "mode":"tcp_and_udp".
+    "fast_open":false
 }
 EOF
  cat > /usr/lib/systemd/system/shadowsocks-libev.service <<-EOF
