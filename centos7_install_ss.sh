@@ -184,7 +184,7 @@ function config()
     "method":"${method}",
     "nameserver":"8.8.8.8",
     "mode":"tcp_and_udp"，
-    “fast_open":true
+    “fast_open":false
 }
 EOF
     systemctl enable shadowsocks-libev
