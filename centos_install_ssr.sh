@@ -335,6 +335,8 @@ function installBBR()
     result=$(lsmod | grep bbr)
     if [ "$result" != "" ]; then
         echo BBR模块已安装
+        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+        echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
         bbr=true
         return
     fi
@@ -357,6 +359,8 @@ function installBBR()
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
     echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
     echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
     bbr=false
 }
 
