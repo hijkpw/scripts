@@ -169,7 +169,7 @@ function config()
     fi
     cat > /etc/shadowsocks-libev/config.json<<-EOF
 {
-    "server":"::",
+    "server":"0.0.0.0",
     "server_port":${port},
     "local_port":1080,
     "password":"${password}",
