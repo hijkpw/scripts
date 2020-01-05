@@ -2,13 +2,6 @@
 # shadowsocks/ss CentOS一键安装教程
 # Author: hijk<https://www.hijk.pw>
 
-echo "#############################################################"
-echo "#         CentOS 7 Shadowsocks/SS 一键安装脚本               #"
-echo "# 网址: https://www.hijk.pw                                 #"
-echo "# 作者: hijk                                                #"
-echo "#############################################################"
-echo ""
-
 red='\033[0;31m'
 plain='\033[0m'
 
