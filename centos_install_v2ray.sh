@@ -94,9 +94,10 @@ function _install()
     sed -i -e "s/port\":.*[0-9]*,/port\": ${port},/" /etc/v2ray/config.json
     logsetting=`cat /etc/v2ray/config.json|grep loglevel`
     if [ "${logsetting}" = "" ]; then
-        sed -i '1a"log": {"loglevel": "info", "access": "/var/log/v2ray/access.log","error": "/var/log/v2ray/error.log"},' /etc/v2ray/config.json
+        sed -i '1a\  "log":\n  {\n    "loglevel": "info",\n    "access": "/var/log/v2ray/access.log",\n    "error": "/var/log/v2ray/error.log"\n  },' /etc/v2ray/config.json
     fi
-    alterid=`cat /etc/v2ray/config.json| grep alterId | cut -d: -f2 | tr -d ' '`
+    alterid=`shuf -i50-90 -n1`
+    sed -i -e "s/alterId\":.*[0-9]*,/alterId\": ${port},/" /etc/v2ray/config.json
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
     rm -f /etc/localtime
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
