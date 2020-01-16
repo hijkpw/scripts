@@ -43,7 +43,7 @@ function preinstall()
         yum update -y
     fi
     echo "安装必要软件"
-    yum install -y epel-release telnet wget vim net-tools ntpdate
+    yum install -y epel-release telnet wget vim net-tools ntpdate unzip
     yum install -y nginx
     res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
     if [ "${res}" = "" ]; then
