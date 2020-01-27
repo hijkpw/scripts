@@ -163,7 +163,7 @@ function showTip()
         echo  
         echo  为使BBR模块生效，系统将在30秒后重启
         echo  
-        echo  您可以按ctrl + c取消重启，稍后输入restart重启系统
+        echo  您可以按ctrl + c取消重启，稍后输入reboot重启系统
     fi
     echo ============================================
 
