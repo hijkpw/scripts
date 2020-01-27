@@ -48,7 +48,7 @@ function preinstall()
         mv Flatfy\ V3/* /usr/share/nginx/html/
         rm -rf theme.zip Flatfy\ V3
     fi
-    systemctl enable nginx && systemctl start nginx
+    systemctl enable nginx && systemctl restart nginx
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
@@ -181,7 +181,7 @@ function config()
 }
 EOF
     systemctl enable shadowsocks-libev
-    systemctl start shadowsocks-libev
+    systemctl restart shadowsocks-libev
 }
 
 function setFirewall()
@@ -239,7 +239,7 @@ function showTip()
         echo  
         echo  为使BBR模块生效，系统将在30秒后重启
         echo  
-        echo  您可以按ctrl + c取消重启，稍后输入restart重启系统
+        echo  您可以按ctrl + c取消重启，稍后输入reboot重启系统
     fi
     echo ============================================
 
