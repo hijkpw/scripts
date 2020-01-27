@@ -49,7 +49,7 @@ function preinstall()
         mv Flatfy\ V3/* /usr/share/nginx/html/
         rm -rf theme.zip Flatfy\ V3
     fi
-    systemctl enable nginx && systemctl start nginx
+    systemctl enable nginx && systemctl restart nginx
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
@@ -217,7 +217,7 @@ WantedBy=multi-user.target
 EOF
     systemctl daemon-reload
     systemctl enable shadowsocks-libev
-    systemctl start shadowsocks-libev
+    systemctl restart shadowsocks-libev
 }
 
 function setFirewall()
