@@ -65,4 +65,6 @@
 
 [免费vpn有风险，请慎用](https://www.hijk.pw/be-careful-when-use-free-vpn/)
 
+[科学上网常见问题](https://www.hijk.pw/vpn-faq/)
+
 
