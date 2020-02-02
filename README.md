@@ -51,10 +51,18 @@
 
 [通过国内服务器转发流量](https://www.hijk.pw/forward-traffic-via-internal-vps/)
 
+[vultr常见问题](hijk.pw/vultr-faq/)
+
+[该选用哪种加密算法？](https://www.hijk.pw/choose-crypto-method/)
+
+[添加ipv6支持](https://www.hijk.pw/add-ipv6-support/)
+
 ## 其他
 
 [境外apple id信息汇总](https://www.hijk.pw/external-apple-id-summary/)
 
 [切换apple id下载其它国家和地区的应用](https://www.hijk.pw/switch-appleid-to-download-app/)
+
+[免费vpn有风险，请慎用](https://www.hijk.pw/be-careful-when-use-free-vpn/)
 
 
