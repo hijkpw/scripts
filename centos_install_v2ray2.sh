@@ -135,6 +135,7 @@ function installNginx()
     if [ $main -eq 7 ]; then
         yum install certbot
     else
+        yum install -y python36
         pip3 install certbot
     fi
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
