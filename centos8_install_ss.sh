@@ -257,7 +257,6 @@ function install()
     getData
     preinstall
     installSS
-    config
     setFirewall
 
     showTip
