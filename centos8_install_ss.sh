@@ -134,7 +134,7 @@ function preinstall()
     sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
     systemctl restart sshd
     ret=`nginx -t`
-    if [ "$ret" != "0" ]; then
+    if [ "$?" != "0" ]; then
         echo "更新系统..."
         yum update -y
     fi
@@ -239,7 +239,7 @@ function showTip()
     echo -e " IP(address):  ${red}`curl -s -4 icanhazip.com`${plain}"
     echo -e " 端口(port)：${red}${port}${plain}"
     echo -e " 密码(password)：${red}${password}${plain}"
-    echo -e " 加密方式： ${red}${method}${plain}"
+    echo -e " 加密方式(method)： ${red}${method}${plain}"
     echo    
     echo -e "SS配置文件：${red}/etc/shadowsocks-libev/config.json${plain}，请按照自己需要进行修改"         
     echo  
