@@ -133,7 +133,7 @@ function installNginx()
     yum install -y nginx
     systemctl stop nginx
     if [ $main -eq 7 ]; then
-        yum install certbot
+        yum install -y certbot
     else
         yum install -y python36
         pip3 install certbot
@@ -144,7 +144,7 @@ function installNginx()
         exit 1
     fi
 
-    if [ !-f /etc/nginx/nginx.conf.bak ]; then
+    if [ ! -f /etc/nginx/nginx.conf.bak ]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     fi
     cat > /etc/nginx/nginx.conf<<-EOF
