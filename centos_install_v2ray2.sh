@@ -82,7 +82,7 @@ function preinstall()
     sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
     systemctl restart sshd
     ret=`nginx -t`
-    if [ "$ret" != "0" ]; then
+    if [ "$?" != "0" ]; then
         echo "更新系统..."
         yum update -y
     fi
@@ -144,10 +144,49 @@ function installNginx()
         exit 1
     fi
 
+    if [ !-f /etc/nginx/nginx.conf.bak ]; then
+        mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+    fi
+    cat > /etc/nginx/nginx.conf<<-EOF
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+# Load dynamic modules. See /usr/share/doc/nginx/README.dynamic.
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format  main  '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+                      '\$status \$body_bytes_sent "\$http_referer" '
+                      '"\$http_user_agent" "\$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+
+    # Load modular configuration files from the /etc/nginx/conf.d directory.
+    # See http://nginx.org/en/docs/ngx_core_module.html#include
+    # for more information.
+    include /etc/nginx/conf.d/*.conf;
+}
+EOF
+
     mkdir -p /etc/nginx/conf.d;
     cat > /etc/nginx/conf.d/${domain}.conf<<-EOF
 server {
-    listen 80;
+    listen 80 default_server;
     server_name ${domain};
     rewrite ^(.*) https://\$server_name\$1 permanent;
 }
@@ -235,8 +274,8 @@ function showTip()
     echo -e " 端口(port)：${red}443${plain}"
     echo -e " id：${red}${uid}${plain}"
     echo -e " 额外id（alterid）： ${red}${alterid}${plain}"
-    echo -e " 加密方式： ${red}auto${plain}"
-    echo -e " 传输协议： ${red}ws${plain}"
+    echo -e " 加密方式(security)： ${red}auto${plain}"
+    echo -e " 传输协议(network)： ${red}ws${plain}"
     echo -e " 域名(host)：${red}${domain}${plain}"
     echo -e " 路径(path)：${red}${path}${plain}"
     echo    
