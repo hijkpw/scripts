@@ -27,56 +27,8 @@ function checkSystem()
     fi
 }
 
-function preinstall()
+function getData()
 {
-    sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
-    systemctl restart sshd
-    ret=`nginx -t`
-    if [ "$ret" != "0" ]; then
-        echo "更新系统..."
-        yum update -y
-    fi
-    
-    echo "安装必要软件"
-    yum install -y epel-release telnet wget vim net-tools unzip
-    yum install -y nginx openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
-    res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
-    if [ "${res}" = "" ]; then
-        wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
-        unzip theme.zip
-        rm -rf __MACOSX/
-        mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
-        mv Flatfy\ V3/* /usr/share/nginx/html/
-        rm -rf theme.zip Flatfy\ V3
-    fi
-    systemctl enable nginx && systemctl restart nginx
-
-    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
-        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
-        setenforce 0
-    fi
-}
-
-function _install()
-{
-    echo 安装SS...
-
-    if ! wget 'https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.3.3/shadowsocks-libev-3.3.3.tar.gz' -O shadowsocks-libev-3.3.3.tar.gz; then
-        echo "下载文件失败！"
-        exit 1
-    fi
-    tar zxf shadowsocks-libev-3.3.3.tar.gz
-    cd shadowsocks-libev-3.3.3
-    ./configure
-    make && make install
-    if [ $? -ne 0 ]; then
-        echo
-        echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://www.hijk.pw 反馈"
-        cd ${BASE} && rm -rf shadowsocks-libev-3.3.3*
-        exit 1
-    fi
-    cd ${BASE} && rm -rf shadowsocks-libev-3.3.3*
-
     read -p "请设置SS的密码（不输入则随机生成）:" password
     [ -z "$password" ] && password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
@@ -177,8 +129,56 @@ function _install()
     echo ""
 }
 
-function config()
+function preinstall()
 {
+    sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
+    systemctl restart sshd
+    ret=`nginx -t`
+    if [ "$ret" != "0" ]; then
+        echo "更新系统..."
+        yum update -y
+    fi
+    
+    echo "安装必要软件"
+    yum install -y epel-release telnet wget vim net-tools unzip
+    yum install -y nginx openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
+    res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
+    if [ "${res}" = "" ]; then
+        wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
+        unzip theme.zip
+        rm -rf __MACOSX/
+        mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
+        mv Flatfy\ V3/* /usr/share/nginx/html/
+        rm -rf theme.zip Flatfy\ V3
+    fi
+    systemctl enable nginx && systemctl restart nginx
+
+    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+        setenforce 0
+    fi
+}
+
+function installSS()
+{
+    echo 安装SS...
+
+    if ! wget 'https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.3.3/shadowsocks-libev-3.3.3.tar.gz' -O shadowsocks-libev-3.3.3.tar.gz; then
+        echo "下载文件失败！"
+        exit 1
+    fi
+    tar zxf shadowsocks-libev-3.3.3.tar.gz
+    cd shadowsocks-libev-3.3.3
+    ./configure
+    make && make install
+    if [ $? -ne 0 ]; then
+        echo
+        echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://www.hijk.pw 反馈"
+        cd ${BASE} && rm -rf shadowsocks-libev-3.3.3*
+        exit 1
+    fi
+    cd ${BASE} && rm -rf shadowsocks-libev-3.3.3*
+
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
     if [ ! -d /etc/shadowsocks-libev ];then
@@ -236,9 +236,9 @@ function showTip()
     echo ============================================
     echo -e "          ${red}SS安装成功！${plain}               "
     echo ""
-    echo -e " IP:  ${red}`curl -s -4 icanhazip.com`${plain}"
-    echo -e " 端口：${red}${port}${plain}"
-    echo -e " 密码：${red}${password}${plain}"
+    echo -e " IP(address):  ${red}`curl -s -4 icanhazip.com`${plain}"
+    echo -e " 端口(port)：${red}${port}${plain}"
+    echo -e " 密码(password)：${red}${password}${plain}"
     echo -e " 加密方式： ${red}${method}${plain}"
     echo    
     echo -e "SS配置文件：${red}/etc/shadowsocks-libev/config.json${plain}，请按照自己需要进行修改"         
@@ -254,8 +254,9 @@ cat /etc/centos-release
 function install()
 {
     checkSystem
+    getData
     preinstall
-    _install
+    installSS
     config
     setFirewall
 
