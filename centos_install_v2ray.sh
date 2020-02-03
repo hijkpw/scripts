@@ -33,12 +33,34 @@ function checkSystem()
     fi
 }
 
+function getData()
+{
+    while true
+    do
+        read -p "请输入v2ray的端口[1-65535]:" port
+        [ -z "$port" ] && port="21568"
+        expr $port + 0 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ $port -ge 1 ] && [ $port -le 65535 ]; then
+                echo ""
+                echo "端口号： $port"
+                echo ""
+                break
+            else
+                echo "输入错误，端口号为1-65535的数字"
+            fi
+        else
+            echo "输入错误，端口号为1-65535的数字"
+        fi
+    done
+}
+
 function preinstall()
 {
     sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
     systemctl restart sshd
     ret=`nginx -t`
-    if [ "$ret" <> "0" ]; then
+    if [ "$ret" != "0" ]; then
         echo "更新系统..."
         yum update -y
     fi
@@ -62,29 +84,10 @@ function preinstall()
     fi
 }
 
-function _install()
+function installV2ray()
 {
     echo 安装v2ray...
     bash <(curl -L -s https://install.direct/go.sh)
-
-    while true
-    do
-        read -p "请输入v2ray的端口[1-65535]:" port
-        [ -z "$port" ] && port="21568"
-        expr $port + 0 &>/dev/null
-        if [ $? -eq 0 ]; then
-            if [ $port -ge 1 ] && [ $port -le 65535 ]; then
-                echo ""
-                echo "端口号： $port"
-                echo ""
-                break
-            else
-                echo "输入错误，端口号为1-65535的数字"
-            fi
-        else
-            echo "输入错误，端口号为1-65535的数字"
-        fi
-    done
 
     if [ ! -f /etc/v2ray/config.json ]; then
         echo "安装失败，请到 https://www.hijk.pw 网站反馈"
@@ -94,12 +97,11 @@ function _install()
     sed -i -e "s/port\":.*[0-9]*,/port\": ${port},/" /etc/v2ray/config.json
     logsetting=`cat /etc/v2ray/config.json|grep loglevel`
     if [ "${logsetting}" = "" ]; then
-        sed -i '1a\  "log":\n  {\n    "loglevel": "info",\n    "access": "/var/log/v2ray/access.log",\n    "error": "/var/log/v2ray/error.log"\n  },' /etc/v2ray/config.json
+        sed -i '1a\  "log": {\n    "loglevel": "info",\n    "access": "/var/log/v2ray/access.log",\n    "error": "/var/log/v2ray/error.log"\n  },' /etc/v2ray/config.json
     fi
     alterid=`shuf -i50-90 -n1`
     sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" /etc/v2ray/config.json
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
-    rm -f /etc/localtime
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
     systemctl enable v2ray && systemctl restart v2ray
@@ -146,10 +148,10 @@ function showTip()
     echo ============================================
     echo -e "        ${red}v2ray安装成功！${plain}               "
     echo ""
-    echo -e " IP:  ${red}`curl -s -4 icanhazip.com`${plain}"
-    echo -e " 端口：${red}${port}${plain}"
+    echo -e " IP(address):  ${red}`curl -s -4 icanhazip.com`${plain}"
+    echo -e " 端口(port)：${red}${port}${plain}"
     echo -e " id：${red}${uid}${plain}"
-    echo -e " 额外id： ${red}${alterid}${plain}"
+    echo -e " 额外id(alterid)： ${red}${alterid}${plain}"
     echo -e " 加密方式： ${red}auto${plain}"
     echo -e " 传输协议： ${red}tcp${plain}"
     echo    
@@ -179,9 +181,10 @@ cat /etc/centos-release
 function install()
 {
     checkSystem
+    getData
     preinstall
     installBBR
-    _install
+    installV2ray
     setFirewall
 
     showTip
