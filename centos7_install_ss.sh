@@ -26,42 +26,8 @@ function checkSystem()
     fi
 }
 
-function preinstall()
+function getData()
 {
-    sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
-    systemctl restart sshd
-    ret=`nginx -t`
-    if [ "$ret" != "0" ]; then
-        echo "更新系统..."
-        yum update -y
-    fi
-    
-    echo "安装必要软件"
-    yum install -y epel-release telnet wget vim net-tools unzip
-    yum install -y nginx
-    res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
-    if [ "${res}" = "" ]; then
-        wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
-        unzip theme.zip
-        rm -rf __MACOSX/
-        mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
-        mv Flatfy\ V3/* /usr/share/nginx/html/
-        rm -rf theme.zip Flatfy\ V3
-    fi
-    systemctl enable nginx && systemctl restart nginx
-
-    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
-        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
-        setenforce 0
-    fi
-}
-
-function _install()
-{
-    echo 安装SS...
-    wget -O /etc/yum.repos.d/librehat-shadowsocks-epel-7.repo 'https://copr.fedorainfracloud.org/coprs/librehat/shadowsocks/repo/epel-7/librehat-shadowsocks-epel-7.repo' >> /dev/null 2>&1
-    yum install -y shadowsocks-libev
-
     read -p "请设置SS的密码（不输入则随机生成）:" password
     [ -z "$password" ] && password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
@@ -162,8 +128,42 @@ function _install()
     echo ""
 }
 
-function config()
+function preinstall()
 {
+    sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
+    systemctl restart sshd
+    ret=`nginx -t`
+    if [ "$ret" != "0" ]; then
+        echo "更新系统..."
+        yum update -y
+    fi
+    
+    echo "安装必要软件"
+    yum install -y epel-release telnet wget vim net-tools unzip
+    yum install -y nginx
+    res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
+    if [ "${res}" = "" ]; then
+        wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
+        unzip theme.zip
+        rm -rf __MACOSX/
+        mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
+        mv Flatfy\ V3/* /usr/share/nginx/html/
+        rm -rf theme.zip Flatfy\ V3
+    fi
+    systemctl enable nginx && systemctl restart nginx
+
+    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+        setenforce 0
+    fi
+}
+
+function installSS()
+{
+    echo 安装SS...
+    wget -O /etc/yum.repos.d/librehat-shadowsocks-epel-7.repo 'https://copr.fedorainfracloud.org/coprs/librehat/shadowsocks/repo/epel-7/librehat-shadowsocks-epel-7.repo' >> /dev/null 2>&1
+    yum install -y shadowsocks-libev
+
     if [ ! -d /etc/shadowsocks-libev ];then
         mkdir /etc/shadowsocks-libev
     fi
@@ -255,10 +255,10 @@ cat /etc/centos-release
 function install()
 {
     checkSystem
+    getData
     preinstall
     installBBR
-    _install
-    config
+    installSS
     setFirewall
 
     showTip
