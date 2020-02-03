@@ -71,6 +71,8 @@ function getData()
             echo "请输入伪装路径，以/开头！"
         elif [ "${path:0:1}" != "/" ]; then
             echo "伪装路径必须以/开头！"
+        elif [ "${path}" = "/" ]; then
+            echo  "不能使用根路径！"
         else
             break
         fi
