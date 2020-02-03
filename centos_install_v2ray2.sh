@@ -40,7 +40,7 @@ function getData()
     echo " "
     echo " 本脚本为带伪装的一键脚本，运行之前请确认如下条件已经具备："
     echo -e "  ${red}1. 一个域名${plain}"
-    echo -e "  ${red}2. 域名解析指向当前服务器ip（${IP}）${plain}"
+    echo -e "  ${red}2. 域名的某个主机名解析指向当前服务器ip（${IP}）${plain}"
     echo " "
     read -p "确认满足按y，按其他退出脚本：" answer
     if [ "${answer}" != "y" ]; then
@@ -49,9 +49,9 @@ function getData()
 
     while true
     do
-        read -p "请输入您的域名：" domain
+        read -p "请输入您的主机名：" domain
         if [ -z "${domain}" ]; then
-            echo "域名输入错误，请重新输入！"
+            echo "主机名输入错误，请重新输入！"
         else
             break
         fi
@@ -275,7 +275,7 @@ function showTip()
     echo -e " 额外id（alterid）： ${red}${alterid}${plain}"
     echo -e " 加密方式(security)： ${red}auto${plain}"
     echo -e " 传输协议(network)： ${red}ws${plain}"
-    echo -e " 域名(host)：${red}${domain}${plain}"
+    echo -e " 主机名(host)：${red}${domain}${plain}"
     echo -e " 路径(path)：${red}${path}${plain}"
     echo    
     echo -e "v2ray配置文件：${red}/etc/v2ray/config.json${plain}，请按照自己需要进行修改"         
