@@ -37,53 +37,8 @@ function checkSystem()
     fi
 }
 
-function preinstall()
+function getData()
 {
-    sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
-    systemctl restart sshd
-    ret=`nginx -t`
-    if [ "$ret" <> "0" ]; then
-        echo "更新系统..."
-        yum update -y
-    fi
-    echo "安装必要软件"
-    yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip
-    if [ $main -eq 8 ]; then
-        ln -s /usr/bin/python3 /usr/bin/python
-    fi
-    yum install -y nginx
-    res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
-    if [ "${res}" = "" ]; then
-        wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
-        unzip theme.zip
-        rm -rf __MACOSX/
-        mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
-        mv Flatfy\ V3/* /usr/share/nginx/html/
-        rm -rf theme.zip Flatfy\ V3
-    fi
-    systemctl enable nginx && systemctl restart nginx
-
-    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
-        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
-        setenforce 0
-    fi
-}
-
-function _install()
-{
-    echo 下载安装文件
-    if ! wget --no-check-certificate -O ${FILENAME}.tar.gz ${URL}; then
-        echo -e "[${red}Error${plain}] 下载文件失败!"
-        exit 1
-    fi
-
-    tar -zxf ${FILENAME}.tar.gz
-    mv shadowsocksr-3.2.2/shadowsocks /usr/local
-    if [ ! -f /usr/local/shadowsocks/server.py ]; then
-        echo "安装失败，请到 https://www.hijk.pw 网站反馈"
-        cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
-        exit 1
-    fi
     read -p "请设置SSR的密码（不输入则随机生成）:" password
     [ -z "$password" ] && password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
@@ -109,7 +64,6 @@ function _install()
         fi
     done
     echo "请选择SSR的加密方式:" 
-    echo "0)none"
     echo "1)aes-256-cfb"
     echo "2)aes-192-cfb"
     echo "3)aes-128-cfb"
@@ -128,9 +82,6 @@ function _install()
         method="aes-256-cfb"
     else
         case $answer in
-        0)
-            method="none"
-            ;;
         1)
             method="aes-256-cfb"
             ;;
@@ -275,6 +226,55 @@ function _install()
     echo ""
 }
 
+function preinstall()
+{
+    sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
+    systemctl restart sshd
+    ret=`nginx -t`
+    if [ "$ret" != "0" ]; then
+        echo "更新系统..."
+        yum update -y
+    fi
+    echo "安装必要软件"
+    yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip
+    if [ $main -eq 8 ]; then
+        ln -s /usr/bin/python3 /usr/bin/python
+    fi
+    yum install -y nginx
+    res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
+    if [ "${res}" = "" ]; then
+        wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
+        unzip theme.zip
+        rm -rf __MACOSX/
+        mv /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.bak
+        mv Flatfy\ V3/* /usr/share/nginx/html/
+        rm -rf theme.zip Flatfy\ V3
+    fi
+    systemctl enable nginx && systemctl restart nginx
+
+    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+        sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+        setenforce 0
+    fi
+}
+
+function installSSR()
+{
+    echo 下载安装文件
+    if ! wget --no-check-certificate -O ${FILENAME}.tar.gz ${URL}; then
+        echo -e "[${red}Error${plain}] 下载文件失败!"
+        exit 1
+    fi
+
+    tar -zxf ${FILENAME}.tar.gz
+    mv shadowsocksr-3.2.2/shadowsocks /usr/local
+    if [ ! -f /usr/local/shadowsocks/server.py ]; then
+        echo "安装失败，请到 https://www.hijk.pw 网站反馈"
+        cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
+        exit 1
+    fi
+}
+
 function config()
 {
      cat > /etc/shadowsocksR.json<<-EOF
@@ -402,9 +402,10 @@ cat /etc/centos-release
 function install()
 {
     checkSystem
+    getData
     preinstall
     installBBR
-    _install
+    installSSR
     config
     setFirewall
 
