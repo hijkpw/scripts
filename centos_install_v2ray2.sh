@@ -132,12 +132,9 @@ function installNginx()
 {
     yum install -y nginx
     systemctl stop nginx
-    if [ $main -eq 7 ]; then
-        yum install -y certbot
-    else
-        yum install -y python36
-        pip3 install certbot
-    fi
+    yum remove -y certbot
+    yum install -y python36
+    pip3 install certbot
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
          echo -e " 获取证书失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
