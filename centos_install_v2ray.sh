@@ -60,7 +60,7 @@ function preinstall()
     sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
     systemctl restart sshd
     ret=`nginx -t`
-    if [ "$ret" != "0" ]; then
+    if [ "$?" != "0" ]; then
         echo "更新系统..."
         yum update -y
     fi
@@ -152,8 +152,8 @@ function showTip()
     echo -e " 端口(port)：${red}${port}${plain}"
     echo -e " id：${red}${uid}${plain}"
     echo -e " 额外id(alterid)： ${red}${alterid}${plain}"
-    echo -e " 加密方式： ${red}auto${plain}"
-    echo -e " 传输协议： ${red}tcp${plain}"
+    echo -e " 加密方式(security)： ${red}auto${plain}"
+    echo -e " 传输协议(network)： ${red}tcp${plain}"
     echo    
     echo -e "v2ray配置文件：${red}/etc/v2ray/config.json${plain}，请按照自己需要进行修改"         
     echo  
