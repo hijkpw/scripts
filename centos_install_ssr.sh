@@ -231,7 +231,7 @@ function preinstall()
     sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
     systemctl restart sshd
     ret=`nginx -t`
-    if [ "$ret" != "0" ]; then
+    if [ "$?" != "0" ]; then
         echo "更新系统..."
         yum update -y
     fi
@@ -273,10 +273,7 @@ function installSSR()
         cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
         exit 1
     fi
-}
 
-function config()
-{
      cat > /etc/shadowsocksR.json<<-EOF
 {
     "server":"0.0.0.0",
@@ -369,12 +366,12 @@ function showTip()
     echo ============================================
     echo -e "          ${red}SSR安装成功！${plain}               "
     echo ""
-    echo -e " IP:  ${red}`curl -s -4 icanhazip.com`${plain}"
-    echo -e " 端口：${red}${port}${plain}"
-    echo -e " 密码：${red}${password}${plain}"
-    echo -e " 加密方式： ${red}${method}${plain}"
-    echo -e " 协议：" ${red}${protocol}${plain}
-    echo -e " 混淆：" ${red}${obfs}${plain}
+    echo -e " IP(address):  ${red}`curl -s -4 icanhazip.com`${plain}"
+    echo -e " 端口(port)：${red}${port}${plain}"
+    echo -e " 密码(password)：${red}${password}${plain}"
+    echo -e " 加密方式(method)： ${red}${method}${plain}"
+    echo -e " 协议(protocol)：" ${red}${protocol}${plain}
+    echo -e " 混淆(obfuscation)：" ${red}${obfs}${plain}
     echo    
     echo -e "SSR配置文件：${red}/etc/shadowsocksR.json${plain}，请按照自己需要进行修改"         
     echo  
@@ -406,7 +403,6 @@ function install()
     preinstall
     installBBR
     installSSR
-    config
     setFirewall
 
     showTip
