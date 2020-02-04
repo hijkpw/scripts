@@ -73,10 +73,8 @@ function getData()
             echo "伪装路径必须以/开头！"
         elif [ "${path}" = "/" ]; then
             echo  "不能使用根路径！"
-        elif [[ "${path}" =~ ^/[a-zA-Z0-9]{1,}[a-zA-Z0-9\_\-/]*$ ]]; then
-            break
         else
-            echo "路径包含 字母、数字、/、-、_ 以外的非法字符"
+            break
         fi
     done
 }
