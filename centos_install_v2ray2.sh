@@ -136,12 +136,17 @@ function installNginx()
     systemctl stop nginx
     res=`which pip3`
     if [ "$?" != "0" ]; then
-        yum install python36
+        yum install -y python36
+    fi
+    res=`which pip3`
+    if [ "$?" != "0" ]; then
+        echo -e " pip3安装失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
+        exit 1
     fi
     pip3 install certbot
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
-         echo -e " 获取证书失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
+        echo -e " 获取证书失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
         exit 1
     fi
 
