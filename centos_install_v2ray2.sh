@@ -76,7 +76,7 @@ function getData()
         elif [[ "${path}" =~ ^/[a-zA-Z0-9]{1,}[a-zA-Z0-9\_\-/]*$ ]]; then
             break
         else
-            echo "路径包含字母、数字、/、-、_意外的非法字符"
+            echo "路径包含 字母、数字、/、-、_ 以外的非法字符"
         fi
     done
 }
