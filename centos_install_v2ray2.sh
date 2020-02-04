@@ -144,6 +144,10 @@ function installNginx()
         exit 1
     fi
     pip3 install certbot
+    res=`which certbot`
+    if [ "$?" != "0" ]; then
+        export PATH=$PATH:/usr/local/bin
+    fi
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
         echo -e " 获取证书失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
