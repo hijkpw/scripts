@@ -139,7 +139,7 @@ function installNginx()
     res=`which pip3`
     if [ "$?" != "0" ]; then
         yum install python36
-    if
+    fi
     pip3 install certbot
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
