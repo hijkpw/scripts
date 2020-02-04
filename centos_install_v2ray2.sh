@@ -73,8 +73,10 @@ function getData()
             echo "伪装路径必须以/开头！"
         elif [ "${path}" = "/" ]; then
             echo  "不能使用根路径！"
-        else
+        elif [[ "${path}" =~ ^/[a-zA-Z0-9]{1,}[a-zA-Z0-9\_\-/]*$ ]]; then
             break
+        else
+            echo "路径包含字母、数字、/、-、_意外的非法字符"
         fi
     done
 }
@@ -134,8 +136,10 @@ function installNginx()
 {
     yum install -y nginx
     systemctl stop nginx
-    yum remove -y certbot
-    yum install -y python36
+    res=`which pip3`
+    if [ "$?" != "0" ]; then
+        yum install python36
+    if
     pip3 install certbot
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
