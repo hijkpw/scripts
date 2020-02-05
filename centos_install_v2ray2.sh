@@ -240,7 +240,8 @@ server {
 EOF
     res=`cat /etc/crontab | grep certbot`
     if [ "${res}" = "" ]; then
-        echo '0 3 1 */2 0 root systemctl stop nginx && certbot renew && systemctl start nginx'
+        echo '0 3 1 */2 0 root systemctl stop nginx && certbot renew && systemctl start nginx' >> /etc/crontab
+    fi
     systemctl enable nginx && systemctl restart nginx
 }
 
