@@ -42,7 +42,11 @@
 
 # VPS
 
+[搬瓦工购买服务器详细教程](https://www.hijk.pw/bandwagonghost-buy-vps-tutorial/)
+
 [购买vultr服务器超详细图文教程](https://www.hijk.pw/vultr-buy-vps-tutorial/)
+
+[HostDare购买服务器超详细教程](https://www.hijk.pw/hostdare-buy-vps-tutorial/)
 
 [手机购买vultr服务器图文教程](https://www.hijk.pw/buy-vultr-vps-in-mobile/)
 
@@ -50,13 +54,8 @@
 
 [Mac电脑连接Linux教程](https://www.hijk.pw/mac-connect-to-linux-tutorial/)
 
-[通过国内服务器转发流量](https://www.hijk.pw/forward-traffic-via-internal-vps/)
-
 [vultr常见问题](hijk.pw/vultr-faq/)
 
-[该选用哪种加密算法？](https://www.hijk.pw/choose-crypto-method/)
-
-[添加ipv6支持](https://www.hijk.pw/add-ipv6-support/)
 
 ## 其他
 
@@ -67,5 +66,13 @@
 [免费vpn有风险，请慎用](https://www.hijk.pw/be-careful-when-use-free-vpn/)
 
 [科学上网常见问题](https://www.hijk.pw/vpn-faq/)
+
+[通过国内服务器转发流量](https://www.hijk.pw/forward-traffic-via-internal-vps/)
+
+[该选用哪种加密算法？](https://www.hijk.pw/choose-crypto-method/)
+
+[添加ipv6支持](https://www.hijk.pw/add-ipv6-support/)
+
+[不建议开启tcp fast open功能](https://www.hijk.pw/donot-use-tcp-fast-open/)
 
 
