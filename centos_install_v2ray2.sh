@@ -134,6 +134,13 @@ function installNginx()
 {
     yum install -y nginx
     systemctl stop nginx
+    res=`netstat -ntlp| grep -E ':80|:443'`
+    if [ "${res}" != "" ]; then
+        echo " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
+        echo " 端口占用信息如下："
+        echo ${res}
+        exit 1
+    fi
     res=`which pip3`
     if [ "$?" != "0" ]; then
         yum install -y python36
@@ -154,6 +161,16 @@ function installNginx()
         exit 1
     fi
 
+    res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
+    if [ "${res}" = "" ]; then
+        mkdir -p /usr/share/nginx/html.bak
+        mv /usr/share/nginx/html/* /usr/share/nginx/html.bak
+        wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
+        unzip theme.zip
+        rm -rf __MACOSX/
+        mv Flatfy\ V3/* /usr/share/nginx/html/
+        rm -rf theme.zip Flatfy\ V3
+    fi
     if [ ! -f /etc/nginx/nginx.conf.bak ]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     fi
@@ -222,7 +239,7 @@ server {
 
     root /usr/share/nginx/html;
     location / {
-        proxy_pass http://www.zhuizishu.com/;
+        index index.html;
     }
 
     location ${path} {
