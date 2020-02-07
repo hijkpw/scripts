@@ -352,7 +352,7 @@ function uninstall()
     rm -rf /etc/systemd/system/v2ray.service
     
     yum remove -y nginx
-    if [ -d /usr/share/nginx/html.bak ];
+    if [ -d /usr/share/nginx/html.bak ]; then
         rm -rf /usr/share/nginx/html
         mv /usr/share/nginx/html.bak /usr/share/nginx/html
     fi
