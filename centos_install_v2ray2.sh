@@ -330,9 +330,6 @@ function showTip()
     fi
 }
 
-echo -n "系统版本:  "
-cat /etc/centos-release
-
 function install()
 {
     checkSystem
@@ -345,4 +342,35 @@ function install()
     showTip
 }
 
-install
+function uninstall()
+{
+    systemctl stop v2ray
+    systemctl disable v2ray
+    rm -rf /etc/v2ray/*
+    rm -rf /usr/bin/v2ray/*
+    rm -rf /var/log/v2ray/*
+    rm -rf /etc/systemd/system/v2ray.service
+    
+    yum remove -y nginx
+    if [ -d /usr/share/nginx/html.bak ];
+        rm -rf /usr/share/nginx/html
+        mv /usr/share/nginx/html.bak /usr/share/nginx/html
+    fi
+}
+
+echo -n "系统版本:  "
+cat /etc/centos-release
+
+
+action=$1
+[ -z $1 ] && action=install
+case "$action" in
+    install|uninstall)
+        ${action}
+        ;;
+    *)
+        echo "参数错误"
+        echo "用法: `basename $0` [install|uninstall]"
+        ;;
+esac
+
