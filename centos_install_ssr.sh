@@ -411,6 +411,7 @@ function uninstall()
         rm -rf /usr/local/shadowsocks
         systemctl disable shadowsocksR && systemctl stop shadowsocksR && rm -rf /usr/lib/systemd/system/shadowsocksR.service
     fi
+    echo -e " ${red}卸载成功${plain}"
 }
 
 action=$1
