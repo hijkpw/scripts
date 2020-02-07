@@ -356,6 +356,7 @@ function uninstall()
         rm -rf /usr/share/nginx/html
         mv /usr/share/nginx/html.bak /usr/share/nginx/html
     fi
+    echo -e " ${red}卸载成功${plain}"    
 }
 
 echo -n "系统版本:  "
