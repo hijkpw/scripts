@@ -186,6 +186,8 @@ function uninstall()
     rm -rf /usr/bin/v2ray/*
     rm -rf /var/log/v2ray/*
     rm -rf /etc/systemd/system/v2ray.service
+    
+    echo -e " ${red}卸载成功${plain}"
 }
 
 echo -n "系统版本:  "
