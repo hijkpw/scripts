@@ -194,7 +194,7 @@ cat /etc/centos-release
 action=$1
 [ -z $1 ] && action=install
 case "$action" in
-    iinstall|uninstall)
+    install|uninstall)
         ${action}
         ;;
     *)
