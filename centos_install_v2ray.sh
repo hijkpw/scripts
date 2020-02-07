@@ -180,14 +180,17 @@ function install()
 
 function uninstall()
 {
-    systemctl stop v2ray
-    systemctl disable v2ray
-    rm -rf /etc/v2ray/*
-    rm -rf /usr/bin/v2ray/*
-    rm -rf /var/log/v2ray/*
-    rm -rf /etc/systemd/system/v2ray.service
-    
-    echo -e " ${red}卸载成功${plain}"
+    read -p "您确定真的要卸载v2ray吗？(y/n)" answer
+    [ -z ${answer} ] && answer="n"
+    if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
+        systemctl stop v2ray
+        systemctl disable v2ray
+        rm -rf /etc/v2ray/*
+        rm -rf /usr/bin/v2ray/*
+        rm -rf /var/log/v2ray/*
+        rm -rf /etc/systemd/system/v2ray.service
+        echo -e " ${red}卸载成功${plain}"
+    fi
 }
 
 echo -n "系统版本:  "
