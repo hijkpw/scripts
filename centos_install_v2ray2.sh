@@ -163,8 +163,11 @@ function installNginx()
 
     res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
     if [ "${res}" = "" ]; then
-        mkdir -p /usr/share/nginx/html.bak
-        mv /usr/share/nginx/html/* /usr/share/nginx/html.bak
+        if [ -d /usr/share/nginx/html ]; then
+            mkdir -p /usr/share/nginx/html.bak
+            mv /usr/share/nginx/html/* /usr/share/nginx/html.bak
+        fi
+        mkdir -p /usr/share/nginx/html
         wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
         unzip theme.zip
         rm -rf __MACOSX/
@@ -303,7 +306,7 @@ function showTip()
     echo ""
     echo -e " IP(address):  ${red}${IP}${plain}"
     echo -e " 端口(port)：${red}443${plain}"
-    echo -e " id：${red}${uid}${plain}"
+    echo -e " id(uuid)：${red}${uid}${plain}"
     echo -e " 额外id（alterid）： ${red}${alterid}${plain}"
     echo -e " 加密方式(security)： ${red}auto${plain}"
     echo -e " 传输协议(network)： ${red}ws${plain}"
