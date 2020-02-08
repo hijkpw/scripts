@@ -122,7 +122,7 @@ function installV2ray()
         line=`grep -n '}]' /etc/v2ray/config.json  | head -n1 | cut -d: -f1`
         line=`expr ${line} - 1`
         sed -i "${line}s/}/},/" /etc/v2ray/config.json
-        sed -i "${line}a\    \"streamSettings\": {\n      \"network\": \"ws\",\n      \"wsSettings\": {\n        \"path\": \"${path}\"\n      }\n    },\n    \"listen\": \"127.0.0.1\"" /etc/v2ray/config.json
+        sed -i "${line}a\    \"streamSettings\": {\n      \"network\": \"ws\",\n      \"wsSettings\": {\n        \"path\": \"${path}\"\n        \"headers\": {\n          \"Host\": \"${domain}\"\n        }\n      }\n    },\n    \"listen\": \"127.0.0.1\"" /etc/v2ray/config.json
     else
         sed -i -e "s/path\":.*/path\": \"\\${path}\"/" /etc/v2ray/config.json
     fi
