@@ -141,7 +141,7 @@ function showTip()
     echo ""
     echo -e " IP(address):  ${red}`curl -s -4 icanhazip.com`${plain}"
     echo -e " 端口(port)：${red}${port}${plain}"
-    echo -e " id：${red}${uid}${plain}"
+    echo -e " id(uuid)：${red}${uid}${plain}"
     echo -e " 额外id(alterid)： ${red}${alterid}${plain}"
     echo -e " 加密方式(security)： ${red}auto${plain}"
     echo -e " 传输协议(network)： ${red}tcp${plain}"
