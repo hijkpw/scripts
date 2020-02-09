@@ -60,7 +60,9 @@ function getData()
     res=`host ${domain}`
     res=`echo -n ${res} | grep ${IP}`
     if [ -z "${res}" ]; then
-        echo "${domain} 未解析到当前服务器IP！"
+        echo -n "${domain} 解析结果："
+        host ${domain}
+        echo "主机未解析到当前服务器IP(${IP})!"
         exit 1
     fi
 
@@ -127,7 +129,12 @@ function installV2ray()
         sed -i -e "s/path\":.*/path\": \"\\${path}\"/" /etc/v2ray/config.json
     fi
     systemctl enable v2ray && systemctl restart v2ray
-    echo "安装成功！"
+    res=`netstat -nltp | grep ${port} | grep v2ray`
+    if [ "${res}" = "" ]; then
+        echo "v2ray启动失败，请检查端口是否被占用！"
+        exit 1
+    fi
+    echo "v2ray安装成功！"
 }
 
 function installNginx()
@@ -263,6 +270,11 @@ EOF
         echo '0 3 1 */2 0 root systemctl stop nginx && certbot renew && systemctl start nginx' >> /etc/crontab
     fi
     systemctl enable nginx && systemctl restart nginx
+    res=`netstat -nltp | grep 443 | grep nginx`
+    if [ "${res}" = "" ]; then
+        echo -e "nginx启动失败！ 请到 ${red}https://www.hijk.pw${plain} 反馈"
+        exit 1
+    fi
 }
 
 function setFirewall()
