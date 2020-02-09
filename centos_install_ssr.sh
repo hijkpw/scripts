@@ -10,6 +10,7 @@ echo "#############################################################"
 echo ""
 
 red='\033[0;31m'
+green="\033[0;32m"
 plain='\033[0m'
 
 FILENAME="ShadowsocksR-v3.2.2"
@@ -251,18 +252,20 @@ function preinstall()
 
 function installSSR()
 {
-    echo 下载安装文件
-    if ! wget --no-check-certificate -O ${FILENAME}.tar.gz ${URL}; then
-        echo -e "[${red}Error${plain}] 下载文件失败!"
-        exit 1
-    fi
+    if [ ! -d /usr/local/shadowsocks ]; then
+        echo 下载安装文件
+        if ! wget --no-check-certificate -O ${FILENAME}.tar.gz ${URL}; then
+            echo -e "[${red}Error${plain}] 下载文件失败!"
+            exit 1
+        fi
 
-    tar -zxf ${FILENAME}.tar.gz
-    mv shadowsocksr-3.2.2/shadowsocks /usr/local
-    if [ ! -f /usr/local/shadowsocks/server.py ]; then
-        echo "安装失败，请到 https://www.hijk.pw 网站反馈"
-        cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
-        exit 1
+        tar -zxf ${FILENAME}.tar.gz
+        mv shadowsocksr-3.2.2/shadowsocks /usr/local
+        if [ ! -f /usr/local/shadowsocks/server.py ]; then
+            echo "安装失败，请到 https://www.hijk.pw 网站反馈"
+            cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
+            exit 1
+        fi
     fi
 
      cat > /etc/shadowsocksR.json<<-EOF
@@ -358,43 +361,49 @@ function installBBR()
     bbr=false
 }
 
-function showTip()
+function info()
 {
+    ip=`curl -s -4 icanhazip.com`
+    port=`cat /etc/shadowsocksR.json | grep server_port | cut -d: -f2 | tr -d \",' '`
+    res=`netstat -nltp | grep ${port} | grep python`
+    [ -z "$res" ] && status="${red}已停止${plain}" || status="${green}正在运行${plain}"
+    password=`cat /etc/shadowsocksR.json | grep password | cut -d: -f2 | tr -d \",' '`
+    method=`cat /etc/shadowsocksR.json | grep method | cut -d: -f2 | tr -d \",' '`
+    protocol=`cat /etc/shadowsocksR.json | grep protocol | cut -d: -f2 | tr -d \",' '`
+    obfs=`cat /etc/shadowsocksR.json | grep obfs | cut -d: -f2 | tr -d \",' '`
+    
     echo ============================================
-    echo -e "          ${red}SSR安装成功！${plain}               "
+    echo -e " ssr运行状态：${status}"
+    echo -e " ssr配置文件：${red}/etc/shadowsocksR.json${plain}"
     echo ""
-    echo -e " IP(address):  ${red}`curl -s -4 icanhazip.com`${plain}"
+    echo -e "${red}ssr配置信息：${plain}"
+    echo -e " IP(address):  ${red}${ip}${plain}"
     echo -e " 端口(port)：${red}${port}${plain}"
     echo -e " 密码(password)：${red}${password}${plain}"
     echo -e " 加密方式(method)： ${red}${method}${plain}"
     echo -e " 协议(protocol)：" ${red}${protocol}${plain}
     echo -e " 混淆(obfuscation)：" ${red}${obfs}${plain}
-    echo    
-    echo -e "SSR配置文件：${red}/etc/shadowsocksR.json${plain}，请按照自己需要进行修改"         
     echo  
-    echo  如果连接不成功，请注意查看安全组/防火墙是否已放行端口
-    echo 
-    echo -e "如有其他问题，请到 ${red}https://www.hijk.pw${plain} 留言反馈"
+    echo ============================================
+}
 
+function bbrReboot()
+{
     if [ "${bbr}" == "false" ]; then
         echo  
         echo  为使BBR模块生效，系统将在30秒后重启
         echo  
-        echo  您可以按ctrl + c取消重启，稍后输入 reboot 重启系统
-    fi
-    echo ============================================
-
-    if [ "${bbr}" == "false" ]; then
+        echo -e "您可以按 ctrl + c 取消重启，稍后输入 ${red}reboot${plain} 重启系统"
         sleep 30
         reboot
     fi
 }
 
-echo -n "系统版本:  "
-cat /etc/centos-release
 
 function install()
 {
+    echo -n "系统版本:  "
+    cat /etc/centos-release
     checkSystem
     getData
     preinstall
@@ -402,8 +411,11 @@ function install()
     installSSR
     setFirewall
 
-    showTip
+    info
+    
     cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
+    
+    bbrReboot
 }
 
 function uninstall()
@@ -423,7 +435,7 @@ function uninstall()
 action=$1
 [ -z $1 ] && action=install
 case "$action" in
-    install|uninstall)
+    install|uninstall|info)
         ${action}
         ;;
     *)
