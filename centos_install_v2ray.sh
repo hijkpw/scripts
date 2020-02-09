@@ -96,7 +96,12 @@ function installV2ray()
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
     systemctl enable v2ray && systemctl restart v2ray
-    echo "安装成功！"
+    res=`netstat -ntlp| grep ${port} | grep v2ray`
+    if [ "${res}" = "" ]; then
+        echo “v2ray启动失败，请检查端口是否已被占用！”
+        exit 1
+    fi
+    echo "v2ray安装成功！"
 }
 
 function setFirewall()
