@@ -173,6 +173,7 @@ function installSS()
 EOF
     systemctl enable shadowsocks-libev
     systemctl restart shadowsocks-libev
+    sleep 3
     res=`netstat -nltp | grep ${port} | grep 'ss-server'`
     if [ "${res}" = "" ]; then
         echo "ss启动失败，请检查端口是否被占用！"
