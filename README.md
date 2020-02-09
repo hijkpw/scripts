@@ -75,4 +75,6 @@
 
 [不建议开启tcp fast open功能](https://www.hijk.pw/donot-use-tcp-fast-open/)
 
+[Namesilo购买域名详细教程](https://www.hijk.pw/namesilo-buy-domain-tutorial/)
+
 
