@@ -10,6 +10,7 @@ echo "#############################################################"
 echo ""
 
 red='\033[0;31m'
+green="\033[0;32m"
 plain='\033[0m'
 
 function checkSystem()
@@ -313,39 +314,53 @@ function installBBR()
     bbr=false
 }
 
-function showTip()
+function info()
 {
+    ip=`curl -s -4 icanhazip.com`
+    port=443
+    res=`netstat -nltp | grep v2ray`
+    [ -z "$res" ] && v2status="${red}已停止${plain}" || v2status="${green}正在运行${plain}"
+    res=`netstat -nltp | grep ${port} | grep nginx`
+    [ -z "$res" ] && ngstatus="${red}已停止${plain}" || ngstatus="${green}正在运行${plain}"
+    uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
+    alterid=`cat /etc/v2ray/config.json | grep alterId | cut -d: -f2 | tr -d \",' '`
+    network=`cat /etc/v2ray/config.json | grep network | cut -d: -f2 | tr -d \",' '`
+    domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
+    path=`cat /etc/v2ray/config.json | grep path | cut -d: -f2 | tr -d \",' '`
+    security="auto"
+    
     echo ============================================
-    echo -e "        ${red}v2ray安装成功！${plain}               "
+    echo -e " v2ray运行状态：${v2status}"
+    echo -e " v2ray配置文件：${red}/etc/v2ray/config.json${plain}"
+    echo -e " nginx运行状态：${ngstatus}"
+    echo -e " nginx配置文件：${red}/etc/nginx/conf.d/${domain}.conf${plain}"
     echo ""
-    echo -e " IP(address):  ${red}${IP}${plain}"
-    echo -e " 端口(port)：${red}443${plain}"
+    echo -e "${red}v2ray配置信息：${plain}               "
+    echo -e " IP(address):  ${red}${ip}${plain}"
+    echo -e " 端口(port)：${red}${port}${plain}"
     echo -e " id(uuid)：${red}${uid}${plain}"
-    echo -e " 额外id（alterid）： ${red}${alterid}${plain}"
-    echo -e " 加密方式(security)： ${red}auto${plain}"
-    echo -e " 传输协议(network)： ${red}ws${plain}"
+    echo -e " 额外id(alterid)： ${red}${alterid}${plain}"
+    echo -e " 加密方式(security)： ${red}$security${plain}"
+    echo -e " 传输协议(network)： ${red}${network}${plain}" 
     echo -e " 主机名(host)：${red}${domain}${plain}"
     echo -e " 路径(path)：${red}${path}${plain}"
-    echo    
-    echo -e "v2ray配置文件：${red}/etc/v2ray/config.json${plain}，请按照自己需要进行修改"         
+    echo -e " 安全传输(security)：${red}TLS${plain}"
     echo  
-    echo  如果连接不成功，请注意查看安全组/防火墙是否已放行端口
-    echo 
-    echo -e "如有其他问题，请到 ${red}https://www.hijk.pw${plain} 留言反馈"
+    echo ============================================
+}
 
+function bbrReboot()
+{
     if [ "${bbr}" == "false" ]; then
         echo  
         echo  为使BBR模块生效，系统将在30秒后重启
         echo  
-        echo  您可以按ctrl + c取消重启，稍后输入reboot重启系统
-    fi
-    echo ============================================
-
-    if [ "${bbr}" == "false" ]; then
+        echo -e "您可以按 ctrl + c 取消重启，稍后输入 ${red}reboot${plain} 重启系统"
         sleep 30
         reboot
     fi
 }
+
 
 function install()
 {
@@ -356,7 +371,9 @@ function install()
     installV2ray
     setFirewall
     installNginx
-    showTip
+    
+    info
+    bbrReboot
 }
 
 function uninstall()
@@ -388,7 +405,7 @@ cat /etc/centos-release
 action=$1
 [ -z $1 ] && action=install
 case "$action" in
-    install|uninstall)
+    install|uninstall|info)
         ${action}
         ;;
     *)
