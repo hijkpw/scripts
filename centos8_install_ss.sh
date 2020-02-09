@@ -3,6 +3,7 @@
 # Author: hijk<https://www.hijk.pw>
 
 red='\033[0;31m'
+green="\033[0;32m"
 plain='\033[0m'
 BASE=`pwd`
 
@@ -228,35 +229,39 @@ function setFirewall()
     fi
 }
 
-function showTip()
+function info()
 {
+    ip=`curl -s -4 icanhazip.com`
+    port=`cat /etc/shadowsocks-libev/config.json | grep server_port | cut -d: -f2 | tr -d \",' '`
+    res=`netstat -nltp | grep ${port} | grep 'ss-server'`
+    [ -z "$res" ] && status="${red}已停止${plain}" || status="${green}正在运行${plain}"
+    password=`cat /etc/shadowsocks-libev/config.json | grep password | cut -d: -f2 | tr -d \",' '`
+    method=`cat /etc/shadowsocks-libev/config.json | grep method | cut -d: -f2 | tr -d \",' '`
+    
     echo ============================================
-    echo -e "          ${red}SS安装成功！${plain}               "
+    echo -e " ss运行状态：${status}"
+    echo -e " ss配置文件：${red}/etc/shadowsocks-libev/config.json${plain}"
     echo ""
-    echo -e " IP(address):  ${red}`curl -s -4 icanhazip.com`${plain}"
+    echo -e "${red}ss配置信息：${plain}"
+    echo -e " IP(address):  ${red}${ip}${plain}"
     echo -e " 端口(port)：${red}${port}${plain}"
     echo -e " 密码(password)：${red}${password}${plain}"
     echo -e " 加密方式(method)： ${red}${method}${plain}"
-    echo    
-    echo -e "SS配置文件：${red}/etc/shadowsocks-libev/config.json${plain}，请按照自己需要进行修改"         
     echo  
-    echo  如果连接不成功，请注意查看安全组/防火墙是否已放行端口
-    echo 
-    echo -e "如有其他问题，请到 ${red}https://www.hijk.pw${plain} 留言反馈"
+    echo ============================================
 }
-
-echo -n "系统版本:  "
-cat /etc/centos-release
 
 function install()
 {
+    echo -n "系统版本:  "
+    cat /etc/centos-release
     checkSystem
     getData
     preinstall
     installSS
     setFirewall
 
-    showTip
+    info
 }
 
 function uninstall()
@@ -279,11 +284,11 @@ function uninstall()
 action=$1
 [ -z $1 ] && action=install
 case "$action" in
-    install|uninstall)
+    install|uninstall|info)
         ${action}
         ;;
     *)
         echo "参数错误"
-        echo "用法: `basename $0` [install|uninstall]"
+        echo "用法: `basename $0` [install|uninstall|info]"
         ;;
 esac
