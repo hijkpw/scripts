@@ -271,6 +271,7 @@ EOF
         echo '0 3 1 */2 0 root systemctl stop nginx && certbot renew && systemctl start nginx' >> /etc/crontab
     fi
     systemctl enable nginx && systemctl restart nginx
+    sleep 3
     res=`netstat -nltp | grep 443 | grep nginx`
     if [ "${res}" = "" ]; then
         echo -e "nginx启动失败！ 请到 ${red}https://www.hijk.pw${plain} 反馈"
