@@ -129,6 +129,7 @@ function installV2ray()
         sed -i -e "s/path\":.*/path\": \"\\${path}\"/" /etc/v2ray/config.json
     fi
     systemctl enable v2ray && systemctl restart v2ray
+    sleep 3
     res=`netstat -nltp | grep ${port} | grep v2ray`
     if [ "${res}" = "" ]; then
         echo "v2ray启动失败，请检查端口是否被占用！"
