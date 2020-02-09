@@ -305,6 +305,11 @@ EOF
 
     systemctl daemon-reload
     systemctl enable shadowsocksR && systemctl restart shadowsocksR
+    res=`netstat -nltp | grep ${port} | grep python`
+    if [ "${res}" = "" ]; then
+        echo "ssr启动失败，请检查端口是否被占用！"
+        exit 1
+    fi
 }
 
 function setFirewall()
