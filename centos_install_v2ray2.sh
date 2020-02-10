@@ -364,6 +364,9 @@ function bbrReboot()
 
 function install()
 {
+    echo -n "系统版本:  "
+    cat /etc/centos-release
+
     checkSystem
     getData
     preinstall
@@ -397,10 +400,6 @@ function uninstall()
         echo -e " ${red}卸载成功${plain}"
     fi
 }
-
-echo -n "系统版本:  "
-cat /etc/centos-release
-
 
 action=$1
 [ -z $1 ] && action=install
