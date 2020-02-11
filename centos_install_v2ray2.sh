@@ -127,7 +127,7 @@ function installV2ray()
         sed -i "${line}s/}/},/" /etc/v2ray/config.json
         sed -i "${line}a\    \"streamSettings\": {\n      \"network\": \"ws\",\n      \"wsSettings\": {\n        \"path\": \"${path}\",\n        \"headers\": {\n          \"Host\": \"${domain}\"\n        }\n      }\n    },\n    \"listen\": \"127.0.0.1\"" /etc/v2ray/config.json
     else
-        sed -i -e "s/path\":.*/path\": \"\\${path}\"/" /etc/v2ray/config.json
+        sed -i -e "s/path\":.*/path\": \"\\${path}\",/" /etc/v2ray/config.json
     fi
     systemctl enable v2ray && systemctl restart v2ray
     sleep 3
@@ -172,16 +172,12 @@ function installNginx()
 
     res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
     if [ "${res}" = "" ]; then
-        if [ -d /usr/share/nginx/html ]; then
-            mkdir -p /usr/share/nginx/html.bak
-            mv /usr/share/nginx/html/* /usr/share/nginx/html.bak
-        fi
-        mkdir -p /usr/share/nginx/html
+        mv /usr/share/nginx/html /usr/share/nginx/html.bak
         wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
         unzip theme.zip
         rm -rf __MACOSX/
-        mv Flatfy\ V3/* /usr/share/nginx/html/
-        rm -rf theme.zip Flatfy\ V3
+        mv Flatfy\ V3 /usr/share/nginx/html
+        rm -rf theme.zip
     fi
     if [ ! -f /etc/nginx/nginx.conf.bak ]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
