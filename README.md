@@ -49,7 +49,7 @@
 [V2rayNG配置教程](https://www.hijk.pw/v2rayng-config-tutorial/)
  	
 
-# VPS
+# VPS教程
 
 [搬瓦工购买服务器详细教程](https://www.hijk.pw/bandwagonghost-buy-vps-tutorial/)
 
@@ -66,7 +66,7 @@
 [vultr常见问题](hijk.pw/vultr-faq/)
 
 
-## 其他
+# 其他
 
 [境外apple id信息汇总](https://www.hijk.pw/external-apple-id-summary/)
 
