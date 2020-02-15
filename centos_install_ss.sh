@@ -38,22 +38,17 @@ checkSystem
 action=$1
 [ -z $1 ] && action=install
 case "$action" in
-    install)
+    install|uninstall|info)
         if [ $main -eq 7 ]; then
-            bash <(curl -L -s https://raw.githubusercontent.com/hijkpw/scripts/master/centos7_install_ss.sh)
+            wget -O ss.sh https://raw.githubusercontent.com/hijkpw/scripts/master/centos7_install_ss.sh
         else
-            bash <(curl -L -s https://raw.githubusercontent.com/hijkpw/scripts/master/centos8_install_ss.sh)
+            wget -O ss.sh https://raw.githubusercontent.com/hijkpw/scripts/master/centos8_install_ss.sh
         fi
-        ;;
-    uninstall)
-        if [ $main -eq 7 ]; then
-            bash <(curl -L -s https://raw.githubusercontent.com/hijkpw/scripts/master/centos7_install_ss.sh) uninstall
-        else
-            bash <(curl -L -s https://raw.githubusercontent.com/hijkpw/scripts/master/centos8_install_ss.sh) uninstall
-        fi
+        bash ss.sh $action
+        rm -rf ss.sh
         ;;
     *)
         echo "参数错误"
-        echo "用法: `basename $0` [install|uninstall]"
+        echo "用法: `basename $0` [install|uninstall|info]"
         ;;
 esac
