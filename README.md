@@ -72,9 +72,15 @@
 
 [切换apple id下载其它国家和地区的应用](https://www.hijk.pw/switch-appleid-to-download-app/)
 
+[Namesilo购买域名详细教程](https://www.hijk.pw/namesilo-buy-domain-tutorial/)
+
+[Just My Socks购买和使用教程](https://www.hijk.pw/just-my-socks-buy-and-use-tutorial/)
+
 [免费vpn有风险，请慎用](https://www.hijk.pw/be-careful-when-use-free-vpn/)
 
 [科学上网常见问题](https://www.hijk.pw/vpn-faq/)
+
+[PC端科学上网常见问题](https://www.hijk.pw/pc-vpn-problem-faq/)
 
 [通过国内服务器转发流量](https://www.hijk.pw/forward-traffic-via-internal-vps/)
 
@@ -83,7 +89,5 @@
 [添加ipv6支持](https://www.hijk.pw/add-ipv6-support/)
 
 [不建议开启tcp fast open功能](https://www.hijk.pw/donot-use-tcp-fast-open/)
-
-[Namesilo购买域名详细教程](https://www.hijk.pw/namesilo-buy-domain-tutorial/)
 
 
