@@ -152,7 +152,7 @@ function installNginx()
     fi
     res=`which pip3`
     if [ "$?" != "0" ]; then
-        yum install -y python36
+        yum install -y python3 python3-pip
     fi
     res=`which pip3`
     if [ "$?" != "0" ]; then
