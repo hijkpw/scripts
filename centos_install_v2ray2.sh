@@ -221,7 +221,7 @@ EOF
     mkdir -p /etc/nginx/conf.d;
     cat > /etc/nginx/conf.d/${domain}.conf<<-EOF
 server {
-    listen 80 default_server;
+    listen 80;
     server_name ${domain};
     rewrite ^(.*) https://\$server_name\$1 permanent;
 }
