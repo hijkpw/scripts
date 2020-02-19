@@ -221,7 +221,7 @@ function info()
 {
     ip=`curl -s -4 icanhazip.com`
     port=`cat /etc/shadowsocks-libev/config.json | grep server_port | cut -d: -f2 | tr -d \",' '`
-    res=`netstat -nltp | grep ${port} | grep python`
+    res=`netstat -nltp | grep ${port} | grep 'ss-server'`
     [ -z "$res" ] && status="${red}已停止${plain}" || status="${green}正在运行${plain}"
     password=`cat /etc/shadowsocks-libev/config.json | grep password | cut -d: -f2 | tr -d \",' '`
     method=`cat /etc/shadowsocks-libev/config.json | grep method | cut -d: -f2 | tr -d \",' '`
