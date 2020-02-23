@@ -51,6 +51,8 @@
 
 # VPS教程
 
+[CN2 GIA商家推荐](https://www.hijk.pw/cn2-gia-merchants/)
+
 [搬瓦工购买服务器详细教程](https://www.hijk.pw/bandwagonghost-buy-vps-tutorial/)
 
 [购买vultr服务器超详细图文教程](https://www.hijk.pw/vultr-buy-vps-tutorial/)
@@ -64,6 +66,8 @@
 [Mac电脑连接Linux教程](https://www.hijk.pw/mac-connect-to-linux-tutorial/)
 
 [vultr常见问题](hijk.pw/vultr-faq/)
+
+[v2ray使用cloudflare中转流量，拯救被墙ip](https://www.hijk.pw/use-cloudflare-unlock-blocked-ip/)
 
 
 # 其他
