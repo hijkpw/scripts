@@ -3,7 +3,7 @@
 # Author: hijk<https://www.hijk.pw>
 
 echo "#############################################################"
-echo "#         CentOS 7/8 v2ray 带伪装一键安装脚本                  #"
+echo "#         CentOS 7/8 v2ray 带伪装一键安装脚本               #"
 echo "# 网址: https://www.hijk.pw                                 #"
 echo "# 作者: hijk                                                #"
 echo "#############################################################"
@@ -12,6 +12,22 @@ echo ""
 red='\033[0;31m'
 green="\033[0;32m"
 plain='\033[0m'
+
+sites=(
+http://www.zhuizishu.com/
+http://xs.56dyc.com/
+http://www.xiaoshuosk.com/
+https://www.x33xs.com/
+http://www.wutuxs.com/
+https://www.23xsw.cc/
+https://www.44pq.cc/
+https://www.23us.us/
+https://www.quledu.net/
+http://www.ddxsku.com/
+http://www.biqu6.com/
+https://www.abcxs.com/
+https://www.23hh.la/
+)
 
 function checkSystem()
 {
@@ -80,6 +96,11 @@ function getData()
             break
         fi
     done
+    
+    len=${#sites[@]}
+    ((len--))
+    index=`shuf -i0-${len} -n1`
+    site=$sites[$index]
 }
 
 function preinstall()
@@ -170,15 +191,6 @@ function installNginx()
         exit 1
     fi
 
-    res=`cat /usr/share/nginx/html/index.html| grep Flatfy`
-    if [ "${res}" = "" ]; then
-        mv /usr/share/nginx/html /usr/share/nginx/html.bak
-        wget 'https://github.com/hijkpw/scripts/raw/master/Flatfy%20V3.zip' -O theme.zip
-        unzip theme.zip
-        rm -rf __MACOSX/
-        mv Flatfy\ V3 /usr/share/nginx/html
-        rm -rf theme.zip
-    fi
     if [ ! -f /etc/nginx/nginx.conf.bak ]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     fi
@@ -247,7 +259,7 @@ server {
 
     root /usr/share/nginx/html;
     location / {
-        index index.html;
+        proxy_pass $site;
     }
 
     location ${path} {
