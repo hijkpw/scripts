@@ -161,21 +161,26 @@ function installSS()
 {
     echo 安装SS...
 
-    if ! wget 'https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.3.4/shadowsocks-libev-3.3.4.tar.gz' -O shadowsocks-libev-3.3.4.tar.gz; then
-        echo "下载文件失败！"
-        exit 1
-    fi
-    tar zxf shadowsocks-libev-3.3.4.tar.gz
-    cd shadowsocks-libev-3.3.4
-    ./configure
-    make && make install
-    if [ $? -ne 0 ]; then
-        echo
-        echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://www.hijk.pw 反馈"
+    res=`which ss-server`
+    if [ "$?" != "0" ]; then
+        if ! wget 'https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.3.4/shadowsocks-libev-3.3.4.tar.gz' -O shadowsocks-libev-3.3.4.tar.gz; then
+            echo "下载文件失败！"
+            exit 1
+        fi
+        tar zxf shadowsocks-libev-3.3.4.tar.gz
+        cd shadowsocks-libev-3.3.4
+        ./configure
+        make && make install
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://www.hijk.pw 反馈"
+            cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
+            exit 1
+        fi
         cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
-        exit 1
+    else
+        echo "SS 已安装"
     fi
-    cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
 
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
