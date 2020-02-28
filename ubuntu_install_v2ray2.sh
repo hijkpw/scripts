@@ -179,6 +179,11 @@ function installNginx()
     fi
     pip3 install --upgrade pip
     pip3 install wheel
+    res=`pip3 list | grep crypto | awk '{print $2}'`
+    if [ "$res" < "2.8" ]; then
+        pip3 uninstall cryptography
+        pip3 install cryptography
+    fi
     pip3 install certbot
     res=`which certbot`
     if [ "$?" != "0" ]; then
