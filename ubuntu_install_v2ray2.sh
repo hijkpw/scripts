@@ -17,16 +17,13 @@ sites=(
 http://www.zhuizishu.com/
 http://xs.56dyc.com/
 http://www.xiaoshuosk.com/
-https://www.x33xs.com/
-http://www.wutuxs.com/
-https://www.23xsw.cc/
-https://www.44pq.cc/
-https://www.23us.us/
 https://www.quledu.net/
 http://www.ddxsku.com/
 http://www.biqu6.com/
-https://www.abcxs.com/
-https://www.23hh.la/
+https://www.wenshulou.cc/
+https://www.php.baby/
+https://www.golglo.com/
+http://www.aiduxshuo.com/
 )
 
 function checkSystem()
