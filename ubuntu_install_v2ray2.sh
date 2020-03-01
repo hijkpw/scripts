@@ -148,7 +148,7 @@ function installV2ray()
     sleep 3
     res=`netstat -nltp | grep ${port} | grep v2ray`
     if [ "${res}" = "" ]; then
-        echo "v2ray启动失败，请检查端口是否被占用！"
+        echo "v2ray启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！"
         exit 1
     fi
     echo "v2ray安装成功！"
