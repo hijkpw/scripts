@@ -47,7 +47,8 @@
 [V2rayX配置教程](https://www.hijk.pw/v2rayx-config-tutorial/)
 
 [V2rayNG配置教程](https://www.hijk.pw/v2rayng-config-tutorial/)
- 	
+
+[v2ray多用户配置](https://www.hijk.pw/v2ray-multiple-users/)
 
 # VPS教程
 
@@ -68,6 +69,8 @@
 [vultr常见问题](hijk.pw/vultr-faq/)
 
 [v2ray使用cloudflare中转流量，拯救被墙ip](https://www.hijk.pw/use-cloudflare-unlock-blocked-ip/)
+
+[CloudCone特价VPS促销，就在今天！](https://www.hijk.pw/cloudcone-special-vps-offers/)
 
 
 # 其他
