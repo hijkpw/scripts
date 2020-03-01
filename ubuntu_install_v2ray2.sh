@@ -278,7 +278,7 @@ server {
 EOF
     res=`cat /etc/crontab | grep certbot`
     if [ "${res}" = "" ]; then
-        echo '0 3 1 */2 0 root systemctl stop nginx && certbot renew && systemctl start nginx' >> /etc/crontab
+        echo '0 3 1 */2 0 root systemctl stop nginx; certbot renew; systemctl restart nginx' >> /etc/crontab
     fi
     systemctl enable nginx && systemctl restart nginx
     sleep 3
@@ -307,6 +307,13 @@ function installBBR()
         echo "3" > /proc/sys/net/ipv4/tcp_fastopen
         echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
         return;
+    fi
+    
+    res=`hostnamectl | grep -i openvz`
+    if [ "$res" != "" ]; then
+        echo openvz机器，跳过安装
+        bbr=false
+        return
     fi
 
     echo 安装BBR模块...
