@@ -341,15 +341,16 @@ function info()
     ip=`curl -s -4 icanhazip.com`
     res=`netstat -nltp | grep v2ray`
     [ -z "$res" ] && v2status="${red}已停止${plain}" || v2status="${green}正在运行${plain}"
-    res=`netstat -nltp | grep ${port} | grep nginx`
-    [ -z "$res" ] && ngstatus="${red}已停止${plain}" || ngstatus="${green}正在运行${plain}"
+    
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
     alterid=`cat /etc/v2ray/config.json | grep alterId | cut -d: -f2 | tr -d \",' '`
     network=`cat /etc/v2ray/config.json | grep network | cut -d: -f2 | tr -d \",' '`
     domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
     path=`cat /etc/v2ray/config.json | grep path | cut -d: -f2 | tr -d \",' '`
-    security="auto"
     port=`cat /etc/nginx/conf.d/${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
+    security="auto"
+    res=`netstat -nltp | grep ${port} | grep nginx`
+    [ -z "$res" ] && ngstatus="${red}已停止${plain}" || ngstatus="${green}正在运行${plain}"
     
     echo ============================================
     echo -e " v2ray运行状态：${v2status}"
