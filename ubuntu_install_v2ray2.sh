@@ -94,6 +94,11 @@ function getData()
             break
         fi
     done
+    
+    read -p "请输入Nginx端口[100-65535的一个数字，默认443]：" port
+    if [ -z "${port}" ]; then
+        port=443
+    fi
        
     len=${#sites[@]}
     ((len--))
@@ -243,7 +248,7 @@ server {
 }
 
 server {
-    listen       443 ssl http2;
+    listen       ${port} ssl http2;
     server_name ${domain};
     charset utf-8;
 
@@ -333,7 +338,6 @@ function installBBR()
 function info()
 {
     ip=`curl -s -4 icanhazip.com`
-    port=443
     res=`netstat -nltp | grep v2ray`
     [ -z "$res" ] && v2status="${red}已停止${plain}" || v2status="${green}正在运行${plain}"
     res=`netstat -nltp | grep ${port} | grep nginx`
@@ -344,6 +348,7 @@ function info()
     domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
     path=`cat /etc/v2ray/config.json | grep path | cut -d: -f2 | tr -d \",' '`
     security="auto"
+    port=`cat /etc/nginx/conf.d/${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
     
     echo ============================================
     echo -e " v2ray运行状态：${v2status}"
@@ -403,6 +408,7 @@ function uninstall()
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
         systemctl stop v2ray
         systemctl disable v2ray
+        domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
         rm -rf /etc/v2ray/*
         rm -rf /usr/bin/v2ray/*
         rm -rf /var/log/v2ray/*
@@ -414,6 +420,7 @@ function uninstall()
             rm -rf /usr/share/nginx/html
             mv /usr/share/nginx/html.bak /usr/share/nginx/html
         fi
+        rm -rf /etc/nginx/conf.d/${domain}.conf
         echo -e " ${red}卸载成功${plain}"
     fi
 }
