@@ -303,6 +303,7 @@ function setFirewall()
     if [ "$res" = "" ];then
         ufw allow http/tcp
         ufw allow https/tcp
+        ufw allow ${port}/tcp
     fi
 }
 
