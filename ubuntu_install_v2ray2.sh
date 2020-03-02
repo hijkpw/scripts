@@ -244,7 +244,7 @@ EOF
 server {
     listen 80;
     server_name ${domain};
-    rewrite ^(.*) https://\$server_name\$1 permanent;
+    rewrite ^(.*) https://\$server_name:${port}\$1 permanent;
 }
 
 server {
