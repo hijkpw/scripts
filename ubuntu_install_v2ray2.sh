@@ -290,7 +290,7 @@ EOF
     fi
     systemctl enable nginx && systemctl restart nginx
     sleep 3
-    res=`netstat -nltp | grep 443 | grep nginx`
+    res=`netstat -nltp | grep ${port} | grep nginx`
     if [ "${res}" = "" ]; then
         echo -e "nginx启动失败！ 请到 ${red}https://www.hijk.pw${plain} 反馈"
         exit 1
