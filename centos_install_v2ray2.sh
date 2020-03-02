@@ -140,7 +140,7 @@ function installV2ray()
     alterid=`shuf -i50-90 -n1`
     sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" /etc/v2ray/config.json
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
-    port=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
+    v2port=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
     res=`cat /etc/v2ray/config.json | grep streamSettings`
@@ -154,7 +154,7 @@ function installV2ray()
     fi
     systemctl enable v2ray && systemctl restart v2ray
     sleep 3
-    res=`netstat -nltp | grep ${port} | grep v2ray`
+    res=`netstat -nltp | grep ${v2port} | grep v2ray`
     if [ "${res}" = "" ]; then
         echo "v2ray启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！"
         exit 1
@@ -266,7 +266,7 @@ server {
 
     location ${path} {
       proxy_redirect off;
-      proxy_pass http://127.0.0.1:${port};
+      proxy_pass http://127.0.0.1:${v2port};
       proxy_http_version 1.1;
       proxy_set_header Upgrade \$http_upgrade;
       proxy_set_header Connection "upgrade";
