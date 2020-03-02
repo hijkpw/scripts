@@ -179,6 +179,9 @@ function installNginx()
     res=`pip3 list | grep crypto | awk '{print $2}'`
     if [ "$res" < "2.8" ]; then
         pip3 uninstall cryptography
+        cd /usr/lib/python3/dist-packages
+        rm -r cryptoggraphy cryptography-2.1.4.egg-info
+        cd -
         pip3 install cryptography
     fi
     pip3 install certbot
