@@ -317,6 +317,14 @@ function installBBR()
         bbr=false
         return
     fi
+    
+    if [ $main -eq 8 ]; then
+        echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+        echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+        echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
+        sysctl -p
+        return
+    fi
 
     echo 安装BBR模块...
     rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
