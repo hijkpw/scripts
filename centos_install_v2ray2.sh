@@ -187,6 +187,10 @@ function installNginx()
     if [ "$?" != "0" ]; then
         export PATH=$PATH:/usr/local/bin
     fi
+    systemctl status firewalld > /dev/null 2>&1
+    if [ $? -eq 0 ];then
+        firewall-cmd --add-service=http
+    fi
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
         echo -e " 获取证书失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
