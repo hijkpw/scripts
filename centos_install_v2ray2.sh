@@ -108,7 +108,7 @@ function getData()
         host=`echo ${site} | cut -d/ -f3`
         ip=`host ${host} | grep -oE "[1-9][0-9.]+[0-9]" | head -n1`
         if [ "$ip" != "" ]; then
-            echo "${ip}  ${host}"
+            echo "${ip}  ${host}" >> /etc/hosts
             break
         fi
     done
