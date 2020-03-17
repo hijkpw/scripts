@@ -101,8 +101,17 @@ function getData()
     
     len=${#sites[@]}
     ((len--))
-    index=`shuf -i0-${len} -n1`
-    site=$sites[$index]
+    while true
+    do
+        index=`shuf -i0-${len} -n1`
+        site=${sites[$index]}
+        host=`echo ${site} | cut -d/ -f3`
+        ip=`host ${host} | grep -oE "[1-9][0-9.]+[0-9]" | head -n1`
+        if [ "$ip" != "" ]; then
+            echo "${ip}  ${host}"
+            break
+        fi
+    done
 }
 
 function preinstall()
@@ -442,7 +451,7 @@ case "$action" in
         ;;
     *)
         echo "参数错误"
-        echo "用法: `basename $0` [install|uninstall]"
+        echo "用法: `basename $0` [install|uninstall|info]"
         ;;
 esac
 
