@@ -6,6 +6,7 @@
 2. CentOS 7/8系统ShadowsocksR/SSR一键脚本：centos_install_ssr.sh，使用教程：<https://www.hijk.pw/shadowsocksr-ssr-one-click-script/>
 3. CentOS 7/8系统V2Ray一键脚本：centos_install_v2ray.sh，使用教程：<https://www.hijk.pw/centos-one-click-install-v2ray/>
 4. CentOS 7/8系统带伪装V2Ray一键脚本：centos_install_v2ray2.sh，使用教程：<https://www.hijk.pw/v2ray-one-click-script-with-mask/>
+5. trojan一键脚本：trojan.sh，使用教程：<https://www.hijk.pw/trojan-one-click-scrip/>
 
 ## Ubuntu
 
@@ -13,6 +14,7 @@
 2. Ubuntu TLS系统ShadowsocksR/SS一键脚本：ubuntu_install_ssr.sh，使用教程：<https://www.hijk.pw/ubuntu-shadowsocksr-ssr-one-click-script/>
 3. Ubuntu TLS系统V2Ray一键脚本：ubuntu_install_v2ray.sh，使用教程：<https://www.hijk.pw/ubuntu-one-click-install-v2ray/>
 4. Ubuntu TLS系统带伪装V2Ray一键脚本：ubuntu_install_v2ray2.sh，使用教程：<https://www.hijk.pw/ubuntu-v2ray-one-click-script-with-mask/>
+5. 5. trojan一键脚本：trojan.sh，使用教程：<https://www.hijk.pw/trojan-one-click-scrip/>
 
 # 客户端配置教程
 
@@ -48,7 +50,21 @@
 
 [V2rayNG配置教程](https://www.hijk.pw/v2rayng-config-tutorial/)
 
+[Kitsunebi安卓版配置教程](https://www.hijk.pw/kitsunebi-android-config-tutorial/)
+
+[bifrostV配置教程](https://www.hijk.pw/bifrostv-config-tutorial/)
+
 [v2ray多用户配置](https://www.hijk.pw/v2ray-multiple-users/)
+
+## trojan
+
+[trojan Windows客户端使用教程](https://www.hijk.pw/trojan-windows-client-tutorial/)
+
+[trojan安卓客户端配置教程](https://www.hijk.pw/trojan-android-client-config-tutorial/)
+
+[trojan mac客户端配置教程](https://www.hijk.pw/trojan-mac-client-config-tutorial/)
+
+[Shadowrocket配置trojan教程](https://www.hijk.pw/shadowrocket-config-trojan-tutorial/)
 
 # VPS教程
 
