@@ -58,9 +58,7 @@ function getData()
     echo -e "  ${red}2. 域名的某个主机名解析指向当前服务器ip（${IP}）${plain}"
     echo " "
     read -p "确认满足按y，按其他退出脚本：" answer
-    if [ "${answer}" != "y" ]; then
-        exit 0
-    fi
+    [ "${answer}" != "y" ] && exit 0
 
     while true
     do
@@ -96,10 +94,12 @@ function getData()
     done
     
     read -p "请输入Nginx端口[100-65535的一个数字，默认443]：" port
-    if [ -z "${port}" ]; then
-        port=443
-    fi
-       
+    [ -z "${port}" ] && port=443
+    
+    read -p "是否安装BBR（安装请按y，不安装请输n，不输则默认安装）:" needBBR
+    [ -z "$needBBR" ] && needBBR=y
+    [ "$needBBR" = "Y" ] && needBBR=y
+
     len=${#sites[@]}
     ((len--))
     while true
@@ -202,10 +202,6 @@ function installNginx()
     res=`which certbot`
     if [ "$?" != "0" ]; then
         export PATH=$PATH:/usr/local/bin
-    fi
-    res=`ufw status | grep -i inactive`
-    if [ "$res" = "" ];then
-        ufw allow http/tcp
     fi
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
@@ -322,6 +318,10 @@ function setFirewall()
 
 function installBBR()
 {
+    if [ "$needBBR" != "y" ]; then
+        bbr=true
+        return
+    fi
     result=$(lsmod | grep bbr)
     if [ "$result" != "" ]; then
         echo BBR模块已安装
@@ -334,7 +334,7 @@ function installBBR()
     res=`hostnamectl | grep -i openvz`
     if [ "$res" != "" ]; then
         echo openvz机器，跳过安装
-        bbr=false
+        bbr=true
         return
     fi
 
