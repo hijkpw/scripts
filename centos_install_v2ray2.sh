@@ -95,9 +95,11 @@ function getData()
     done
     
     read -p "请输入Nginx端口[100-65535的一个数字，默认443]：" port
-    if [ -z "${port}" ]; then
-        port=443
-    fi
+    [ -z "${port}" ] && port=443
+
+    read -p "是否安装BBR（安装请按y，不安装请输n，不输则默认安装）:" needBBR
+    [ -z "$needBBR" ] && needBBR=y
+    [ "$needBBR" = "Y" ] && needBBR=y
     
     len=${#sites[@]}
     ((len--))
@@ -195,10 +197,6 @@ function installNginx()
     res=`which certbot`
     if [ "$?" != "0" ]; then
         export PATH=$PATH:/usr/local/bin
-    fi
-    systemctl status firewalld > /dev/null 2>&1
-    if [ $? -eq 0 ];then
-        firewall-cmd --add-service=http
     fi
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
@@ -316,6 +314,10 @@ function setFirewall()
 
 function installBBR()
 {
+    if [ "$needBBR" != "y" ]; then
+        bbr=true
+        return
+    fi
     result=$(lsmod | grep bbr)
     if [ "$result" != "" ]; then
         echo BBR模块已安装
@@ -327,7 +329,7 @@ function installBBR()
     res=`hostnamectl | grep -i openvz`
     if [ "$res" != "" ]; then
         echo openvz机器，跳过安装
-        bbr=false
+        bbr=true
         return
     fi
     
@@ -336,6 +338,7 @@ function installBBR()
         echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
         echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
         sysctl -p
+        bbr=true
         return
     fi
 
