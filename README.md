@@ -14,7 +14,7 @@
 2. Ubuntu TLS系统ShadowsocksR/SS一键脚本：ubuntu_install_ssr.sh，使用教程：<https://www.hijk.pw/ubuntu-shadowsocksr-ssr-one-click-script/>
 3. Ubuntu TLS系统V2Ray一键脚本：ubuntu_install_v2ray.sh，使用教程：<https://www.hijk.pw/ubuntu-one-click-install-v2ray/>
 4. Ubuntu TLS系统带伪装V2Ray一键脚本：ubuntu_install_v2ray2.sh，使用教程：<https://www.hijk.pw/ubuntu-v2ray-one-click-script-with-mask/>
-5. 5. trojan一键脚本：trojan.sh，使用教程：<https://www.hijk.pw/trojan-one-click-scrip/>
+5. trojan一键脚本：trojan.sh，使用教程：<https://www.hijk.pw/trojan-one-click-scrip/>
 
 # 客户端配置教程
 
@@ -58,7 +58,7 @@
 
 ## trojan
 
-[trojan Windows客户端使用教程](https://www.hijk.pw/trojan-windows-client-tutorial/)
+[trojan Windows客户端配置教程](https://www.hijk.pw/trojan-windows-client-tutorial/)
 
 [trojan安卓客户端配置教程](https://www.hijk.pw/trojan-android-client-config-tutorial/)
 
