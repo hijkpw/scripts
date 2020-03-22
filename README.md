@@ -114,3 +114,6 @@
 [不建议开启tcp fast open功能](https://www.hijk.pw/donot-use-tcp-fast-open/)
 
 
+[安装魔改BBR/BBR Plus/锐速(Lotserver)](https://www.hijk.pw/install-bbr-plus-lotserver/)
+
+
