@@ -140,8 +140,11 @@ function installV2ray()
     bash <(curl -L -s https://install.direct/go.sh)
 
     if [ ! -f /etc/v2ray/config.json ]; then
-        echo "安装失败，请到 https://www.hijk.pw 网站反馈"
-        exit 1
+        bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
+        if [ ! -f /etc/v2ray/config.json ]; then
+            echo "安装失败，请到 https://www.hijk.pw 网站反馈"
+            exit 1
+        fi
     fi
 
     logsetting=`cat /etc/v2ray/config.json|grep loglevel`
