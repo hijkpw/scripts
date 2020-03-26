@@ -286,6 +286,9 @@ server {
     ssl_session_tickets off;
     ssl_certificate /etc/letsencrypt/live/${domain}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${domain}/privkey.pem;
+    
+    # placeholder
+    # placeholder
 
     root /usr/share/nginx/html;
     location / {
