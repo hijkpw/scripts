@@ -178,8 +178,21 @@ function installV2ray()
 
 function installNginx()
 {
+    bt=false
+    confpath="/etc/nginx/conf.d/"
     yum install -y nginx
-    systemctl stop nginx
+    if [ "$?" != "0" ]; then
+        res=`which nginx`
+        if [ "$?" != "0" ]; then
+            echo "您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
+            exit 1
+        fi
+        bt=true
+        confpath="/www/server/panel/vhost/nginx/"
+        nginx -s stop
+    else
+        systemctl stop nginx
+    fi
     res=`netstat -ntlp| grep -E ':80|:443'`
     if [ "${res}" != "" ]; then
         echo " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
@@ -187,6 +200,7 @@ function installNginx()
         echo ${res}
         exit 1
     fi
+    
     res=`which pip3`
     if [ "$?" != "0" ]; then
         yum install -y python3 python3-pip
@@ -207,10 +221,11 @@ function installNginx()
         exit 1
     fi
 
-    if [ ! -f /etc/nginx/nginx.conf.bak ]; then
-        mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-    fi
-    cat > /etc/nginx/nginx.conf<<-EOF
+    if [ "$bt" = "false" ]; then
+        if [ ! -f /etc/nginx/nginx.conf.bak ]; then
+            mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+        fi
+        cat > /etc/nginx/nginx.conf<<-EOF
 user nginx;
 worker_processes auto;
 error_log /var/log/nginx/error.log;
@@ -246,8 +261,10 @@ http {
 }
 EOF
 
-    mkdir -p /etc/nginx/conf.d;
-    cat > /etc/nginx/conf.d/${domain}.conf<<-EOF
+        mkdir -p /etc/nginx/conf.d;
+    fi
+    
+    cat > ${confpath}${domain}.conf<<-EOF
 server {
     listen 80;
     server_name ${domain};
@@ -260,7 +277,7 @@ server {
     charset utf-8;
 
     # ssl配置
-    ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_protocols TLSv1.1 TLSv1.2;
     ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
     ssl_ecdh_curve secp384r1;
     ssl_prefer_server_ciphers on;
@@ -269,9 +286,6 @@ server {
     ssl_session_tickets off;
     ssl_certificate /etc/letsencrypt/live/${domain}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${domain}/privkey.pem;
-
-    access_log  /var/log/nginx/${domain}.access.log;
-    error_log /var/log/nginx/${domain}.error.log;
 
     root /usr/share/nginx/html;
     location / {
@@ -293,9 +307,18 @@ server {
 EOF
     res=`cat /etc/crontab | grep certbot`
     if [ "${res}" = "" ]; then
-        echo '0 3 1 */2 0 root systemctl stop nginx ; certbot renew ; systemctl restart nginx' >> /etc/crontab
+        if [ "$bt" = "true" ]; then
+            echo '0 3 1 */2 0 root nginx -s stop; certbot renew ; nginx -c /www/server/nginx/conf/nginx.conf' >> /etc/crontab
+        else
+            echo '0 3 1 */2 0 root systemctl stop nginx ; certbot renew ; systemctl restart nginx' >> /etc/crontab
+        fi
     fi
-    systemctl enable nginx && systemctl restart nginx
+    if [ "$bt" = "false" ]; then
+        systemctl enable nginx && systemctl restart nginx
+    else
+        nginx -c /www/server/nginx/conf/nginx.conf
+    fi
+    
     sleep 3
     res=`netstat -nltp | grep ${port} | grep nginx`
     if [ "${res}" = "" ]; then
@@ -364,12 +387,17 @@ function info()
     res=`netstat -nltp | grep v2ray`
     [ -z "$res" ] && v2status="${red}已停止${plain}" || v2status="${green}正在运行${plain}"
     
+    confpath="/etc/nginx/conf.d/"
+    if [ ! -f $confpath ]; then
+        confpath="/www/server/panel/vhost/nginx/"
+    fi
+    
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
     alterid=`cat /etc/v2ray/config.json | grep alterId | cut -d: -f2 | tr -d \",' '`
     network=`cat /etc/v2ray/config.json | grep network | cut -d: -f2 | tr -d \",' '`
     domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
     path=`cat /etc/v2ray/config.json | grep path | cut -d: -f2 | tr -d \",' '`
-    port=`cat /etc/nginx/conf.d/${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
+    port=`cat ${confpath}${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
     security="auto"
     
     res=`netstat -nltp | grep ${port} | grep nginx`
@@ -379,7 +407,7 @@ function info()
     echo -e " v2ray运行状态：${v2status}"
     echo -e " v2ray配置文件：${red}/etc/v2ray/config.json${plain}"
     echo -e " nginx运行状态：${ngstatus}"
-    echo -e " nginx配置文件：${red}/etc/nginx/conf.d/${domain}.conf${plain}"
+    echo -e " nginx配置文件：${red}${confpath}${domain}.conf${plain}"
     echo ""
     echo -e "${red}v2ray配置信息：${plain}               "
     echo -e " IP(address):  ${red}${ip}${plain}"
