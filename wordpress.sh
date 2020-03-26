@@ -144,11 +144,7 @@ EOF
     chown -R apache:apache /var/www/${domain}
 
     # config nginx
-    sed -i '22,25d' /etc/nginx/conf.d/${domain}.conf
-    res=`cat /etc/nginx/conf.d/${domain}.conf | grep root`
-    if [ "$res" != "" ]; then
-        sed -i '22,25d' /etc/nginx/conf.d/${domain}.conf
-    fi
+    sed -i '26,29d' /etc/nginx/conf.d/${domain}.conf
     sed -i '$d' /etc/nginx/conf.d/${domain}.conf
     if [ $main -eq 7 ]; then
         upstream="127.0.0.1:9000"
