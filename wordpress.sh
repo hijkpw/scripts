@@ -69,7 +69,7 @@ function installPHP()
         sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/remi.repo
         dnf module install -y php:remi-7.4
     fi
-    yum install -y php-cli php-fpm php-bcmath php-gd php-mbstring php-mysqlnd php-pdo php-opcache php-xml php-pecl-zip php-pecl-imagick
+    yum install -y php-cli php-fpm php-bcmath php-gd php-mbstring php-mysqlnd php-pdo php-opcache php-xml php-pecl-zip
     systemctl enable php-fpm.service
 }
 
