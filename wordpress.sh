@@ -34,7 +34,7 @@ function checkSystem()
     fi
 }
 
-function getData()
+function checkV2()
 {
     echo "该脚本仅适用于 https://www.hijk.pw 网站的v2ray带伪装一键脚本 安装wordpress用！"
     read -p "退出请按n，按其他键继续：" answer
@@ -53,9 +53,6 @@ function getData()
         echo "未找到域名的nginx配置文件"
         exit 1
     fi
-
-    read -p "请设置MySQL root密码：" dbrootpwd
-    [ -z "${domain}" ] && dbrootpwd=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
 }
 
 function installPHP()
@@ -114,15 +111,10 @@ function config()
     dbname="wordpress"
     dbuser="wordpress"
     dbpass=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
-    mysqladmin password "${dbrootpwd}"
-    mysql -uroot -p"${dbrootpwd}" <<EOF
-DELETE FROM mysql.user WHERE User='';
-DELETE FROM mysql.user where Password IS NULL;
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-DROP DATABASE IF EXISTS test;
+    mysql -uroot <<EOF
 CREATE DATABASE $dbname default charset utf8mb4;
 CREATE USER ${dbuser}@'%' IDENTIFIED BY '${dbpass}';
-GRANT ALL PRIVILEGES ON ${dbname}.* to ${dbuser};
+GRANT ALL PRIVILEGES ON ${dbname}.* to ${dbuser}@'%';
 FLUSH PRIVILEGES;
 EOF
 
@@ -178,7 +170,6 @@ function info()
 {
     echo "WordPress安装成功！"
     echo "==============================="
-    echo -e "MySQL root密码：${red}$dbrootpwd${plain}"
     echo -e "WordPress安装路径：${red}/var/www/${domain}${plain}"
     echo -e "WordPress数据库：${red}${dbname}${plain}"
     echo -e "WordPress数据库用户名：${red}${dbuser}${plain}"
@@ -190,7 +181,7 @@ function info()
 function main()
 {
     checkSystem
-    getData
+    checkV2
     installPHP
     installMysql
     installWordPress
