@@ -56,6 +56,8 @@
 
 [v2ray多用户配置](https://www.hijk.pw/v2ray-multiple-users/)
 
+[v2ray伪装建站教程](https://www.hijk.pw/v2ray-mask-with-website/)
+
 ## trojan
 
 [trojan Windows客户端配置教程](https://www.hijk.pw/trojan-windows-client-tutorial/)
