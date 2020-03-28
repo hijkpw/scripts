@@ -72,15 +72,18 @@ function installPHP()
 
 function installMysql()
 {
-    if [ $main -eq 7 ]; then
-    echo '# MariaDB 10.4 CentOS repository list - created 2019-11-23 15:00 UTC
+    yum remove -y MariaDB-server
+    rm -rf /var/lib/mysql
+    if [ ! -f /etc/yum.repos.d/mariadb.repo ]; then
+    	if [ $main -eq 7 ]; then
+    	echo '# MariaDB 10.4 CentOS repository list - created 2019-11-23 15:00 UTC
 # http://downloads.mariadb.org/mariadb/repositories/
 [mariadb]
 name = MariaDB
 baseurl = http://yum.mariadb.org/10.4/centos7-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1' >> /etc/yum.repos.d/mariadb.repo
-else
+	else
 echo '# MariaDB 10.4 CentOS repository list - created 2020-03-11 16:29 UTC
 # http://downloads.mariadb.org/mariadb/repositories/
 [mariadb]
@@ -89,8 +92,9 @@ baseurl = http://yum.mariadb.org/10.4/centos8-amd64
 module_hotfixes=1
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1' >>  /etc/yum.repos.d/mariadb.repo
-fi
-    yum install -y MariaDB-server MariaDB-client
+	fi
+    fi
+    yum install -y MariaDB-server
     systemctl enable mariadb.service
 }
 
@@ -100,6 +104,7 @@ function installWordPress()
     mkdir -p /var/www;
     wget https://cn.wordpress.org/latest-zh_CN.tar.gz
     tar -zxf latest-zh_CN.tar.gz
+    rm -rf /var/www/$domain
     mv wordpress /var/www/$domain
     rm -rf latest-zh_CN.tar.gz
 }
