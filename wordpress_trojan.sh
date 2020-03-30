@@ -72,7 +72,7 @@ function installMysql()
 name = MariaDB
 baseurl = http://yum.mariadb.org/10.4/centos${main}-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-gpgcheck=1" >> /etc/yum.repos.d/mariadb.repo
+gpgcheck=1" > /etc/yum.repos.d/mariadb.repo
     if [ $main -eq 8 ]; then
         echo "module_hotfixes=1" >>  /etc/yum.repos.d/mariadb.repo
     fi
