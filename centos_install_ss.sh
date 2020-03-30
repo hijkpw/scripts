@@ -125,7 +125,7 @@ function getData()
             method="chacha20-ietf-poly1305"
             ;;
         15)
-            method="xchacha20-ietf--poly1305"
+            method="xchacha20-ietf-poly1305"
             ;;
         *)
             echo "无效的选择，使用默认的aes-256-cfb"
