@@ -135,6 +135,9 @@ EOF
   }
   s/put your unique phrase here/salt()/ge
 ' wp-config.php
+    sed -i "23a define( 'WP_HOME', 'https://${domain}' );" wp-config.php
+    sed -i "24a define( 'WP_SITEURL', 'https://${domain}' );" wp-config.php
+
     chown -R apache:apache /var/www/$domain
 
     # config nginx
@@ -183,7 +186,7 @@ EOF
     sed -i -e "s/remote_port\":\s*[0-9]*/remote_port\": 8080/" $CONFIG_FILE
 
     # restart service
-    systemctl restart php-fpm mariadb nginx
+    systemctl restart php-fpm mariadb nginx trojan
 }
 
 function info()
