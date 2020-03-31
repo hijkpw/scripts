@@ -68,6 +68,8 @@
 
 [Shadowrocket配置trojan教程](https://www.hijk.pw/shadowrocket-config-trojan-tutorial/)
 
+[trojan建站教程](https://www.hijk.pw/build-website-with-trojan/)
+
 # VPS教程
 
 [CN2 GIA商家推荐](https://www.hijk.pw/cn2-gia-merchants/)
