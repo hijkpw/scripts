@@ -103,6 +103,10 @@ function installWordPress()
     yum install -y wget
     mkdir -p /var/www;
     wget https://cn.wordpress.org/latest-zh_CN.tar.gz
+    if [ ! -f latest-zh_CN.tar.gz ]; then
+    	echo "下载WordPress失败，请稍后重试"
+	exit 1
+    fi
     tar -zxf latest-zh_CN.tar.gz
     rm -rf /var/www/$domain
     mv wordpress /var/www/$domain
