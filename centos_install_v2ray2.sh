@@ -386,6 +386,11 @@ function installBBR()
 
 function info()
 {
+    if [ ! -f /etc/v2ray/config.json ]; then
+        echo "v2ray未安装"
+        exit 1
+    fi
+    
     ip=`curl -s -4 icanhazip.com`
     res=`netstat -nltp | grep v2ray`
     [ -z "$res" ] && v2status="${red}已停止${plain}" || v2status="${green}正在运行${plain}"
@@ -394,6 +399,10 @@ function info()
     alterid=`cat /etc/v2ray/config.json | grep alterId | cut -d: -f2 | tr -d \",' '`
     network=`cat /etc/v2ray/config.json | grep network | cut -d: -f2 | tr -d \",' '`
     domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
+    if [ -z "$domain" ]; then
+        echo "不是伪装版本的v2ray"
+        exit 1
+    fi
     path=`cat /etc/v2ray/config.json | grep path | cut -d: -f2 | tr -d \",' '`
     confpath="/etc/nginx/conf.d/"
     if [ ! -f $confpath${domain}.conf ]; then
