@@ -264,6 +264,7 @@ EOF
         mkdir -p /etc/nginx/conf.d;
     fi
     
+    mkdir -p /usr/share/nginx/html;
     cat > ${confpath}${domain}.conf<<-EOF
 server {
     listen 80;
