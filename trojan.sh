@@ -391,7 +391,7 @@ function install()
 
 function removeTrojan()
 {
-    rm -rf /etc/local/bin/trojan
+    rm -rf /usr/local/bin/trojan
     rm -rf /usr/local/etc/trojan
     rm -rf /usr/share/nginx/html/trojan
     rm -rf /etc/systemd/system/trojan.service
