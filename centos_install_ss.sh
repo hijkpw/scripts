@@ -148,7 +148,7 @@ function preinstall()
     fi
     
     echo "安装必要软件"
-    yum install -y epel-release telnet wget vim net-tools unzip
+    yum install -y epel-release telnet wget vim net-tools unzip tar
     yum install -y openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
