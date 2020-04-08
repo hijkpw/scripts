@@ -123,9 +123,9 @@ function preinstall()
     fi
     echo "安装必要软件"
     if [ "$pm" = "yum" ]; then
-        yum install -y epel-release telnet wget vim net-tools ntpdate unzip
+        yum install -y epel-release telnet wget vim net-tools ntpdate unzip tar
     else
-        apt install -y telnet wget vim net-tools ntpdate unzip gcc g++
+        apt install -y telnet wget vim net-tools ntpdate unzip gcc g++ tar
         apt autoremove -y
     fi
 
