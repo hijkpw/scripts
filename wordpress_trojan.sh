@@ -124,6 +124,7 @@ EOF
     line=`cat -n /etc/php-fpm.d/www.conf | grep 'listen.mode' | tail -n1 | awk '{print $1}'`
     sed -i "${line}a listen.mode=0666" /etc/php-fpm.d/www.conf
 
+    port=`cat $CONFIG_FILE | grep local_port | cut -d: -f2 | tr -d \",' '`
     # config wordpress
     cd /var/www/$domain
     cp wp-config-sample.php wp-config.php
@@ -145,7 +146,6 @@ EOF
     chown -R apache:apache /var/www/$domain
 
     # config nginx
-    port=`cat $CONFIG_FILE | grep local_port | cut -d: -f2 | tr -d \",' '`
     cat > /etc/nginx/conf.d/${domain}.conf<<-EOF
 server {
     listen 80;
