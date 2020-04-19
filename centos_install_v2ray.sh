@@ -146,6 +146,10 @@ function installBBR()
 
 function info()
 {
+    if [ ! -f /etc/v2ray/config.json ]; then
+        echo -e "${red}未安装v2ray!${plain}"
+        exit 1
+    fi
     ip=`curl -s -4 icanhazip.com`
     port=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep v2ray`
