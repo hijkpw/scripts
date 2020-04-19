@@ -388,7 +388,7 @@ function installBBR()
 function info()
 {
     if [ ! -f /etc/v2ray/config.json ]; then
-        echo "v2ray未安装"
+        echo -e "${red}未安装v2ray!${plain}"
         exit 1
     fi
     
