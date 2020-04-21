@@ -292,8 +292,8 @@ Wants=network-online.target
 Type=forking
 LimitNOFILE=32768
 ExecStart=/usr/local/shadowsocks/server.py -c /etc/shadowsocksR.json -d start
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s TERM $MAINPID
+ExecReload=/bin/kill -s HUP \$MAINPID
+ExecStop=/bin/kill -s TERM \$MAINPID
 
 [Install]
 WantedBy=multi-user.target
