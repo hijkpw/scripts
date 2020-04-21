@@ -161,7 +161,7 @@ function installSS()
 {
     echo 安装SS...
 
-    res=`which ss-server`
+    ssPath=`which ss-server`
     if [ "$?" != "0" ]; then
         if ! wget 'https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.3.4/shadowsocks-libev-3.3.4.tar.gz' -O shadowsocks-libev-3.3.4.tar.gz; then
             echo "下载文件失败！"
@@ -211,9 +211,9 @@ Wants=network-online.target
 Type=simple
 PIDFile=/var/run/shadowsocks-libev.pid
 LimitNOFILE=32768
-ExecStart=/usr/local/bin/ss-server -c /etc/shadowsocks-libev/config.json -f /var/run/shadowsocks-libev.pid
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s TERM $MAINPID
+ExecStart=$ssPath -c /etc/shadowsocks-libev/config.json -f /var/run/shadowsocks-libev.pid
+ExecReload=/bin/kill -s HUP \$MAINPID
+ExecStop=/bin/kill -s TERM \$MAINPID
 
 [Install]
 WantedBy=multi-user.target
