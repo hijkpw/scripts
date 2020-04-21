@@ -207,8 +207,8 @@ Type=simple
 PIDFile=/var/run/shadowsocks-libev.pid
 LimitNOFILE=32768
 ExecStart=/usr/local/bin/ss-server -c /etc/shadowsocks-libev/config.json -f /var/run/shadowsocks-libev.pid
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s TERM $MAINPID
+ExecReload=/bin/kill -s HUP \$MAINPID
+ExecStop=/bin/kill -s TERM \$MAINPID
 
 [Install]
 WantedBy=multi-user.target
