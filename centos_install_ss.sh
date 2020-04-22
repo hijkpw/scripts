@@ -178,6 +178,7 @@ function installSS()
             exit 1
         fi
         cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
+        ssPath=/usr/local/bin/ss-server
     else
         echo "SS 已安装"
     fi
