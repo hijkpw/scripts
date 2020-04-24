@@ -174,6 +174,7 @@ server {
         try_files \$uri =404;
         fastcgi_index index.php;
         fastcgi_pass unix:/run/php-fpm/www.sock;
+	fastcgi_param  X-Forwarded-Proto “https”;
         include fastcgi_params;
         fastcgi_param  SCRIPT_FILENAME  \$document_root\$fastcgi_script_name;
     }
