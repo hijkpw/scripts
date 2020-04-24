@@ -132,6 +132,7 @@ EOF
     sed -i "s/username_here/$dbuser/g" wp-config.php
     sed -i "s/password_here/$dbpass/g" wp-config.php
     sed -i "s/utf8/utf8mb4/g" wp-config.php
+    sed -i "1a \$_SERVER['HTTPS']='on';" index.php
     perl -i -pe'
   BEGIN {
     @chars = ("a" .. "z", "A" .. "Z", 0 .. 9);
@@ -174,7 +175,6 @@ server {
         try_files \$uri =404;
         fastcgi_index index.php;
         fastcgi_pass unix:/run/php-fpm/www.sock;
-	fastcgi_param  X-Forwarded-Proto “https”;
         include fastcgi_params;
         fastcgi_param  SCRIPT_FILENAME  \$document_root\$fastcgi_script_name;
     }
