@@ -35,17 +35,20 @@ function checkSystem()
     fi
 
     res=`lsb_release -d | grep -i ubuntu`
-    if [ "${res}" = "" ];then
-        echo "系统不是Ubuntu"
-        exit 1
-    fi
-    
-    result=`lsb_release -d | grep -oE "[0-9.]+"`
-    main=${result%%.*}
-    if [ $main -lt 16 ]; then
-        echo "不受支持的Ubuntu版本"
-        exit 1
-    fi
+    if [ "$?" != "0" ]; then
+        res=`which apt`
+        if [ "$?" != "0" ]; then
+            echo "系统不是Ubuntu"
+            exit 1
+        fi
+    else
+        result=`lsb_release -d | grep -oE "[0-9.]+"`
+        main=${result%%.*}
+        if [ $main -lt 16 ]; then
+            echo "不受支持的Ubuntu版本"
+            exit 1
+        fi
+     fi
 }
 
 function getData()
