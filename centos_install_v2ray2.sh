@@ -35,15 +35,18 @@ function checkSystem()
     fi
 
     if [ ! -f /etc/centos-release ];then
-        echo "系统不是CentOS"
-        exit 1
-    fi
-    
-    result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
-    main=${result%%.*}
-    if [ $main -lt 7 ]; then
-        echo "不受支持的CentOS版本"
-        exit 1
+        res=`which yum`
+        if [ "$?" != "0" ]; then
+            echo "系统不是CentOS"
+            exit 1
+         fi
+    else
+        result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
+        main=${result%%.*}
+        if [ $main -lt 7 ]; then
+            echo "不受支持的CentOS版本"
+            exit 1
+         fi
     fi
 }
 
