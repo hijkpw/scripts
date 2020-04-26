@@ -135,7 +135,7 @@ EOF
     sed -i "s/username_here/$dbuser/g" wp-config.php
     sed -i "s/password_here/$dbpass/g" wp-config.php
     sed -i "s/utf8/utf8mb4/g" wp-config.php
-    sed -i "1a \$_SERVER['HTTPS']='on';" index.php
+    #sed -i "1a \$_SERVER['HTTPS']='on';" index.php
     perl -i -pe'
   BEGIN {
     @chars = ("a" .. "z", "A" .. "Z", 0 .. 9);
@@ -144,8 +144,8 @@ EOF
   }
   s/put your unique phrase here/salt()/ge
 ' wp-config.php
-    sed -i "23a define( 'WP_HOME', 'https://${domain}' );" wp-config.php
-    sed -i "24a define( 'WP_SITEURL', 'https://${domain}' );" wp-config.php
+    #sed -i "23a define( 'WP_HOME', 'https://${domain}' );" wp-config.php
+    #sed -i "24a define( 'WP_SITEURL', 'https://${domain}' );" wp-config.php
 
     chown -R apache:apache /var/www/$domain
 
@@ -154,7 +154,7 @@ EOF
 server {
     listen 80;
     server_name ${domain};
-    rewrite ^(.*) https://\$server_name:${port}\$1 permanent;
+    return 301 https://\$server_name:${port}\$request_uri;
 }
 server {
     listen 8080;
@@ -166,10 +166,6 @@ server {
     access_log  /var/log/nginx/${domain}.access.log  main buffer=32k flush=30s;
     error_log /var/log/nginx/${domain}.error.log;
     root   \$host_path;
-    location = / {
-        index  index.php index.html;
-        try_files /index.php?\$args /index.php?\$args;
-    }
     location / {
         index  index.php index.html;
         try_files \$uri \$uri/ /index.php?\$args;
@@ -180,6 +176,8 @@ server {
         fastcgi_pass unix:/run/php-fpm/www.sock;
         include fastcgi_params;
         fastcgi_param  SCRIPT_FILENAME  \$document_root\$fastcgi_script_name;
+	fastcgi_param  SERVER_PORT	${port};
+	fastcgi_param  HTTPS		"on";
     }
     location ~ \.(js|css|png|jpg|jpeg|gif|ico|swf|webp|pdf|txt|doc|docx|xls|xlsx|ppt|pptx|mov|fla|zip|rar)\$ {
         expires max;
