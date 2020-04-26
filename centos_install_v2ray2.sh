@@ -248,6 +248,7 @@ http {
 
     access_log  /var/log/nginx/access.log  main;
 
+    gzip                on;
     sendfile            on;
     tcp_nopush          on;
     tcp_nodelay         on;
@@ -272,7 +273,7 @@ EOF
 server {
     listen 80;
     server_name ${domain};
-    rewrite ^(.*) https://\$server_name:${port}\$1 permanent;
+    return 301 https://\$server_name:${port}\$request_uri;
 }
 
 server {
