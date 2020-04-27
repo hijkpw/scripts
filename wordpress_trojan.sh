@@ -144,8 +144,8 @@ EOF
   }
   s/put your unique phrase here/salt()/ge
 ' wp-config.php
-    #sed -i "23a define( 'WP_HOME', 'https://${domain}' );" wp-config.php
-    #sed -i "24a define( 'WP_SITEURL', 'https://${domain}' );" wp-config.php
+    sed -i "23a define( 'WP_HOME', 'https://${domain}:${port}' );" wp-config.php
+    sed -i "24a define( 'WP_SITEURL', 'https://${domain}:${port}' );" wp-config.php
 
     chown -R apache:apache /var/www/$domain
 
