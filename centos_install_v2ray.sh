@@ -27,6 +27,11 @@ function checkSystem()
             echo "系统不是CentOS"
             exit 1
          fi
+         res=`which systemctl`
+         if [ "$?" != "0" ]; then
+            echo "系统版本过低，请重装系统到高版本后再使用本脚本！"
+            exit 1
+         fi
     else
         result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
         main=${result%%.*}
