@@ -34,30 +34,23 @@ function checkSystem()
         exit 1
     fi
 
-    if [ -f /etc/centos-release ];then
-        result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
-        main=${result%%.*}
-        if [ $main -lt 7 ]; then
-            echo "不受支持的CentOS版本"
+    res=`which yum`
+    if [ "$?" != "0" ]; then
+        res=`which apt`
+        if [ "$?" != "0" ]; then
+            echo "不受支持的Linux系统"
             exit 1
-        fi
+         fi
+         OS=ubuntu
+         pm=apt
+    else
         OS=centos
         pm=yum
-    else
-        res=`hostnamectl | grep -i ubuntu`
-        if [ "${res}" = "" ];then
-            echo "不受支持的系统"
-            exit 1
-        fi
-    
-        result=`lsb_release -d | grep -oE "[0-9.]+"`
-        main=${result%%.*}
-        if [ $main -lt 16 ]; then
-            echo "不受支持的Ubuntu版本"
-            exit 1
-        fi
-        OS=ubuntu
-        pm=apt
+    fi
+    res=`which systemctl`
+    if [ "$?" != "0" ]; then
+        echo "系统版本过低，请升级到最新版本"
+        exit 1
     fi
 }
 
