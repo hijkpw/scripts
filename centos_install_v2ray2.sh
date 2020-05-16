@@ -318,13 +318,13 @@ server {
     }
 }
 EOF
-    res=`cat /etc/crontab | grep certbot`
-    if [ "${res}" = "" ]; then
-        if [ "$bt" = "true" ]; then
-            echo '0 3 1 */2 0 root nginx -s stop; certbot renew ; nginx -c /www/server/nginx/conf/nginx.conf' >> /etc/crontab
-        else
-            echo '0 3 1 */2 0 root systemctl stop nginx ; certbot renew ; systemctl restart nginx' >> /etc/crontab
-        fi
+
+    sed -i '/certbot/d' /etc/crontab
+    certbotpath=`which certbot`
+    if [ "$bt" = "true" ]; then
+        echo "0 3 1 */2 0 root nginx -s stop; ${certbotpath} renew ; nginx -c /www/server/nginx/conf/nginx.conf" >> /etc/crontab
+    else
+        echo "0 3 1 */2 0 root systemctl stop nginx ; ${certbotpath} renew ; systemctl restart nginx" >> /etc/crontab
     fi
     if [ "$bt" = "false" ]; then
         systemctl enable nginx && systemctl restart nginx
