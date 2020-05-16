@@ -257,10 +257,9 @@ server {
     rewrite ^(.*) https://\$server_name:${port}\$1 permanent;
 }
 EOF
-    res=`cat /etc/crontab | grep certbot`
-    if [ "${res}" = "" ]; then
-        echo '0 3 1 */2 0 root systemctl stop nginx ; certbot renew ; systemctl restart nginx' >> /etc/crontab
-    fi
+    sed -i '/certbot/d' /etc/crontab
+    certbotpath=`which certbot`
+    echo "0 3 1 */2 0 root systemctl stop nginx ; ${certbotpath} renew ; systemctl restart nginx" >> /etc/crontab
     systemctl enable nginx && systemctl restart nginx
 }
 
