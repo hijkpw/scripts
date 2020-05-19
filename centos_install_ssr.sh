@@ -241,6 +241,10 @@ function preinstall()
     fi
     echo "安装必要软件"
     yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip tar
+    res=`which wget`
+    [ "$?" != "0" ] && yum install -y wget
+    res=`which netstat`
+    [ "$?" != "0" ] && yum install -y net-tools
     if [ $main -eq 8 ]; then
         ln -s /usr/bin/python3 /usr/bin/python
     fi
