@@ -76,6 +76,10 @@ function preinstall()
     fi
     echo "安装必要软件"
     apt install -y telnet wget vim net-tools ntpdate unzip
+    res=`which wget`
+    [ "$?" != "0" ] && apt install -y wget
+    res=`which netstat`
+    [ "$?" != "0" ] && apt install -y net-tools
     apt autoremove -y
 }
 
