@@ -135,6 +135,10 @@ function preinstall()
     echo "安装必要软件"
     apt install -y telnet wget vim net-tools ntpdate unzip gcc g++
     apt autoremove -y
+    res=`which wget`
+    [ "$?" != "0" ] && apt install -y wget
+    res=`which netstat`
+    [ "$?" != "0" ] && apt install -y net-tools
 }
 
 function installV2ray()
