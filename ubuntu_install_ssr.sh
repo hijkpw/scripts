@@ -239,6 +239,10 @@ function preinstall()
 
     echo "安装必要软件"
     apt install -y telnet curl wget vim net-tools libsodium18 openssl unzip
+    res=`which wget`
+    [ "$?" != "0" ] && apt install -y wget
+    res=`which netstat`
+    [ "$?" != "0" ] && apt install -y net-tools
     apt autoremove -y
     res=`which python`
     if [ "$?" != "0" ]; then
