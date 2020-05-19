@@ -135,6 +135,10 @@ function preinstall()
     fi
     echo "安装必要软件"
     yum install -y epel-release telnet wget vim net-tools ntpdate unzip
+    res=`which wget`
+    [ "$?" != "0" ] && yum install -y wget
+    res=`which netstat`
+    [ "$?" != "0" ] && yum install -y net-tools
 
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
