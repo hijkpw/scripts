@@ -151,6 +151,9 @@ function preinstall()
     echo "安装必要软件"
     apt install -y telnet wget vim net-tools unzip tar
     apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls10 libmbedtls-dev libsodium18 libsodium-dev libc-ares2 libc-ares-dev gcc g++
+    if [ "$?" != "0" ]; then
+        apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls10 libmbedtls-dev libsodium23 libsodium-dev libc-ares2 libc-ares-dev gcc g++
+    fi
     apt autoremove -y
     res=`which wget`
     [ "$?" != "0" ] && apt install -y wget
