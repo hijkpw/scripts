@@ -78,6 +78,8 @@
 
 [购买vultr服务器超详细图文教程](https://www.hijk.pw/vultr-buy-vps-tutorial/)
 
+[性价比最高的香港服务器](https://www.hijk.pw/best-hongkong-vps/)
+
 [HostDare购买服务器超详细教程](https://www.hijk.pw/hostdare-buy-vps-tutorial/)
 
 [手机购买vultr服务器图文教程](https://www.hijk.pw/buy-vultr-vps-in-mobile/)
@@ -92,6 +94,21 @@
 
 [CloudCone特价VPS促销，就在今天！](https://www.hijk.pw/cloudcone-special-vps-offers/)
 
+[购买VPS的建议](https://www.hijk.pw/buy-vps-tips/)
+
+[使用NAT VPS中转加速](https://www.hijk.pw/use-nat-vps-forward-traffic/)
+
+# Just My Socks
+
+[Just My Socks购买和使用教程](https://www.hijk.pw/just-my-socks-buy-and-use-tutorial/)
+
+[Just My Socks Windows配置教程](https://www.hijk.pw/just-my-socks-windows-config-tutorial/)
+
+[Just My Socks安卓配置教程](https://www.hijk.pw/just-my-socks-android-config-tutorial/)
+
+[Just My Socks iOS配置教程](https://www.hijk.pw/just-my-socks-ios-config-tutorial/)
+
+[Just My Socks苹果配置教程](https://www.hijk.pw/just-my-socks-mac-config-tutorial/)
 
 # 其他
 
@@ -100,8 +117,6 @@
 [切换apple id下载其它国家和地区的应用](https://www.hijk.pw/switch-appleid-to-download-app/)
 
 [Namesilo购买域名详细教程](https://www.hijk.pw/namesilo-buy-domain-tutorial/)
-
-[Just My Socks购买和使用教程](https://www.hijk.pw/just-my-socks-buy-and-use-tutorial/)
 
 [免费vpn有风险，请慎用](https://www.hijk.pw/be-careful-when-use-free-vpn/)
 
@@ -117,7 +132,11 @@
 
 [不建议开启tcp fast open功能](https://www.hijk.pw/donot-use-tcp-fast-open/)
 
-
 [安装魔改BBR/BBR Plus/锐速(Lotserver)](https://www.hijk.pw/install-bbr-plus-lotserver/)
 
+[配置Telegram走SS/SSR/V2ray/trojan代理](https://www.hijk.pw/pc-config-telegram-use-proxy/)
+
+[WordPress插件推荐及性能优化建议](https://www.hijk.pw/wordpress-plugin-recommand-and-mentions/)
+
+[Google Scholar/谷歌学术403: your client does not have permission to get URL或者we’re sorry的解决办法](https://www.hijk.pw/google-scholar-403-error-solution/)
 
