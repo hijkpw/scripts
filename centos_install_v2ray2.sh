@@ -163,7 +163,7 @@ function installV2ray()
     if [ "${logsetting}" = "" ]; then
         sed -i '1a\  "log": {\n    "loglevel": "info",\n    "access": "/var/log/v2ray/access.log",\n    "error": "/var/log/v2ray/error.log"\n  },' /etc/v2ray/config.json
     fi
-    alterid=`shuf -i50-90 -n1`
+    alterid=0
     sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" /etc/v2ray/config.json
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
     v2port=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
