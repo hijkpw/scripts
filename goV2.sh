@@ -258,7 +258,7 @@ getVersion(){
         NEW_VER="$(normalizeVersion "$(curl ${PROXY} -s "${TAG_URL}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
 
         if [[ "${NEW_VER}" =~ "https" ]]; then
-          NEW_VER="v4.23.1"
+          NEW_VER="v4.23.4"
         fi
         if [[ $? -ne 0 ]] || [[ $NEW_VER == "" ]]; then
             colorEcho ${RED} "Failed to fetch release information. Please check your network or try again."
