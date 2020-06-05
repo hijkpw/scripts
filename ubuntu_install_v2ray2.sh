@@ -173,12 +173,22 @@ function installV2ray()
     else
         sed -i -e "s/path\":.*/path\": \"\\${path}\",/" /etc/v2ray/config.json
     fi
-    systemctl enable v2ray && systemctl restart v2ray
+    systemctl enable v2ray
+    systemctl restart v2ray
     sleep 3
-    res=`netstat -nltp | grep ${v2port} | grep v2ray`
+    res=`netstat -ntlp| grep ${v2port} | grep v2ray`
     if [ "${res}" = "" ]; then
-        echo "v2ray启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！"
-        exit 1
+        res=`which netstat`
+        if [ "$?" != "0" ]; then
+            res=`ss -ntlp| grep ${v2port} | grep v2ray`
+            if [ "${res}" = "" ]; then
+                echo "端口号：${v2port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
+                exit 1
+            fi
+         else
+            echo "端口号：${v2port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
+            exit 1
+         fi
     fi
     echo "v2ray安装成功！"
 }
