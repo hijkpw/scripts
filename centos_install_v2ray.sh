@@ -111,12 +111,22 @@ function installV2ray()
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
-    systemctl enable v2ray && systemctl restart v2ray
+    systemctl enable v2ray
+    systemctl restart v2ray
     sleep 3
     res=`netstat -ntlp| grep ${port} | grep v2ray`
     if [ "${res}" = "" ]; then
-        echo “v2ray启动失败，请检查端口是否已被占用！”
-        exit 1
+        res=`which netstat`
+        if [ "$?" != "0" ]; then
+            res=`ss -ntlp| grep ${port} | grep v2ray`
+            if [ "${res}" = "" ]; then
+                echo "v2端口号：${port}， 启动失败，请检查端口是否已被占用！"
+                exit 1
+            fi
+         else
+            echo "v2端口号：${port}， 启动失败，请检查端口是否已被占用！"
+            exit 1
+         fi
     fi
     echo "v2ray安装成功！"
 }
