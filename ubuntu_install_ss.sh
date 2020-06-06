@@ -149,7 +149,7 @@ function preinstall()
     apt update && apt upgrade -y
     
     echo "安装必要软件"
-    apt install -y telnet wget vim net-tools unzip tar
+    apt install -y telnet wget vim net-tools unzip tar qrencode
     apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls10 libmbedtls-dev libsodium18 libsodium-dev libc-ares2 libc-ares-dev gcc g++
     if [ "$?" != "0" ]; then
         apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls10 libmbedtls-dev libsodium23 libsodium-dev libc-ares2 libc-ares-dev gcc g++
@@ -274,6 +274,9 @@ function info()
     password=`cat /etc/shadowsocks-libev/config.json | grep password | cut -d: -f2 | tr -d \",' '`
     method=`cat /etc/shadowsocks-libev/config.json | grep method | cut -d: -f2 | tr -d \",' '`
     
+    res=`echo -n ${method}:${password}@${ip}:${port} | base64`
+    link="ss://${res}"
+
     echo ============================================
     echo -e " ss运行状态：${status}"
     echo -e " ss配置文件：${red}/etc/shadowsocks-libev/config.json${plain}"
@@ -283,8 +286,9 @@ function info()
     echo -e " 端口(port)：${red}${port}${plain}"
     echo -e " 密码(password)：${red}${password}${plain}"
     echo -e " 加密方式(method)： ${red}${method}${plain}"
-    echo  
-    echo ============================================
+    echo
+    echo " SS: ${link}"
+    qrencode -o - -t utf8 ${link}
 }
 
 function bbrReboot()
