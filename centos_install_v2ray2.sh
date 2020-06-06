@@ -181,17 +181,14 @@ function installV2ray()
     systemctl enable v2ray
     systemctl restart v2ray
     sleep 3
-    res=`netstat -ntlp| grep ${v2port} | grep v2ray`
+    res=`ss -ntlp| grep ${v2port} | grep v2ray`
     if [ "${res}" = "" ]; then
-        res=`which netstat`
-        if [ "$?" != "0" ]; then
-            res=`ss -ntlp| grep ${v2port} | grep v2ray`
-            if [ "${res}" = "" ]; then
-                echo "端口号：${v2port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
-                exit 1
-            fi
-         else
-            echo "端口号：${v2port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
+        sed -i '/Capabili/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
+        systemctl daemon-reload
+        systemctl restart v2ray
+        res=`ss -ntlp| grep ${v2port} | grep v2ray`
+        if [ "${res}" = "" ]; then
+            echo "端口号：${port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
             exit 1
          fi
     fi
