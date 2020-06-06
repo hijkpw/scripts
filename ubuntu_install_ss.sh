@@ -81,9 +81,9 @@ function getData()
     echo "13)chacha20-ietf"
     echo "14)chacha20-ietf-poly1305"
     echo "15)xchacha20-ietf-poly1305"
-    read -p "请选择（默认aes-256-cfb）" answer
+    read -p "请选择（默认aes-256-gcm）" answer
     if [ -z "$answer" ]; then
-        method="aes-256-cfb"
+        method="aes-256-gcm"
     else
         case $answer in
         1)
@@ -132,8 +132,8 @@ function getData()
             method="xchacha20-ietf-poly1305"
             ;;
         *)
-            echo "无效的选择，使用默认的aes-256-cfb"
-            method="aes-256-cfb"
+            echo "无效的选择，使用默认的aes-256-gcm"
+            method="aes-256-gcm"
         esac
     fi
     echo ""
@@ -267,6 +267,7 @@ function installBBR()
 
 function info()
 {
+    apt install -y qrencode
     ip=`curl -s -4 icanhazip.com`
     port=`cat /etc/shadowsocks-libev/config.json | grep server_port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep 'ss-server'`
@@ -274,7 +275,7 @@ function info()
     password=`cat /etc/shadowsocks-libev/config.json | grep password | cut -d: -f2 | tr -d \",' '`
     method=`cat /etc/shadowsocks-libev/config.json | grep method | cut -d: -f2 | tr -d \",' '`
     
-    res=`echo -n ${method}:${password}@${ip}:${port} | base64`
+    res=`echo -n ${method}:${password}@${ip}:${port} | base64 -w 0`
     link="ss://${res}"
 
     echo ============================================
@@ -287,7 +288,7 @@ function info()
     echo -e " 密码(password)：${red}${password}${plain}"
     echo -e " 加密方式(method)： ${red}${method}${plain}"
     echo
-    echo " SS: ${link}"
+    echo " ss链接： ${link}"
     qrencode -o - -t utf8 ${link}
 }
 
