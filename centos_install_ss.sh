@@ -151,7 +151,7 @@ function preinstall()
     fi
     
     echo "安装必要软件"
-    yum install -y epel-release telnet wget vim net-tools unzip tar
+    yum install -y epel-release telnet wget vim net-tools unzip tar qrencode
     yum install -y openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
     res=`which wget`
     [ "$?" != "0" ] && yum install -y wget
@@ -256,7 +256,9 @@ function info()
     [ -z "$res" ] && status="${red}已停止${plain}" || status="${green}正在运行${plain}"
     password=`cat /etc/shadowsocks-libev/config.json | grep password | cut -d: -f2 | tr -d \",' '`
     method=`cat /etc/shadowsocks-libev/config.json | grep method | cut -d: -f2 | tr -d \",' '`
-    
+    res=`echo -n ${method}:${password}@${ip}:${port} | base64`
+    link="ss://${res}"
+
     echo ============================================
     echo -e " ss运行状态：${status}"
     echo -e " ss配置文件：${red}/etc/shadowsocks-libev/config.json${plain}"
@@ -266,8 +268,9 @@ function info()
     echo -e " 端口(port)：${red}${port}${plain}"
     echo -e " 密码(password)：${red}${password}${plain}"
     echo -e " 加密方式(method)： ${red}${method}${plain}"
-    echo  
-    echo ============================================
+    echo
+    echo " SS: ${link}"
+    qrencode -o - -t utf8 ${link}
 }
 
 function install()
