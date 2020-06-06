@@ -111,15 +111,12 @@ function installV2ray()
     sleep 3
     res=`netstat -ntlp| grep ${port} | grep v2ray`
     if [ "${res}" = "" ]; then
-        res=`which netstat`
-        if [ "$?" != "0" ]; then
-            res=`ss -ntlp| grep ${port} | grep v2ray`
-            if [ "${res}" = "" ]; then
-                echo "v2端口号：${port}， 启动失败，请检查端口是否已被占用！"
-                exit 1
-            fi
-         else
-            echo "v2端口号：${port}， 启动失败，请检查端口是否已被占用！"
+        sed -i '/Capabili/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
+        systemctl daemon-reload
+        systemctl restart v2ray
+        res=`netstat -ntlp| grep ${port} | grep v2ray`
+        if [ "${res}" = "" ]; then
+            echo "端口号：${port}，v2启动失败，请检查端口是否被占用！"
             exit 1
          fi
     fi
