@@ -240,7 +240,7 @@ function preinstall()
         yum update -y
     fi
     echo "安装必要软件"
-    yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip tar
+    yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip tar qrencode
     res=`which wget`
     [ "$?" != "0" ] && yum install -y wget
     res=`which netstat`
@@ -370,6 +370,7 @@ function installBBR()
 
 function info()
 {
+    yum install -y qrencode
     ip=`curl -s -4 icanhazip.com`
     port=`cat /etc/shadowsocksR.json | grep server_port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep python`
@@ -379,6 +380,12 @@ function info()
     protocol=`cat /etc/shadowsocksR.json | grep protocol | cut -d: -f2 | tr -d \",' '`
     obfs=`cat /etc/shadowsocksR.json | grep obfs | cut -d: -f2 | tr -d \",' '`
     
+    p1=`echo -n ${password} | base64 -w 0`
+    p1=`echo -n ${p1} | tr -d =`
+    res=`echo -n "${ip}:${port}:${protocol}:${method}:${obfs}:${p1}/?remarks=&protoparam=&obfsparam=" | base64 -w 0`
+    res=`echo -n ${res} | tr -d =`
+    link="ssr://${res}"
+
     echo ============================================
     echo -e " ssr运行状态：${status}"
     echo -e " ssr配置文件：${red}/etc/shadowsocksR.json${plain}"
@@ -390,8 +397,9 @@ function info()
     echo -e " 加密方式(method)： ${red}${method}${plain}"
     echo -e " 协议(protocol)：" ${red}${protocol}${plain}
     echo -e " 混淆(obfuscation)：" ${red}${obfs}${plain}
-    echo  
-    echo ============================================
+    echo
+    echo " ssr链接: $link"
+    qrencode -o - -t utf8 $link
 }
 
 function bbrReboot()
