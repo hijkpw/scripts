@@ -179,6 +179,22 @@ function info()
     [ -z "$res" ] && network="tcp" || network=`cat /etc/v2ray/config.json | grep network | cut -d: -f2 | tr -d \",' '`
     security="auto"
     
+    raw="{
+  \"v\":\"2\",
+  \"ps\":\"\",
+  \"add\":\"$ip\",
+  \"port\":\"${port}\",
+  \"id\":\"${uid}\",
+  \"aid\":\"$alterid\",
+  \"net\":\"tcp\",
+  \"type\":\"none\",
+  \"host\":\"\",
+  \"path\":\"\",
+  \"tls\":\"\"
+}"
+    link=`echo -n ${raw} | base64 -w 0`
+    link="vmess://${link}"
+
     echo ============================================
     echo -e " v2ray运行状态：${status}"
     echo -e " v2ray配置文件：${red}/etc/v2ray/config.json${plain}"
@@ -189,9 +205,9 @@ function info()
     echo -e " id(uuid)：${red}${uid}${plain}"
     echo -e " 额外id(alterid)： ${red}${alterid}${plain}"
     echo -e " 加密方式(security)： ${red}$security${plain}"
-    echo -e " 传输协议(network)： ${red}${network}${plain}" 
-    echo  
-    echo ============================================
+    echo -e " 传输协议(network)： ${red}${network}${plain}"
+    echo
+    echo "vmess链接: $link"
 }
 
 function bbrReboot()
