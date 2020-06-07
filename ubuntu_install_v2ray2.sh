@@ -395,11 +395,28 @@ function info()
     res=`netstat -nltp | grep ${port} | grep nginx`
     [ -z "$res" ] && ngstatus="${red}已停止${plain}" || ngstatus="${green}正在运行${plain}"
     
+    raw="{
+  \"v\":\"2\",
+  \"ps\":\"\",
+  \"add\":\"$ip\",
+  \"port\":\"${port}\",
+  \"id\":\"${uid}\",
+  \"aid\":\"$alterid\",
+  \"net\":\"${network}\",
+  \"type\":\"none\",
+  \"host\":\"${domain}\",
+  \"path\":\"${path}\",
+  \"tls\":\"tls\"
+}"
+    link=`echo -n ${raw} | base64 -w 0`
+    link="vmess://${link}"
+
+    
     echo ============================================
     echo -e " v2ray运行状态：${v2status}"
     echo -e " v2ray配置文件：${red}/etc/v2ray/config.json${plain}"
     echo -e " nginx运行状态：${ngstatus}"
-    echo -e " nginx配置文件：${red}/etc/nginx/conf.d/${domain}.conf${plain}"
+    echo -e " nginx配置文件：${red}${confpath}${domain}.conf${plain}"
     echo ""
     echo -e "${red}v2ray配置信息：${plain}               "
     echo -e " IP(address):  ${red}${ip}${plain}"
@@ -412,7 +429,7 @@ function info()
     echo -e " 路径(path)：${red}${path}${plain}"
     echo -e " 安全传输(security)：${red}TLS${plain}"
     echo  
-    echo ============================================
+    echo "vmess链接: $link"
 }
 
 function bbrReboot()
