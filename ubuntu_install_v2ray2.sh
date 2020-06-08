@@ -179,6 +179,7 @@ function installV2ray()
     res=`netstat -ntlp| grep ${v2port} | grep v2ray`
     if [ "${res}" = "" ]; then
         sed -i '/Capabili/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
+        sed -i '/NoNewPrivileges/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
         systemctl daemon-reload
         systemctl restart v2ray
         res=`netstat -ntlp| grep ${v2port} | grep v2ray`
