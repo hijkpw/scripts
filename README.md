@@ -58,6 +58,12 @@
 
 [v2ray伪装建站教程](https://www.hijk.pw/v2ray-mask-with-website/)
 
+[Clash for Windows配置V2ray教程](https://www.hijk.pw/clash-for-windows-v2ray-tutorial/)
+
+[ClashX配置V2ray教程](https://www.hijk.pw/clashx-config-v2ray-tutorial/)
+
+[Clash for Android配置V2ray教程](https://www.hijk.pw/clash-for-android-config-v2ray-tutorial/)
+
 ## trojan
 
 [trojan Windows客户端配置教程](https://www.hijk.pw/trojan-windows-client-tutorial/)
@@ -67,6 +73,12 @@
 [trojan mac客户端配置教程](https://www.hijk.pw/trojan-mac-client-config-tutorial/)
 
 [Shadowrocket配置trojan教程](https://www.hijk.pw/shadowrocket-config-trojan-tutorial/)
+
+[Clash for Windows配置trojan教程](https://www.hijk.pw/clash-for-windows-trojan-config/)
+
+[ClashX配置Trojan教程](https://www.hijk.pw/clashx-config-trojan-tutorial/)
+
+[Clash for Android配置trojan教程](https://www.hijk.pw/clash-for-android-config-trojan-tutorial/)
 
 [trojan建站教程](https://www.hijk.pw/build-website-with-trojan/)
 
@@ -84,6 +96,8 @@
 
 [手机购买vultr服务器图文教程](https://www.hijk.pw/buy-vultr-vps-in-mobile/)
 
+[CloudCone CN2 GIA套餐开售了，趁还没超售可买来香一把](https://www.hijk.pw/cloudcone-cn2-gia-plans-on-sale/)
+
 [Bitvise连接Linux服务器教程](https://www.hijk.pw/bitvise-connect-linux-server-tutorial/)
 
 [Mac电脑连接Linux教程](https://www.hijk.pw/mac-connect-to-linux-tutorial/)
@@ -98,6 +112,8 @@
 
 [使用NAT VPS中转加速](https://www.hijk.pw/use-nat-vps-forward-traffic/)
 
+[frp内网穿透教程](https://www.hijk.pw/frp-nat-tunnel-tutorial/)
+
 # Just My Socks
 
 [Just My Socks购买和使用教程](https://www.hijk.pw/just-my-socks-buy-and-use-tutorial/)
@@ -109,6 +125,12 @@
 [Just My Socks iOS配置教程](https://www.hijk.pw/just-my-socks-ios-config-tutorial/)
 
 [Just My Socks苹果配置教程](https://www.hijk.pw/just-my-socks-mac-config-tutorial/)
+
+[Clash for Windows配置Just My Socks教程](https://www.hijk.pw/clash-for-windows-config-just-my-socks-tutorial/)
+
+[ClashX配置Just My Socks教程](https://www.hijk.pw/clashx-config-just-my-socks-tutorial/)
+
+[Clash for Android配置Just My Socks教程](https://www.hijk.pw/clash-for-android-config-just-my-socks-tutorial/)
 
 # 其他
 
