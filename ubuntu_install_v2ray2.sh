@@ -21,9 +21,10 @@ https://www.quledu.net/
 http://www.ddxsku.com/
 http://www.biqu6.com/
 https://www.wenshulou.cc/
-https://www.php.baby/
-https://www.golglo.com/
-http://www.aiduxshuo.com/
+http://www.auutea.com/
+http://www.55shuba.com/
+http://www.39shubao.com/
+https://www.23xsw.cc/
 )
 
 function checkSystem()
