@@ -338,7 +338,7 @@ function info()
     [ -z "$res" ] && status="${red}已停止${plain}" || status="${green}正在运行${plain}"
     
     CONFIG_FILE=/usr/local/etc/trojan/config.json
-    ip=`cat $CONFIG_FILE | grep cert | cut -d/ -f5`
+    ip=`cat $CONFIG_FILE | grep -m1 cert | cut -d/ -f5`
     port=`cat $CONFIG_FILE | grep local_port | cut -d: -f2 | tr -d \",' '`
     line1=`grep -n 'password' $CONFIG_FILE  | head -n1 | cut -d: -f1`
     line11=`expr $line1 + 1`
