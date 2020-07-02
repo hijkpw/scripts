@@ -47,7 +47,7 @@ function checkTrojan()
         exit 1
     fi
     CONFIG_FILE=/usr/local/etc/trojan/config.json
-    domain=`grep cert $CONFIG_FILE | awk 'BEGIN { FS = "/" } ; { print $5 }'`
+    domain=`grep -m1 cert $CONFIG_FILE | awk 'BEGIN { FS = "/" } ; { print $5 }'`
     if [ ! -f /etc/nginx/conf.d/${domain}.conf ]; then
         echo "未找到域名的nginx配置文件"
         exit 1
