@@ -288,6 +288,8 @@ EOF
     fi
     
     mkdir -p /usr/share/nginx/html;
+    echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
+    echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt 
     cat > ${confpath}${domain}.conf<<-EOF
 server {
     listen 80;
@@ -317,6 +319,8 @@ server {
     root /usr/share/nginx/html;
     location / {
         proxy_pass $site;
+    }
+    location = /robots.txt {
     }
 
     location ${path} {
