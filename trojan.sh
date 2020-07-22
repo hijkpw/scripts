@@ -221,6 +221,9 @@ function installNginx()
     if [ ! -f /etc/nginx/nginx.conf.bak ]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     fi
+    mkdir -p /usr/share/nginx/html;
+    echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
+    echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
     cat > /etc/nginx/nginx.conf<<-EOF
 user nginx;
 worker_processes auto;
@@ -263,7 +266,13 @@ EOF
 server {
     listen 80;
     server_name ${domain};
-    rewrite ^(.*) https://\$server_name:${port}\$1 permanent;
+    root /usr/share/nginx/html;
+    location / {
+        return 301 https://\$server_name:${port}\$request_uri;
+    }
+    
+    location = /robots.txt {
+    }
 }
 EOF
     sed -i '/certbot/d' /etc/crontab
