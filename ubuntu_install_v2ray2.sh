@@ -237,6 +237,8 @@ function installNginx()
     if [ ! -f /etc/nginx/nginx.conf.bak ]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     fi
+    echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
+    echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
     cat > /etc/nginx/nginx.conf<<-EOF
 user www-data;
 worker_processes auto;
@@ -303,6 +305,8 @@ server {
     root /usr/share/nginx/html;
     location / {
         proxy_pass $site;
+    }
+    location = /robots.txt {
     }
 
     location ${path} {
