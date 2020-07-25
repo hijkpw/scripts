@@ -1,10 +1,10 @@
 #!/bin/bash
 # centos7/8 trojan WordPress一键安装脚本
-# Author: hijk<https://www.hijk.pw>
+# Author: hijk<https://hijk.pp.ua>
 
 echo "#############################################################"
 echo "#             CentOS 7/8 WordPress一键安装脚本                #"
-echo "# 网址: https://www.hijk.pw                                 #"
+echo "# 网址: https://hijk.pp.ua                                  #"
 echo "# 作者: hijk                                                #"
 echo "#############################################################"
 echo ""
@@ -38,7 +38,7 @@ function checkSystem()
 
 function checkTrojan()
 {
-    echo "该脚本仅适用于 https://www.hijk.pw 网站的trojan一键脚本 安装wordpress用！"
+    echo "该脚本仅适用于 https://hijk.pp.ua 网站的trojan一键脚本 安装wordpress用！"
     read -p "退出请按n，按其他键继续：" answer
     [ "$answer" = "n" ] && exit 0
 
