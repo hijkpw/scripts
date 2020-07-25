@@ -1,10 +1,10 @@
 #!/bin/bash
 # shadowsocksR/SSR Ubuntu一键安装教程
-# Author: hijk<https://www.hijk.pw>
+# Author: hijk<https://hijk.pp.ua>
 
 echo "#############################################################"
-echo "#         Ubuntu TLS ShadowsocksR/SSR 一键安装脚本          #"
-echo "# 网址: https://www.hijk.pw                                 #"
+echo "#         Ubuntu TLS ShadowsocksR/SSR 一键安装脚本            #"
+echo "# 网址: https://hijk.pp.ua                                  #"
 echo "# 作者: hijk                                                #"
 echo "#############################################################"
 echo ""
@@ -262,7 +262,7 @@ function installSSR()
         tar -zxf ${FILENAME}.tar.gz
         mv shadowsocksr-3.2.2/shadowsocks /usr/local
         if [ ! -f /usr/local/shadowsocks/server.py ]; then
-            echo "安装失败，请到 https://www.hijk.pw 网站反馈"
+            echo "安装失败，请到 https://hijk.pp.ua 网站反馈"
             cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
             exit 1
         fi
@@ -291,7 +291,7 @@ EOF
 cat > /lib/systemd/system/shadowsocksR.service <<-EOF
 [Unit]
 Description=shadowsocksR
-Documentation=https://www.hijk.pw/
+Documentation=https://hijk.pp.ua/
 After=network-online.target
 Wants=network-online.target
 
