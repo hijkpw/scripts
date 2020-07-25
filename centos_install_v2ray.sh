@@ -1,10 +1,10 @@
 #!/bin/bash
 # v2ray centos系统一键安装教程
-# Author: hijk<https://www.hijk.pw>
+# Author: hijk<https://hijk.pp.ua>
 
 echo "#############################################################"
-echo "#         CentOS 7/8 v2ray 一键安装脚本                     #"
-echo "# 网址: https://www.hijk.pw                                 #"
+echo "#         CentOS 7/8 v2ray 一键安装脚本                      #"
+echo "# 网址: https://hijk.pp.ua                                  #"
 echo "# 作者: hijk                                                #"
 echo "#############################################################"
 echo ""
@@ -96,7 +96,7 @@ function installV2ray()
     if [ ! -f /etc/v2ray/config.json ]; then
         bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
         if [ ! -f /etc/v2ray/config.json ]; then
-            echo "安装失败，请到 https://www.hijk.pw 网站反馈"
+            echo "安装失败，请到 https://hijk.pp.ua 网站反馈"
             exit 1
         fi
     fi
