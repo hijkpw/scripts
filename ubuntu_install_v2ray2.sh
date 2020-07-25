@@ -1,10 +1,10 @@
 #!/bin/bash
 # v2ray Ubuntu系统一键安装脚本
-# Author: hijk<https://www.hijk.pw>
+# Author: hijk<https://hijk.pp.a>
 
 echo "#############################################################"
 echo "#         Ubuntu 16.04 TLS v2ray 带伪装一键安装脚本           #"
-echo "# 网址: https://www.hijk.pw                                 #"
+echo "# 网址: https://hijk.pp.ua                                  #"
 echo "# 作者: hijk                                                #"
 echo "#############################################################"
 echo ""
@@ -150,7 +150,7 @@ function installV2ray()
     if [ ! -f /etc/v2ray/config.json ]; then
         bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
         if [ ! -f /etc/v2ray/config.json ]; then
-            echo "安装失败，请到 https://www.hijk.pw 网站反馈"
+            echo "安装失败，请到 https://hijk.pp.ua 网站反馈"
             exit 1
         fi
     fi
@@ -210,7 +210,7 @@ function installNginx()
     fi
     res=`which pip3`
     if [ "$?" != "0" ]; then
-        echo -e " pip3安装失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
+        echo -e " pip3安装失败，请到 ${red}https://hijk.pp.a${plain} 反馈"
         exit 1
     fi
     pip3 install --upgrade pip
@@ -230,7 +230,7 @@ function installNginx()
     fi
     certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
     if [ "$?" != "0" ]; then
-        echo -e " 获取证书失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
+        echo -e " 获取证书失败，请到 ${red}https://hijk.pp.ua${plain} 反馈"
         exit 1
     fi
 
@@ -329,7 +329,7 @@ EOF
     sleep 3
     res=`netstat -nltp | grep ${port} | grep nginx`
     if [ "${res}" = "" ]; then
-        echo -e "nginx启动失败！ 请到 ${red}https://www.hijk.pw${plain} 反馈"
+        echo -e "nginx启动失败！ 请到 ${red}https://hijk.pp.ua${plain} 反馈"
         exit 1
     fi
 }
