@@ -1,10 +1,10 @@
 #!/bin/bash
 # shadowsocks/ss CentOS8一键安装脚本
-# Author: hijk<https://www.hijk.pw>
+# Author: hijk<https://hijk.pp.ua>
 
 echo "#############################################################"
 echo "#         CentOS 7/8 Shadowsocks/SS 一键安装脚本             #"
-echo "# 网址: https://www.hijk.pw                                 #"
+echo "# 网址: https://hijk.pp.ua                                  #"
 echo "# 作者: hijk                                                #"
 echo "#############################################################"
 echo ""
@@ -181,7 +181,7 @@ function installSS()
         make && make install
         if [ $? -ne 0 ]; then
             echo
-            echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://www.hijk.pw 反馈"
+            echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://hijk.pp.ua 反馈"
             cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
             exit 1
         fi
@@ -212,7 +212,7 @@ EOF
  cat > /usr/lib/systemd/system/shadowsocks-libev.service <<-EOF
 [Unit]
 Description=shadowsocks
-Documentation=https://www.hijk.pw/
+Documentation=https://hijk.pp.ua/
 After=network-online.target
 Wants=network-online.target
 
