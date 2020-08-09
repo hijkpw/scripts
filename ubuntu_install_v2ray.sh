@@ -1,10 +1,10 @@
 #!/bin/bash
 # v2ray Ubuntu系统一键安装脚本
-# Author: hijk<https://hijk.pp.ua>
+# Author: hijk<https://hijk.art>
 
 echo "#############################################################"
 echo "#         Ubuntu 16.04 TLS v2ray 带一键安装脚本              #"
-echo "# 网址: https://hijk.pp.ua                                  #"
+echo "# 网址: https://hijk.art                                  #"
 echo "# 作者: hijk                                                #"
 echo "#############################################################"
 echo ""
@@ -91,7 +91,7 @@ function installV2ray()
     if [ ! -f /etc/v2ray/config.json ]; then
         bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
         if [ ! -f /etc/v2ray/config.json ]; then
-            echo "安装失败，请到 https://hijk.pp.ua 网站反馈"
+            echo "安装失败，请到 https://hijk.art 网站反馈"
             exit 1
         fi
     fi

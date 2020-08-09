@@ -1,10 +1,10 @@
 #!/bin/bash
 # shadowsocks/ss Ubuntu一键安装脚本
-# Author: hijk<https://hijk.pp.ua>
+# Author: hijk<https://hijk.art>
 
 echo "#############################################################"
 echo "#         Ubuntu TLS Shadowsocks/SS  一键安装脚本            #"
-echo "# 网址: https://hijk.pp.ua                                  #"
+echo "# 网址: https://hijk.art                                  #"
 echo "# 作者: hijk                                                #"
 echo "#############################################################"
 echo ""
@@ -150,9 +150,14 @@ function preinstall()
     
     echo "安装必要软件"
     apt install -y telnet wget vim net-tools unzip tar qrencode
-    apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls10 libmbedtls-dev libsodium18 libsodium-dev libc-ares2 libc-ares-dev gcc g++
+    apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls-dev libsodium-dev libc-ares2 libc-ares-dev gcc g++
+    apt install -y libsodium18
     if [ "$?" != "0" ]; then
-        apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls10 libmbedtls-dev libsodium23 libsodium-dev libc-ares2 libc-ares-dev gcc g++
+        apt install -y libsodium23
+    fi
+    apt install -y libmbedtls10
+    if [ "$?" != "0" ]; then
+        apt install -y libmbedtls12
     fi
     apt autoremove -y
     res=`which wget`
@@ -177,7 +182,7 @@ function installSS()
         make && make install
         if [ $? -ne 0 ]; then
             echo
-            echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://hijk.pp.ua 反馈"
+            echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
             cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
             exit 1
         fi
@@ -208,7 +213,7 @@ EOF
  cat > /lib/systemd/system/shadowsocks-libev.service <<-EOF
 [Unit]
 Description=shadowsocks
-Documentation=https://hijk.pp.ua/
+Documentation=https://hijk.art/
 After=network-online.target
 Wants=network-online.target
 
