@@ -145,14 +145,11 @@ function preinstall()
 function installV2ray()
 {
     echo 安装v2ray...
-    bash <(curl -L -s https://install.direct/go.sh)
+    bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
 
     if [ ! -f /etc/v2ray/config.json ]; then
-        bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
-        if [ ! -f /etc/v2ray/config.json ]; then
-            echo "安装失败，请到 https://hijk.art 网站反馈"
-            exit 1
-        fi
+        echo "安装失败，请到 https://hijk.art 网站反馈"
+        exit 1
     fi
 
     logsetting=`cat /etc/v2ray/config.json|grep loglevel`
