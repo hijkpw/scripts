@@ -183,6 +183,7 @@ function installV2ray()
         sed -i '/AmbientCapabilities/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
         systemctl daemon-reload
         systemctl restart v2ray
+        sleep 3
         res=`netstat -ntlp| grep ${v2port} | grep v2ray`
         if [ "${res}" = "" ]; then
             echo "端口号：${port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
@@ -481,6 +482,7 @@ function uninstall()
         rm -rf /usr/bin/v2ray/*
         rm -rf /var/log/v2ray/*
         rm -rf /etc/systemd/system/v2ray.service
+        rm -rf /etc/systemd/system/multi-user.target.wants/v2ray.service
 
         apt remove -y nginx
         apt autoremove -y

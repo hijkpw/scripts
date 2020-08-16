@@ -120,6 +120,7 @@ function installV2ray()
         sed -i '/AmbientCapabilities/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
         systemctl daemon-reload
         systemctl restart v2ray
+        sleep 3
         res=`ss -ntlp| grep ${port} | grep v2ray`
         if [ "${res}" = "" ]; then
             echo "端口号：${port}， v2启动失败，请检查端口是否被占用！"
@@ -251,6 +252,7 @@ function uninstall()
         rm -rf /usr/bin/v2ray/*
         rm -rf /var/log/v2ray/*
         rm -rf /etc/systemd/system/v2ray.service
+        rm -rf /etc/systemd/system/multi-user.target.wants/v2ray.service
         echo -e " ${red}卸载成功${plain}"
     fi
 }
