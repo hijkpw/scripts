@@ -117,15 +117,19 @@ function preinstall()
     fi
     echo "安装必要软件"
     if [ "$pm" = "yum" ]; then
-        yum install -y epel-release telnet wget vim net-tools ntpdate unzip tar
+        yum install -y epel-release telnet wget vim unzip tar
         res=`which wget`
         [ "$?" != "0" ] && yum install -y wget
+        yum install -y net-tools
+        yum install -y ntpdate
         res=`which netstat`
         [ "$?" != "0" ] && yum install -y net-tools
     else
-        apt install -y telnet wget vim net-tools ntpdate unzip gcc g++ tar
+        apt install -y telnet wget vim unzip gcc g++ tar
         res=`which wget`
         [ "$?" != "0" ] && apt install -y wget
+        apt install -y net-tools
+        apt install -y ntpdate
         res=`which netstat`
         [ "$?" != "0" ] && apt install -y net-tools
         apt autoremove -y
