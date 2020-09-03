@@ -197,7 +197,7 @@ function installNginx()
 {
     apt install -y nginx
     systemctl stop nginx
-    res=`netstat -ntlp| grep -E ':80|:443'`
+    res=`netstat -ntlp| grep -E ':80 |:443 '`
     if [ "${res}" != "" ]; then
         echo " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
         echo " 端口占用信息如下："
