@@ -59,7 +59,6 @@ function checkSystem()
 
 function getData()
 {
-    apt install -y dnsutils curl
     IP=`curl -s -4 icanhazip.com`
     echo " "
     echo " 本脚本为带伪装的一键脚本，运行之前请确认如下条件已经具备："
@@ -80,11 +79,10 @@ function getData()
     done
     
     domain=${domain,,}
-    res=`host ${domain}`
-    res=`echo -n ${res} | grep ${IP}`
+    resolve=`curl -s https://hijk.art/hostip.php?d=${domain}`
+    res=`echo -n ${resolve} | grep ${IP}`
     if [ -z "${res}" ]; then
-        echo -n "${domain} 解析结果："
-        host ${domain}
+        echo "${domain} 解析结果：${resolve}"
         echo -e "${red}主机未解析到当前服务器IP(${IP})!${plain}"
         exit 1
     fi
