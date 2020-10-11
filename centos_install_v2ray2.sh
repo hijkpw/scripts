@@ -177,6 +177,9 @@ function installV2ray()
         sed -i -e "s/path\":.*/path\": \"\\${path}\",/" /etc/v2ray/config.json
     fi
     echo "0 3 */3 * * root echo '' > /var/log/v2ray/access.log; echo ''>/var/log/v2ray/error.log" >> /etc/crontab
+    if [ -d /etc/systemd/system/v2ray.service.d ]; then
+        rm -rf /etc/systemd/system/v2ray.service.d
+    fi
     systemctl enable v2ray
     systemctl restart v2ray
     sleep 3

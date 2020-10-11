@@ -109,6 +109,9 @@ function installV2ray()
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     echo "0 3 */3 * * root echo '' > /var/log/v2ray/access.log; echo ''>/var/log/v2ray/error.log" >> /etc/crontab
     ntpdate -u time.nist.gov
+    if [ -d /etc/systemd/system/v2ray.service.d ]; then
+        rm -rf /etc/systemd/system/v2ray.service.d
+    fi
     systemctl enable v2ray
     systemctl restart v2ray
     sleep 3
