@@ -49,6 +49,10 @@ function getData()
     do
         read -p "请输入v2ray的端口[1-65535]:" port
         [ -z "$port" ] && port="21568"
+        if [ "${port:0:1}" = "0" ]; then
+            echo -e "${red}端口不能以0开头${plain}"
+            exit 1
+        fi
         expr $port + 0 &>/dev/null
         if [ $? -eq 0 ]; then
             if [ $port -ge 1 ] && [ $port -le 65535 ]; then

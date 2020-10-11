@@ -79,13 +79,14 @@ function getData()
             break
         fi
     done
-    
+
+    domain=${domain,,}
     res=`host ${domain}`
     res=`echo -n ${res} | grep ${IP}`
     if [ -z "${res}" ]; then
         echo -n "${domain} 解析结果："
         host ${domain}
-        echo "主机未解析到当前服务器IP(${IP})!"
+        echo -e "${red}主机未解析到当前服务器IP(${IP})!${plain}"
         exit 1
     fi
 
@@ -105,6 +106,10 @@ function getData()
     
     read -p "请输入Nginx端口[100-65535的一个数字，默认443]：" port
     [ -z "${port}" ] && port=443
+    if [ "${port:0:1}" = "0" ]; then
+        echo -e "${red}端口不能以0开头${plain}"
+        exit 1
+    fi
 
     read -p "是否安装BBR（安装请按y，不安装请输n，不输则默认安装）:" needBBR
     [ -z "$needBBR" ] && needBBR=y

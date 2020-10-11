@@ -50,6 +50,10 @@ function getData()
     do
         read -p "请设置SS的端口号[1025-65535]:" port
         [ -z "$port" ] && port="12345"
+        if [ "${port:0:1}" = "0" ]; then
+            echo -e "${red}端口不能以0开头${plain}"
+            exit 1
+        fi
         expr $port + 0 &>/dev/null
         if [ $? -eq 0 ]; then
             if [ $port -ge 1025 ] && [ $port -le 65535 ]; then
