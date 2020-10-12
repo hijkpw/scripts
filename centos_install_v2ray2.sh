@@ -120,7 +120,7 @@ function getData()
         index=`shuf -i0-${len} -n1`
         site=${sites[$index]}
         host=`echo ${site} | cut -d/ -f3`
-        ip=`host ${host} | grep -oE "[1-9][0-9.]+[0-9]" | head -n1`
+        ip=`curl -s https://hijk.art/hostip.php?d=${host} | grep -oE "[1-9][0-9.]+[0-9]"`
         if [ "$ip" != "" ]; then
             echo "${ip}  ${host}" >> /etc/hosts
             break
