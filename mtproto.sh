@@ -54,7 +54,7 @@ function checkSystem()
 
 status()
 {
-    if [ ! -x $DOCKER_CMD ]; then
+    if [ "$DOCKER_CMD" = "" ]; then
         echo 0
         return
     elif [ ! -f $MTG_ENV ]; then
@@ -120,6 +120,12 @@ installDocker()
 
     $CMD_REMOVE docker docker-engine docker.io containerd runc
     if [ $PMT = "apt" ]; then
+		apt-get install \
+			apt-transport-https \
+			ca-certificates \
+			curl \
+			gnupg-agent \
+			software-properties-common
         curl -fsSL https://download.docker.com/linux/$OS/gpg | sudo apt-key add -
         add-apt-repository \
             "deb [arch=amd64] https://download.docker.com/linux/$OS \
@@ -169,16 +175,19 @@ firewall()
     port=$1
     systemctl status firewalld > /dev/null 2>&1
     if [ $? -eq 0 ];then
-        firewall-cmd --permanent --add-port=${port}/tcp
-        firewall-cmd --reload
+        systemctl disable firewalld
+        systemctl stop firewalld
     else
         nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
         if [ "$nl" != "3" ]; then
-            iptables -I INPUT -p tcp --dport $port -j ACCEPT
+            iptables -P INPUT ACCEPT
+            iptables -P FORWARD ACCEPT
+            iptables -P OUTPUT ACCEPT
+            iptables -F
         else
             res=`ufw status | grep -i inactive`
             if [ "$res" = "" ]; then
-                ufw allow ${port}/tcp
+                ufw disable
             fi
         fi
     fi
