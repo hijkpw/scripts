@@ -242,6 +242,12 @@ stop()
 
 showInfo()
 {
+    res=`status`
+    if [ $res -lt 3 ]; then
+        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        return
+    fi
+
     IP=`curl -s -4 ip.sb`
     SECRET=$(cat "$MTG_SECRET")
     set -a
@@ -249,13 +255,13 @@ showInfo()
     set +a
 
     echo 
-    echo -e "${red}MTProto代理信息：${plain}"
+    echo -e "  ${red}MTProto代理信息：${plain}"
     echo 
-    echo -e "IP：${red}$IP${plain}"
-    echo -e "端口：${red}$MTG_PORT${plain}"
-    echo -e "密钥：${red}$SECRET${plain}"
+    echo -e "  IP：${red}$IP${plain}"
+    echo -e "  端口：${red}$MTG_PORT${plain}"
+    echo -e "  密钥：${red}$SECRET${plain}"
     echo ""
-    echo -e "如需获取tg://proxy形式的链接，请打开telegrame关注${green}@MTProxybot${plain}生成"
+    echo -e "  如需获取tg://proxy形式的链接，请打开telegrame关注${green}@MTProxybot${plain}生成"
     echo ""
 }
 
@@ -360,29 +366,29 @@ function menu()
     clear
     echo "#############################################################"
     echo -e "#                    ${red}MTProto一键安装脚本${plain}                    #"
-    echo "# 作者: 网络跳越(hijk)                                      #"
-    echo "# 网址: https://hijk.art                                    #"
-    echo "# 论坛: https://hijk.club                                   #"
-    echo "# TG群: https://t.me/hijkclub                               #"
-    echo "# Youtube频道: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+    echo -e "# ${green}作者${plain}: 网络跳越(hijk)                                      #"
+    echo -e "# ${green}网址${plain}: https://hijk.art                                    #"
+    echo -e "# ${green}论坛${plain}: https://hijk.club                                   #"
+    echo -e "# ${green}TG群${plain}: https://t.me/hijkclub                               #"
+    echo -e "# ${green}Youtube频道${plain}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
     echo "#############################################################"
     echo ""
 
-    echo -e ${green}1.${plain} 安装MTProto代理
-    echo -e ${green}2.${plain} 更新MTProto代理
-    echo -e ${green}3.${plain} 卸载MTProto代理
-    echo "-------------"
-    echo -e ${green}4.${plain} 启动MTProto代理
-    echo -e ${green}5.${plain} 重启MTProto代理
-    echo -e ${green}6.${plain} 停止MTProto代理
-    echo "-------------"
-    echo -e ${green}7.${plain} 查看MTProto信息
-    echo -e ${green}8.${plain} 修改MTProto配置
-    echo -e ${green}9.${plain} 查看MTProto日志
-    echo "-------------"
-    echo -e ${green}0.${plain} 退出
+    echo -e "  ${green}1.${plain} 安装MTProto代理"
+    echo -e "  ${green}2.${plain} 更新MTProto代理"
+    echo -e "  ${green}3.${plain} 卸载MTProto代理"
+    echo " -------------"
+    echo -e "  ${green}4.${plain} 启动MTProto代理"
+    echo -e "  ${green}5.${plain} 重启MTProto代理"
+    echo -e "  ${green}6.${plain} 停止MTProto代理"
+    echo " -------------"
+    echo -e "  ${green}7.${plain} 查看MTProto信息"
+    echo -e "  ${green}8.${plain} 修改MTProto配置"
+    echo -e "  ${green}9.${plain} 查看MTProto日志"
+    echo " -------------"
+    echo -e "  ${green}0.${plain} 退出"
     echo 
-    echo -n "当前状态："
+    echo -n " 当前状态："
     statusText
     echo 
 
