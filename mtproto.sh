@@ -291,12 +291,15 @@ update()
 
 uninstall()
 {
-    stop
-    rm -rf $MTG_CONFIG
-    docker system prune -a
-    systemctl stop docker
-    systemctl disable docker
-    $CMD_REMOVE docker-ce docker-ce-cli containerd.io
+    read -p " 确定卸载MTProto？[y/n]：" answer
+    if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+        stop
+        rm -rf $MTG_CONFIG
+        docker system prune -af
+        systemctl stop docker
+        systemctl disable docker
+        $CMD_REMOVE docker-ce docker-ce-cli containerd.io
+    fi
 }
 
 run()
