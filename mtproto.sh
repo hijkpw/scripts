@@ -291,8 +291,8 @@ update()
 
 uninstall()
 {
-    rm -rf $MTG_CONFIG
     stop
+    rm -rf $MTG_CONFIG
     docker system prune -a
     systemctl stop docker
     systemctl disable docker
