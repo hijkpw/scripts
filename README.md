@@ -4,9 +4,11 @@
 
 论坛：<https://hijk.club>
 
-TG讨论组： (@hijkclub)[https://t.me/hijkclub]
+TG讨论组： [@hijkclub](https://t.me/hijkclub)
 
 镜像站点：<https://v2raytech.com>
+
+Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 
 联系邮箱：hijk.pw@protonmail.ch
 
@@ -17,6 +19,7 @@ TG讨论组： (@hijkclub)[https://t.me/hijkclub]
 3. CentOS 7/8系统V2Ray一键脚本：centos_install_v2ray.sh，使用教程：<https://hijk.art/centos-one-click-install-v2ray/>
 4. CentOS 7/8系统带伪装V2Ray一键脚本：centos_install_v2ray2.sh，使用教程：<https://hijk.art/v2ray-one-click-script-with-mask/>
 5. trojan一键脚本：trojan.sh，使用教程：<https://hijk.art/trojan-one-click-scrip/>
+6. 一键搭建Telegram的MTProto代理：mtproto.sh，使用教程： <https://v2raytech.com/one-click-telegram-mtproto-proxy/>
 
 ## Ubuntu
 
@@ -25,6 +28,7 @@ TG讨论组： (@hijkclub)[https://t.me/hijkclub]
 3. Ubuntu TLS系统V2Ray一键脚本：ubuntu_install_v2ray.sh，使用教程：<https://hijk.art/ubuntu-one-click-install-v2ray/>
 4. Ubuntu TLS系统带伪装V2Ray一键脚本：ubuntu_install_v2ray2.sh，使用教程：<https://hijk.art/ubuntu-v2ray-one-click-script-with-mask/>
 5. trojan一键脚本：trojan.sh，使用教程：<https://hijk.art/trojan-one-click-scrip/>
+6. 一键搭建Telegram的MTProto代理：mtproto.sh，使用教程： <https://v2raytech.com/one-click-telegram-mtproto-proxy/>
 
 # 客户端配置教程
 
@@ -96,15 +100,23 @@ TG讨论组： (@hijkclub)[https://t.me/hijkclub]
 
 [CN2 GIA商家推荐](https://hijk.art/cn2-gia-merchants/)
 
+[做站VPS推荐](https://v2raytech.com/vps-for-website/)
+
 [搬瓦工购买服务器详细教程](https://hijk.art/bandwagonghost-buy-vps-tutorial/)
 
 [购买vultr服务器超详细图文教程](https://hijk.art/vultr-buy-vps-tutorial/)
+
+[DMIT服务器购买和使用教程](https://v2raytech.com/dmit-vps-tutorial/)
 
 [性价比最高的香港服务器](https://hijk.art/best-hongkong-vps/)
 
 [HostDare购买服务器超详细教程](https://hijk.art/hostdare-buy-vps-tutorial/)
 
 [vps ping测试、去程/回程路由跟踪、vps一键测试脚本](https://hijk.art/benchmark-your-vps/)
+
+[IP、域名、DNS和VPS之间的关系](https://v2raytech.com/ip-vps-domain-relations/)
+
+[为什么回程路由比去程路由重要？](https://v2raytech.com/why-return-route-important/)
 
 [CloudCone CN2 GIA套餐开售了，趁还没超售可买来香一把](https://hijk.art/cloudcone-cn2-gia-plans-on-sale/)
 
