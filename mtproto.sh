@@ -138,7 +138,7 @@ installDocker()
     $CMD_INSTALL docker-ce docker-ce-cli containerd.io
 
     DOCKER_CMD="$(command -v docker)"
-    if [ ! -x $DOCKER_CMD ]; then
+    if [ $DOCKER_CMD = "" ]; then
         echo -e "${red}docker安装失败，请到https://hijk.art反馈${plain}"
         exit 1
     fi
