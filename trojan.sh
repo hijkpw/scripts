@@ -182,7 +182,11 @@ function installTrojan()
 
 function installNginx()
 {
-    yum install -y nginx
+    if [ "$pm" = "yum" ]; then
+        yum install -y nginx
+    else
+        apt install -y nginx
+    fi
     systemctl stop nginx
     res=`netstat -ntlp| grep -E ':80|:443'`
     if [ "${res}" != "" ]; then
@@ -426,7 +430,11 @@ function uninstall()
         domain=`cat $CONFIG_FILE | grep cert | cut -d/ -f5`
         removeTrojan
 
-        yum remove -y nginx
+        if [[ "$pm" = "yum" ]]; then
+            yum remove -y nginx
+        else
+            apt remove -y nginx
+        fi
         if [ -d /usr/share/nginx/html.bak ]; then
             rm -rf /usr/share/nginx/html
             mv /usr/share/nginx/html.bak /usr/share/nginx/html
