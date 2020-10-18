@@ -74,7 +74,7 @@ status()
     fi
     if [[ ! -f $CONFIG_FILE ]]; then
         echo 1
-        return;
+        return
     fi
     port=`grep local_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
     res=`ss -ntlp| grep ${port} | grep trojan-go`
@@ -217,7 +217,7 @@ getData()
     done
     
     read -p " 请输入trojan端口[100-65535的一个数字，默认443]：" PORT
-    [ -z "${PORT}" ] && PORT=443
+    [[ -z "${PORT}" ]] && PORT=443
     if [[ "${PORT:0:1}" = "0" ]]; then
         echo -e "${RED}端口不能以0开头${PLAIN}"
         exit 1
@@ -258,16 +258,14 @@ getData()
 
 installNginx()
 {
-    if [ "$PMT" = "yum" ]; then
-        $CMD_INSTALL epel-release
-        $CMD_INSTALL nginx
-    else
-        $CMD_INSTALL nginx
+    if [[ "$PMT" = "yum" ]]; then
+        $CMD_INSTALL epel-release 
     fi
+    $CMD_INSTALL nginx
     systemctl enable nginx
     systemctl stop nginx
     res=`netstat -ntlp| grep -E ':80|:443'`
-    if [ "${res}" != "" ]; then
+    if [[ "${res}" != "" ]]; then
         echo -e "${RED} 其他进程占用了80或443端口，请先关闭再运行一键脚本${PLAIN}"
         echo " 端口占用信息如下："
         echo ${res}
@@ -279,11 +277,11 @@ getCert()
 {
     if [[ -z ${CERT_FILE+x} ]]; then
         res=`which pip3`
-        if [ "$?" != "0" ]; then
+        if [[ "$?" != "0" ]]; then
             $CMD_INSTALL python3 python3-pip
         fi
         res=`which pip3`
-        if [ "$?" != "0" ]; then
+        if [[ "$?" != "0" ]]; then
             echo -e " pip3安装失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
             exit 1
         fi
@@ -299,11 +297,11 @@ getCert()
         fi
         pip3 install certbot
         res=`which certbot`
-        if [ "$?" != "0" ]; then
+        if [[ "$?" != "0" ]]; then
             export PATH=$PATH:/usr/local/bin
         fi
         certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
-        if [ "$?" != "0" ]; then
+        if [[ "$?" != "0" ]]; then
             echo -e " 获取证书失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
             exit 1
         fi
@@ -315,7 +313,7 @@ getCert()
 
 configNginx()
 {
-    if [ ! -f /etc/nginx/nginx.conf.bak ]; then
+    if [[ ! -f /etc/nginx/nginx.conf.bak ]]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     fi
     mkdir -p /usr/share/nginx/html;
@@ -499,7 +497,7 @@ setFirewall()
             res=`which ufw`
             if [[ $? -eq 0 ]]; then
                 res=`ufw status | grep -i inactive`
-                if [ "$res" = "" ]; then
+                if [[ "$res" = "" ]]; then
                     ufw allow http/tcp
                     ufw allow https/tcp
                     ufw allow ${PORT}/tcp
@@ -511,20 +509,20 @@ setFirewall()
 
 installBBR()
 {
-    if [ "$NEED_BBR" != "y" ]; then
+    if [[ "$NEED_BBR" != "y" ]]; then
         INSTALL_BBR=false
         return
     fi
     result=$(lsmod | grep bbr)
-    if [ "$result" != "" ]; then
+    if [[ "$result" != "" ]]; then
         echo " BBR模块已安装"
         INSTALL_BBR=false
         echo "3" > /proc/sys/net/ipv4/tcp_fastopen
         echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-        return;
+        return
     fi
     res=`hostnamectl | grep -i openvz`
-    if [ "$res" != "" ]; then
+    if [[ "$res" != "" ]]; then
         echo " openvz机器，跳过安装"
         INSTALL_BBR=false
         return
@@ -535,14 +533,14 @@ installBBR()
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
     sysctl -p
     result=$(lsmod | grep bbr)
-    if [ "$result" != "" ]; then
+    if [[ "$result" != "" ]]; then
         echo " BBR模块已启用"
         INSTALL_BBR=false
         return
     fi
 
     echo " 安装BBR模块..."
-    if [ "$PMT" = "yum" ]; then
+    if [[ "$PMT" = "yum" ]]; then
         rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
         rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
         yum --enablerepo=elrepo-kernel install kernel-ml -y
@@ -587,7 +585,7 @@ install()
 
 bbrReboot()
 {
-    if [ "${INSTALL_BBR}" == "true" ]; then
+    if [[ "${INSTALL_BBR}" == "true" ]]; then
         echo  
         echo " 为使BBR模块生效，系统将在30秒后重启"
         echo  
@@ -600,7 +598,7 @@ bbrReboot()
 update()
 {
     res=`status`
-    if [ $res -lt 2 ]; then
+    if [[ $res -lt 2 ]]; then
         echo -e " ${RED}trojan-go未安装，请先安装！${PLAIN}"
         return
     fi
@@ -629,7 +627,7 @@ uninstall()
         systemctl disable nginx
         $CMD_REMOVE nginx
         rm -rf /etc/nginx/nginx.conf
-        if [ -f /etc/nginx/nginx.conf.bak ]; then
+        if [[ -f /etc/nginx/nginx.conf.bak ]]; then
             mv /etc/nginx/nginx.conf.bak /etc/nginx/nginx.conf
         fi
 
@@ -641,13 +639,13 @@ uninstall()
 run()
 {
     res=`status`
-    if [ $res -lt 2 ]; then
+    if [[ $res -lt 2 ]]; then
         echo -e "${RED}trojan-go未安装，请先安装！${PLAIN}"
         return
     fi
 
     res=`ss -ntlp| grep trojan-go`
-    if [ "$res" != "" ]; then
+    if [[ "$res" != "" ]]; then
         return
     fi
 
@@ -671,7 +669,7 @@ stop()
 restart()
 {
     res=`status`
-    if [ $res -lt 2 ]; then
+    if [[ $res -lt 2 ]]; then
         echo -e " ${RED}trojan-go未安装，请先安装！${PLAIN}"
         return
     fi
@@ -683,7 +681,7 @@ restart()
 reconfig()
 {
     res=`status`
-    if [ $res -lt 2 ]; then
+    if [[ $res -lt 2 ]]; then
         echo -e " ${RED}trojan-go未安装，请先安装！${PLAIN}"
         return
     fi
@@ -737,7 +735,7 @@ showInfo()
 showLog()
 {
     res=`status`
-    if [ $res -lt 2 ]; then
+    if [[ $res -lt 2 ]]; then
         echo -e "${RED}trojan-go未安装，请先安装！${PLAIN}"
         return
     fi
@@ -758,17 +756,17 @@ menu()
     echo "#############################################################"
     echo ""
 
-    echo -e "  ${GREEN}1.${PLAIN} 安装trojan-go"
-    echo -e "  ${GREEN}2.${PLAIN} 安装trojan-go+WS"
-    echo -e "  ${GREEN}3.${PLAIN} 更新trojan-go"
-    echo -e "  ${GREEN}4.${PLAIN} 卸载trojan-go"
+    echo -e "  ${GREEN}1.${PLAIN}  安装trojan-go"
+    echo -e "  ${GREEN}2.${PLAIN}  安装trojan-go+WS"
+    echo -e "  ${GREEN}3.${PLAIN}  更新trojan-go"
+    echo -e "  ${GREEN}4.${PLAIN}  卸载trojan-go"
     echo " -------------"
-    echo -e "  ${GREEN}5.${PLAIN} 启动trojan-go"
-    echo -e "  ${GREEN}6.${PLAIN} 重启trojan-go"
-    echo -e "  ${GREEN}7.${PLAIN} 停止trojan-go"
+    echo -e "  ${GREEN}5.${PLAIN}  启动trojan-go"
+    echo -e "  ${GREEN}6.${PLAIN}  重启trojan-go"
+    echo -e "  ${GREEN}7.${PLAIN}  停止trojan-go"
     echo " -------------"
-    echo -e "  ${GREEN}8.${PLAIN} 查看trojan-go信息"
-    echo -e "  ${GREEN}9.${PLAIN} 修改trojan-go配置"
+    echo -e "  ${GREEN}8.${PLAIN}  查看trojan-go信息"
+    echo -e "  ${GREEN}9.${PLAIN}  修改trojan-go配置"
     echo -e "  ${GREEN}10.${PLAIN} 查看trojan-go日志"
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"
@@ -777,7 +775,7 @@ menu()
     statusText
     echo 
 
-    read -p " 请选择操作[0-9]：" answer
+    read -p " 请选择操作[0-10]：" answer
     case $answer in
         0)
             exit 0
