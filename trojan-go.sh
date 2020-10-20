@@ -152,7 +152,7 @@ archAffix(){
 getData()
 {
     can_change=$1
-    if [[ "$can_change" = "yes" ]]; then
+    if [[ "$can_change" != "yes" ]]; then
         IP=`curl -s -4 ip.sb`
         echo " "
         echo " trojan-go一键脚本，运行之前请确认如下条件已经具备："
