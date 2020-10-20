@@ -252,6 +252,7 @@ getData()
     index=`shuf -i0-${len} -n1`
     site=${SITES[$index]}
     REMOTE_HOST=`echo ${site} | cut -d/ -f3`
+    REMOTE_HOST=`curl -s https://hijk.art/hostip.php?d=${REMOTE_HOST}`
     protocol=`echo ${site} | cut -d/ -f1`
     [[ "$protocol" != "http:" ]] && REMOTE_PORT=80 || REMOTE_PORT=443
 }
@@ -306,8 +307,8 @@ getCert()
             exit 1
         fi
 
-        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
-        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+        CERT_FILE="/etc/letsencrypt/archive/${DOMAIN}/fullchain1.pem"
+        KEY_FILE="/etc/letsencrypt/archive/${DOMAIN}/privkey1.pem"
     fi
 }
 
