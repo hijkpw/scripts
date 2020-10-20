@@ -657,6 +657,7 @@ start()
 {
     systemctl restart nginx
     systemctl restart trojan-go
+    sleep 3
 }
 
 stop()
