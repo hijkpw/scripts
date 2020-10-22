@@ -257,6 +257,8 @@ showInfo()
     echo 
     echo -e "  ${red}MTProto代理信息：${plain}"
     echo 
+    echo -n "  当前状态："
+    statusText
     echo -e "  IP：${red}$IP${plain}"
     echo -e "  端口：${red}$MTG_PORT${plain}"
     echo -e "  密钥：${red}$SECRET${plain}"

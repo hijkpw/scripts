@@ -395,6 +395,7 @@ installTrojan()
     unzip /tmp/${ZIP_FILE}.zip  -d /tmp/${ZIP_FILE}
     cp /tmp/${ZIP_FILE}/trojan-go /usr/bin
     cp /tmp/${ZIP_FILE}/example/trojan-go.service /etc/systemd/system/
+    sed -i '/User=nobody/d' /etc/systemd/system/trojan-go.service
     systemctl daemon-reload
 
     systemctl enable trojan-go
@@ -722,6 +723,8 @@ showInfo()
     echo 
     echo -e "  ${RED}trojan-go配置信息：${PLAIN}"
     echo 
+    echo -n "  当前状态："
+    statusText
     echo -e "  IP：${RED}$ip${PLAIN}"
     echo -e "  域名/主机名(host)：${RED}$domain${PLAIN}"
     echo -e "  端口(port)：${RED}$port${PLAIN}"
