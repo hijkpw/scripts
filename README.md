@@ -20,6 +20,8 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 4. CentOS 7/8系统带伪装V2Ray一键脚本：centos_install_v2ray2.sh，使用教程：<https://hijk.art/v2ray-one-click-script-with-mask/>
 5. trojan一键脚本：trojan.sh，使用教程：<https://hijk.art/trojan-one-click-scrip/>
 6. 一键搭建Telegram的MTProto代理：mtproto.sh，使用教程： <https://v2raytech.com/one-click-telegram-mtproto-proxy/>
+7. trojan-go一键脚本：trojan-go.sh，使用教程：<https://v2raytech.com/trojan-go-one-click-script/>
+8. V2ray多合一脚本，支持VMESS+websocket+TLS+Nginx、VLESS+TCP+XTLS、VLESS+TCP+TLS等组合，使用教程：<https://v2raytech.com/v2ray-all-in-one-script-vless-tcp-xtls-support/>
 
 ## Ubuntu
 
@@ -29,6 +31,8 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 4. Ubuntu TLS系统带伪装V2Ray一键脚本：ubuntu_install_v2ray2.sh，使用教程：<https://hijk.art/ubuntu-v2ray-one-click-script-with-mask/>
 5. trojan一键脚本：trojan.sh，使用教程：<https://hijk.art/trojan-one-click-scrip/>
 6. 一键搭建Telegram的MTProto代理：mtproto.sh，使用教程： <https://v2raytech.com/one-click-telegram-mtproto-proxy/>
+7. trojan-go一键脚本：trojan-go.sh，使用教程：<https://v2raytech.com/trojan-go-one-click-script/>
+8. V2ray多合一脚本，支持VMESS+websocket+TLS+Nginx、VLESS+TCP+XTLS、VLESS+TCP+TLS等组合，使用教程：<https://v2raytech.com/v2ray-all-in-one-script-vless-tcp-xtls-support/>
 
 # 客户端配置教程
 
