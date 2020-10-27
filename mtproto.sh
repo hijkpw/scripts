@@ -119,6 +119,7 @@ installDocker()
     fi
 
     $CMD_REMOVE docker docker-engine docker.io containerd runc
+    $CMD_INSTALL wget curl
     if [ $PMT = "apt" ]; then
 		apt-get install \
 			apt-transport-https \
@@ -138,7 +139,7 @@ installDocker()
     $CMD_INSTALL docker-ce docker-ce-cli containerd.io
 
     DOCKER_CMD="$(command -v docker)"
-    if [ $DOCKER_CMD = "" ]; then
+    if [ "$DOCKER_CMD" = "" ]; then
         echo -e "${red}docker安装失败，请到https://hijk.art反馈${plain}"
         exit 1
     fi
