@@ -232,11 +232,17 @@ function installNginx()
     if [ ! -f /etc/nginx/nginx.conf.bak ]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     fi
+    res=`id nginx`
+    if [[ "$?" != "0" ]]; then
+        user="www-data"
+    else
+        user="nginx"
+    fi
     mkdir -p /usr/share/nginx/html;
     echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
     echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
     cat > /etc/nginx/nginx.conf<<-EOF
-user nginx;
+user $user;
 worker_processes auto;
 error_log /var/log/nginx/error.log;
 pid /run/nginx.pid;
