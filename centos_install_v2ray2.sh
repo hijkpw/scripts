@@ -2,13 +2,6 @@
 # v2ray centos系统一键安装脚本
 # Author: hijk<https://hijk.art>
 
-echo "#############################################################"
-echo "#         CentOS 7/8 v2ray 带伪装一键安装脚本                 #"
-echo "# 网址: https://hijk.art                                  #"
-echo "# 作者: hijk                                                #"
-echo "#############################################################"
-echo ""
-
 red='\033[0;31m'
 green="\033[0;32m"
 plain='\033[0m'
@@ -56,88 +49,156 @@ function checkSystem()
     fi
 }
 
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
+PLAIN='\033[0m'
+
+colorEcho() {
+    echo -e "${1}${@:2}${PLAIN}"
+}
+
+slogon() {
+    clear
+    echo "#############################################################"
+    colorEcho $RED "#         CentOS 7/8 v2ray 带伪装一键安装脚本                 #"
+    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
+    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+    echo "#############################################################"
+    echo ""
+}
+
 function getData()
 {
     IP=`curl -s -4 icanhazip.com`
     echo " "
     echo " 本脚本为带伪装的一键脚本，运行之前请确认如下条件已经具备："
-    echo -e "  ${red}1. 一个域名${plain}"
-    echo -e "  ${red}2. 域名的某个主机名解析指向当前服务器ip（${IP}）${plain}"
+     colorEcho ${YELLOW} "  1. 一个域名"
+    colorEcho ${YELLOW} "  2. 域名的某个主机名解析指向当前服务器ip（${IP}）"
+    colorEcho ${BLUE} "  3. 如果/root目录下有 v2ray.pem 和 v2ray.key 证书密钥文件，无需理会条件2"
     echo " "
-    read -p "确认满足按y，按其他退出脚本：" answer
+    read -p " 确认满足按y，按其他退出脚本：" answer
     if [ "${answer}" != "y" ]; then
         exit 0
     fi
+    echo ""
 
     while true
     do
-        read -p "请输入您的主机名：" domain
+        read -p " 请输入您的主机名：" domain
         if [ -z "${domain}" ]; then
-            echo "主机名输入错误，请重新输入！"
+            echo " 主机名输入错误，请重新输入！"
         else
             break
         fi
     done
-
     domain=${domain,,}
-    resolve=`curl -s https://hijk.art/hostip.php?d=${domain}`
-    res=`echo -n ${resolve} | grep ${IP}`
-    if [ -z "${res}" ]; then
-        echo "${domain} 解析结果：${resolve}"
-        echo -e "${red}主机未解析到当前服务器IP(${IP})!${plain}"
-        exit 1
+    colorEcho ${BLUE}  " 主机名(host)：$domain"
+    echo ""
+
+    if [[ -f ~/v2ray.pem && -f ~/v2ray.key ]]; then
+        colorEcho ${BLUE}  " 检测到自有证书，将使用其部署"
+        echo 
+        CERT_FILE="/etc/v2ray/${domain}.pem"
+        KEY_FILE="/etc/v2ray/${domain}.key"
+    else
+        resolve=`curl -s https://hijk.art/hostip.php?d=${domain}`
+        res=`echo -n ${resolve} | grep ${IP}`
+        if [[ -z "${res}" ]]; then
+            colorEcho ${BLUE}  "${domain} 解析结果：${resolve}"
+            colorEcho ${RED}  " 主机未解析到当前服务器IP(${IP})!"
+            exit 1
+        fi
     fi
 
     while true
     do
-        read -p "请输入伪装路径，以/开头：" path
+        read -p " 请输入伪装路径，以/开头：" path
         if [ -z "${path}" ]; then
-            echo "请输入伪装路径，以/开头！"
+            echo " 请输入伪装路径，以/开头！"
         elif [ "${path:0:1}" != "/" ]; then
-            echo "伪装路径必须以/开头！"
+            echo " 伪装路径必须以/开头！"
         elif [ "${path}" = "/" ]; then
-            echo  "不能使用根路径！"
+            echo  " 不能使用根路径！"
         else
             break
         fi
     done
+    colorEcho ${BLUE}  " 伪装路径：$path"
+    echo 
     
-    read -p "请输入Nginx端口[100-65535的一个数字，默认443]：" port
+    read -p " 请输入Nginx端口[100-65535的一个数字，默认443]：" port
     [ -z "${port}" ] && port=443
     if [ "${port:0:1}" = "0" ]; then
-        echo -e "${red}端口不能以0开头${plain}"
+        echo -e " ${red}端口不能以0开头${plain}"
         exit 1
     fi
+    colorEcho ${BLUE}  " Nginx端口：$port"
+    echo ""
 
-    read -p "是否安装BBR（安装请按y，不安装请输n，不输则默认安装）:" needBBR
+    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" needBBR
     [ -z "$needBBR" ] && needBBR=y
     [ "$needBBR" = "Y" ] && needBBR=y
     
-    len=${#sites[@]}
-    ((len--))
-    while true
-    do
-        index=`shuf -i0-${len} -n1`
-        site=${sites[$index]}
-        host=`echo ${site} | cut -d/ -f3`
-        ip=`curl -s https://hijk.art/hostip.php?d=${host} | grep -oE "[1-9][0-9.]+[0-9]"`
-        if [ "$ip" != "" ]; then
-            echo "${ip}  ${host}" >> /etc/hosts
-            break
-        fi
-    done
+    echo ""
+    colorEcho $BLUE " 请选择伪装站类型:" 
+    echo "   1) 静态网站(位于/usr/share/nginx/html)"
+    echo "   2) 小说站(随机选择)"
+    echo "   3) 美女站(https://imeizi.me)"
+    echo "   4) VPS优惠博客(https://vpsgongyi.com)"
+    echo "   5) 自定义反代站点(需以http或者https开头)"
+    read -p "  请选择伪装网站类型[默认:美女站]" answer
+    if [[ -z "$answer" ]]; then
+        PROXY_URL="https://imeizi.me"
+    else
+        case $answer in
+        1)
+            PROXY_URL=""
+            ;;
+        2)
+            len=${#sites[@]}
+            ((len--))
+            while true
+            do
+                index=`shuf -i0-${len} -n1`
+                PROXY_URL=${sites[$index]}
+            done
+            ;;
+        3)
+            PROXY_URL="https://imeizi.me"
+            ;;
+        4)
+            PROXY_URL="https://vpsgongyi.com"
+            ;;
+        5)
+            read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
+            if [[ -z "$PROXY_URL" ]]; then
+                colorEcho $RED " 请输入反代网站！"
+                exit 1
+            elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+                colorEcho $RED " 反代网站必须以http或https开头！"
+                exit 1
+            fi
+            ;;
+        *)
+            colorEcho $RED " 请输入正确的选项！"
+            exit 1
+        esac
+    fi
 }
 
 function preinstall()
 {
-    sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
-    systemctl restart sshd
     ret=`nginx -t`
     if [ "$?" != "0" ]; then
-        echo "更新系统..."
+        echo " 更新系统..."
         yum update -y
     fi
-    echo "安装必要软件"
+    echo " 安装必要软件"
     yum install -y epel-release telnet wget vim net-tools ntpdate unzip
     res=`which wget`
     [ "$?" != "0" ] && yum install -y wget
@@ -150,20 +211,68 @@ function preinstall()
     fi
 }
 
+getCert() {
+    if [[ -z ${CERT_FILE+x} ]]; then
+        systemctl stop nginx
+        systemctl stop v2ray
+        res=`netstat -ntlp| grep -E ':80|:443'`
+        if [[ "${res}" != "" ]]; then
+            colorEcho ${RED}  " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
+            echo " 端口占用信息如下："
+            echo ${res}
+            exit 1
+        fi
+
+        res=`which pip3`
+        if [[ "$?" != "0" ]]; then
+            yum install -y python3 python3-pip
+        fi
+        res=`which pip3`
+        if [[ "$?" != "0" ]]; then
+            colorEcho ${RED}  " pip3安装失败，请到 https://hijk.art 反馈"
+            exit 1
+        fi
+        pip3 install --upgrade pip
+        pip3 install wheel
+        res=`pip3 list | grep crypto | awk '{print $2}'`
+        if [[ "$res" < "2.8" ]]; then
+            pip3 uninstall -y cryptography
+            pip3 install cryptography
+        fi
+        pip3 install certbot
+        res=`which certbot`
+        if [[ "$?" != "0" ]]; then
+            export PATH=$PATH:/usr/local/bin
+        fi
+        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
+        if [[ "$?" != "0" ]]; then
+            colorEcho ${RED}  " 获取证书失败，请到 https://hijk.art 反馈"
+            exit 1
+        fi
+
+        CERT_FILE="/etc/letsencrypt/live/${domain}/fullchain.pem"
+        KEY_FILE="/etc/letsencrypt/live/${domain}/privkey.pem"
+    else
+        mkdir -p /etc/v2ray
+        cp ~/v2ray.pem /etc/v2ray/${domain}.pem
+        cp ~/v2ray.key /etc/v2ray/${domain}.key
+    fi
+}
+
 function installV2ray()
 {
     echo 安装v2ray...
     bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
 
     if [ ! -f /etc/v2ray/config.json ]; then
-        echo "安装失败，请到 https://hijk.art 网站反馈"
+        echo " 安装失败，请到 https://hijk.art 网站反馈"
         exit 1
     fi
 
-    logsetting=`cat /etc/v2ray/config.json|grep loglevel`
-    if [ "${logsetting}" = "" ]; then
-        sed -i '1a\  "log": {\n    "loglevel": "info",\n    "access": "/var/log/v2ray/access.log",\n    "error": "/var/log/v2ray/error.log"\n  },' /etc/v2ray/config.json
-    fi
+    #logsetting=`cat /etc/v2ray/config.json|grep loglevel`
+    #if [ "${logsetting}" = "" ]; then
+    #    sed -i '1a\  "log": {\n    "loglevel": "info",\n    "access": "/var/log/v2ray/access.log",\n    "error": "/var/log/v2ray/error.log"\n  },' /etc/v2ray/config.json
+    #fi
     alterid=0
     sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" /etc/v2ray/config.json
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
@@ -179,7 +288,7 @@ function installV2ray()
     else
         sed -i -e "s/path\":.*/path\": \"\\${path}\",/" /etc/v2ray/config.json
     fi
-    echo "0 3 */3 * * root echo '' > /var/log/v2ray/access.log; echo ''>/var/log/v2ray/error.log" >> /etc/crontab
+
     if [ -d /etc/systemd/system/v2ray.service.d ]; then
         rm -rf /etc/systemd/system/v2ray.service.d
     fi
@@ -197,11 +306,11 @@ function installV2ray()
         sleep 3
         res=`ss -ntlp| grep ${v2port} | grep v2ray`
         if [ "${res}" = "" ]; then
-            echo "端口号：${port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
+            echo " 端口号：${port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
             exit 1
          fi
     fi
-    echo "v2ray安装成功！"
+    colorEcho $GREEN " v2ray安装成功！"
 }
 
 function installNginx()
@@ -212,7 +321,7 @@ function installNginx()
     if [ "$?" != "0" ]; then
         res=`which nginx`
         if [ "$?" != "0" ]; then
-            echo "您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
+            echo " 您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
             exit 1
         fi
         bt=true
@@ -221,33 +330,8 @@ function installNginx()
     else
         systemctl stop nginx
     fi
-    res=`netstat -ntlp| grep -E ':80 |:443 '`
-    if [ "${res}" != "" ]; then
-        echo " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
-        echo " 端口占用信息如下："
-        echo ${res}
-        exit 1
-    fi
     
-    res=`which pip3`
-    if [ "$?" != "0" ]; then
-        yum install -y python3 python3-pip
-    fi
-    res=`which pip3`
-    if [ "$?" != "0" ]; then
-        echo -e " pip3安装失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
-        exit 1
-    fi
-    pip3 install certbot
-    res=`which certbot`
-    if [ "$?" != "0" ]; then
-        export PATH=$PATH:/usr/local/bin
-    fi
-    certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
-    if [ "$?" != "0" ]; then
-        echo -e " 获取证书失败，请到 ${red}https://www.hijk.pw${plain} 反馈"
-        exit 1
-    fi
+    getCert
 
     if [ "$bt" = "false" ]; then
         if [ ! -f /etc/nginx/nginx.conf.bak ]; then
@@ -295,7 +379,19 @@ EOF
     
     mkdir -p /usr/share/nginx/html;
     echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
-    echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt 
+    echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+    if [[ "$PROXY_URL" = "" ]]; then
+        action=""
+    else
+        if [[ "${PROXY_URL:0:5}" == "https" ]]; then
+        action=<<EOF
+        proxy_ssl_server_name on;
+        proxy_pass $PROXY_URL;
+EOF
+        else
+            action="proxy_pass $PROXY_URL;"
+        fi
+    fi
     cat > ${confpath}${domain}.conf<<-EOF
 server {
     listen 80;
@@ -316,15 +412,15 @@ server {
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
     ssl_session_tickets off;
-    ssl_certificate /etc/letsencrypt/live/${domain}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${domain}/privkey.pem;
+    ssl_certificate $CERT_FILE;
+    ssl_certificate_key $KEY_FILE;
     
     # placeholder
     # placeholder
 
     root /usr/share/nginx/html;
     location / {
-        proxy_pass $site;
+        $action
     }
     location = /robots.txt {
     }
@@ -355,11 +451,12 @@ EOF
     else
         nginx -c /www/server/nginx/conf/nginx.conf
     fi
+    systemctl start v2ray
     
     sleep 3
     res=`netstat -nltp | grep ${port} | grep nginx`
     if [ "${res}" = "" ]; then
-        echo -e "nginx启动失败！ 请到 ${red}https://www.hijk.pw${plain} 反馈"
+        echo -e " nginx启动失败！ 请到 ${red}https://www.hijk.pw${plain} 反馈"
         exit 1
     fi
 }
@@ -383,7 +480,7 @@ function installBBR()
     fi
     result=$(lsmod | grep bbr)
     if [ "$result" != "" ]; then
-        echo BBR模块已安装
+        colorEcho $YELLOW BBR模块已安装
         bbr=true
         echo "3" > /proc/sys/net/ipv4/tcp_fastopen
         echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
@@ -391,7 +488,7 @@ function installBBR()
     fi
     res=`hostnamectl | grep -i openvz`
     if [ "$res" != "" ]; then
-        echo openvz机器，跳过安装
+        colorEcho $YELLOW openvz机器，跳过安装
         bbr=true
         return
     fi
@@ -405,7 +502,7 @@ function installBBR()
         return
     fi
 
-    echo 安装BBR模块...
+    colorEcho $BLUE 安装BBR模块...
     rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
     rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
     yum --enablerepo=elrepo-kernel install kernel-ml -y
@@ -421,7 +518,7 @@ function installBBR()
 function info()
 {
     if [ ! -f /etc/v2ray/config.json ]; then
-        echo -e "${red}未安装v2ray!${plain}"
+        echo -e " ${red}未安装v2ray!${plain}"
         exit 1
     fi
     
@@ -434,7 +531,7 @@ function info()
     network=`cat /etc/v2ray/config.json | grep network | cut -d: -f2 | tr -d \",' '`
     domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
     if [ -z "$domain" ]; then
-        echo "不是伪装版本的v2ray"
+        colorEcho $RED " 不是伪装版本的v2ray"
         exit 1
     fi
     path=`cat /etc/v2ray/config.json | grep path | cut -d: -f2 | tr -d \",' '`
@@ -471,27 +568,27 @@ function info()
     echo -e " nginx运行状态：${ngstatus}"
     echo -e " nginx配置文件：${red}${confpath}${domain}.conf${plain}"
     echo ""
-    echo -e "${red}v2ray配置信息：${plain}               "
-    echo -e " IP(address):  ${red}${ip}${plain}"
-    echo -e " 端口(port)：${red}${port}${plain}"
-    echo -e " id(uuid)：${red}${uid}${plain}"
-    echo -e " 额外id(alterid)： ${red}${alterid}${plain}"
-    echo -e " 加密方式(security)： ${red}$security${plain}"
-    echo -e " 传输协议(network)： ${red}${network}${plain}" 
-    echo -e " 主机名(host)：${red}${domain}${plain}"
-    echo -e " 路径(path)：${red}${path}${plain}"
-    echo -e " 安全传输(security)：${red}TLS${plain}"
+    echo -e " ${red}v2ray配置信息：${plain}               "
+    echo -e "   IP(address):  ${red}${ip}${plain}"
+    echo -e "   端口(port)：${red}${port}${plain}"
+    echo -e "   id(uuid)：${red}${uid}${plain}"
+    echo -e "   额外id(alterid)： ${red}${alterid}${plain}"
+    echo -e "   加密方式(security)： ${red}$security${plain}"
+    echo -e "   传输协议(network)： ${red}${network}${plain}" 
+    echo -e "   主机名(host)：${red}${domain}${plain}"
+    echo -e "   路径(path)：${red}${path}${plain}"
+    echo -e "   安全传输(security)：${red}TLS${plain}"
     echo  
-    echo "vmess链接: $link"
+    echo " vmess链接: $link"
 }
 
 function bbrReboot()
 {
     if [ "${bbr}" == "false" ]; then
         echo  
-        echo  为使BBR模块生效，系统将在30秒后重启
+        colorEcho $BLUE  为使BBR模块生效，系统将在30秒后重启
         echo  
-        echo -e "您可以按 ctrl + c 取消重启，稍后输入 ${red}reboot${plain} 重启系统"
+        echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${red}reboot${plain} 重启系统"
         sleep 30
         reboot
     fi
@@ -500,7 +597,7 @@ function bbrReboot()
 
 function install()
 {
-    echo -n "系统版本:  "
+    echo -n " 系统版本:  "
     cat /etc/centos-release
 
     checkSystem
@@ -517,7 +614,7 @@ function install()
 
 function uninstall()
 {
-    read -p "您确定真的要卸载v2ray吗？(y/n)" answer
+    read -p " 确定卸载v2ray吗？(y/n)" answer
     [ -z ${answer} ] && answer="n"
 
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
@@ -540,6 +637,8 @@ function uninstall()
     fi
 }
 
+slogon
+
 action=$1
 [ -z $1 ] && action=install
 case "$action" in
@@ -547,8 +646,8 @@ case "$action" in
         ${action}
         ;;
     *)
-        echo "参数错误"
-        echo "用法: `basename $0` [install|uninstall|info]"
+        echo " 参数错误"
+        echo " 用法: `basename $0` [install|uninstall|info]"
         ;;
 esac
 

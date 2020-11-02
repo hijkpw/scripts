@@ -304,20 +304,50 @@ getData() {
     [[ -z "$NEED_BBR" ]] && NEED_BBR=y
     [[ "$NEED_BBR" = "Y" ]] && NEED_BBR=y
     
-    len=${#SITES[@]}
-    ((len--))
-    while true
-    do
-        index=`shuf -i0-${len} -n1`
-        SITE=${SITES[$index]}
-        host=`echo ${SITE} | cut -d/ -f3`
-        ip=`curl -s https://hijk.art/hostip.php?d=${host} | grep -oE "[1-9][0-9.]+[0-9]"`
-        if [ "$ip" != "" ]; then
-            REMOTE_IP=$ip
-            echo "$ip $host" >> /etc/hosts
-            break
-        fi
-    done
+    colorEcho $BLUE " 请选择伪装站类型:" 
+    echo "   1) 静态网站(位于/usr/share/nginx/html)"
+    echo "   2) 小说站(随机选择)"
+    echo "   3) 美女站(https://imeizi.me)"
+    echo "   4) VPS优惠博客(https://vpsgongyi.com)"
+    echo "   5) 自定义反代站点(需以http或者https开头)"
+    read -p "  请选择伪装网站类型[默认:美女站]" answer
+    if [[ -z "$answer" ]]; then
+        PROXY_URL="https://imeizi.me"
+    else
+        case $answer in
+        1)
+            PROXY_URL=""
+            ;;
+        2)
+            len=${#SITES[@]}
+            ((len--))
+            while true
+            do
+                index=`shuf -i0-${len} -n1`
+                PROXY_URL=${SITES[$index]}
+            done
+            ;;
+        3)
+            PROXY_URL="https://imeizi.me"
+            ;;
+        4)
+            PROXY_URL="https://vpsgongyi.com"
+            ;;
+        5)
+            read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
+            if [[ -z "$PROXY_URL" ]]; then
+                colorEcho $RED " 请输入反代网站！"
+                exit 1
+            elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+                colorEcho $RED " 反代网站必须以http或https开头！"
+                exit 1
+            fi
+            ;;
+        *)
+            colorEcho $RED " 请输入正确的选项！"
+            exit 1
+        esac
+    fi
 }
 
 installNginx() {
@@ -427,6 +457,19 @@ http {
 }
 EOF
 
+    if [[ "$PROXY_URL" = "" ]]; then
+        action=""
+    else
+        if [[ "${PROXY_URL:0:5}" == "https" ]]; then
+        action=<<EOF
+        proxy_ssl_server_name on;
+        proxy_pass $PROXY_URL;
+EOF
+        else
+            action="proxy_pass $PROXY_URL;"
+        fi
+    fi
+
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
         mkdir -p /etc/nginx/conf.d;
         # VMESS+WS+TLS
@@ -457,7 +500,7 @@ server {
 
     root /usr/share/nginx/html;
     location / {
-        proxy_pass $SITE;
+        $action
     }
     location = /robots.txt {
     }
@@ -484,7 +527,7 @@ server {
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
-        proxy_pass $SITE;
+        $action
     }
     location = /robots.txt {
     }

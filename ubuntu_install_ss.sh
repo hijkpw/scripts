@@ -2,13 +2,6 @@
 # shadowsocks/ss Ubuntu一键安装脚本
 # Author: hijk<https://hijk.art>
 
-echo "#############################################################"
-echo "#         Ubuntu TLS Shadowsocks/SS  一键安装脚本            #"
-echo "# 网址: https://hijk.art                                  #"
-echo "# 作者: hijk                                                #"
-echo "#############################################################"
-echo ""
-
 red='\033[0;31m'
 green="\033[0;32m"
 plain='\033[0m'
@@ -37,6 +30,29 @@ function checkSystem()
             exit 1
         fi
      fi
+}
+
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
+PLAIN='\033[0m'
+
+colorEcho() {
+    echo -e "${1}${@:2}${PLAIN}"
+}
+
+slogon() {
+    clear
+    echo "#############################################################"
+    colorEcho $RED "#         Ubuntu TLS Shadowsocks/SS  一键安装脚本            #"
+    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
+    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+    echo "#############################################################"
+    echo ""
 }
 
 function getData()
@@ -344,6 +360,8 @@ function uninstall()
         echo "SS卸载完成"
     fi
 }
+
+slogon
 
 action=$1
 [ -z $1 ] && action=install

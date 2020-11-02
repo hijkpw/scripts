@@ -2,13 +2,6 @@
 # trojan一键安装脚本
 # Author: hijk<https://hijk.art>
 
-echo "#############################################################"
-echo "#                      trojan一键安装脚本                    #"
-echo "# 网址: https://hijk.art                                  #"
-echo "# 作者: hijk                                                #"
-echo "#############################################################"
-echo ""
-
 red='\033[0;31m'
 green="\033[0;32m"
 plain='\033[0m'
@@ -55,6 +48,29 @@ function checkSystem()
     fi
 }
 
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
+PLAIN='\033[0m'
+
+colorEcho() {
+    echo -e "${1}${@:2}${PLAIN}"
+}
+
+slogon() {
+    clear
+    echo "#############################################################"
+    colorEcho $RED "#                      trojan一键安装脚本                    #"
+    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
+    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+    echo "#############################################################"
+    echo ""
+}
+
 function getData()
 {
     IP=`curl -s -4 icanhazip.com`
@@ -62,42 +78,57 @@ function getData()
     echo " 本脚本为trojan一键脚本，运行之前请确认如下条件已经具备："
     echo -e "  ${red}1. 一个域名${plain}"
     echo -e "  ${red}2. 域名的某个主机名解析指向当前服务器ip（${IP}）${plain}"
+    echo -e "  3. 如果/root目录下有 ${GREEN}trojan.pem${PLAIN} 和 ${GREEN}trojan.key${PLAIN} 证书密钥文件，无需理会条件2"
     echo " "
-    read -p "确认满足按y，按其他退出脚本：" answer
+    read -p " 确认满足按y，按其他退出脚本：" answer
     if [ "${answer}" != "y" ] && [ "${answer}" != "Y" ]; then
         exit 0
     fi
+    echo ""
 
     while true
     do
-        read -p "请输入您的主机名：" domain
+        read -p " 请输入您的主机名：" domain
         if [ -z "${domain}" ]; then
-            echo "主机名输入错误，请重新输入！"
+            echo " 主机名输入错误，请重新输入！"
         else
             break
         fi
     done
-    
     domain=${domain,,}
-    resolve=`curl -s https://hijk.art/hostip.php?d=${domain}`
-    res=`echo -n ${resolve} | grep ${IP}`
-    if [ -z "${res}" ]; then
-        echo "${domain} 解析结果：${resolve}"
-        echo -e "${red}主机未解析到当前服务器IP(${IP})!${plain}"
-        exit 1
+    colorEcho $BLUE " 主机名(host)： $domain"
+    echo ""
+
+    if [[ -f ~/trojan.pem && -f ~/trojan.key ]]; then
+        echo -e "${GREEN} 检测到自有证书，将使用其部署${PLAIN}"
+        echo 
+        CERT_FILE="/usr/local/etc/trojan/${domain}.pem"
+        KEY_FILE="/usr/local/etc/trojan/${domain}.key"
+    else
+        resolve=`curl -s https://hijk.art/hostip.php?d=${domain}`
+        res=`echo -n ${resolve} | grep ${IP}`
+        if [[ -z "${res}" ]]; then
+            echo " ${domain} 解析结果：${resolve}"
+            echo -e " ${RED}主机未解析到当前服务器IP(${IP})!${PLAIN}"
+            exit 1
+        fi
     fi
 
-    read -p "请设置trojan密码（不输入则随机生成）:" password
+    read -p " 请设置trojan密码（不输入则随机生成）:" password
     [ -z "$password" ] && password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+    colorEcho $BLUE " 密码： " $password
+    echo ""
     
-    read -p "请输入trojan端口[100-65535的一个数字，默认443]：" port
+    read -p " 请输入trojan端口[100-65535的一个数字，默认443]：" port
     [ -z "${port}" ] && port=443
     if [ "${port:0:1}" = "0" ]; then
-        echo -e "${red}端口不能以0开头${plain}"
+        echo -e " ${red}端口不能以0开头${plain}"
         exit 1
     fi
+    colorEcho $BLUE " trojan端口： " $port
+    echo ""
 
-    read -p "是否安装BBR（安装请按y，不安装请输n，不输则默认安装）:" needBBR
+    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" needBBR
     [ -z "$needBBR" ] && needBBR=y
     [ "$needBBR" = "Y" ] && needBBR=y
     
@@ -147,11 +178,13 @@ function preinstall()
 function installTrojan()
 {
     echo 安装trojan...
+    CONFIG_FILE=/usr/local/etc/trojan/config.json
+    rm -rf $CONFIG_FILE
+    rm -rf /etc/systemd/system/trojan.service
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/trojan-gfw/trojan-quickstart/master/trojan-quickstart.sh)"
 
-    CONFIG_FILE=/usr/local/etc/trojan/config.json
     if [ ! -f $CONFIG_FILE ]; then
-        echo "安装失败，请到 https://hijk.art 反馈"
+        echo " 安装失败，请到 https://hijk.art 反馈"
         exit 1
     fi
 
@@ -174,10 +207,60 @@ function installTrojan()
     sleep 3
     res=`netstat -nltp | grep ${port} | grep trojan`
     if [ "${res}" = "" ]; then
-        echo "trojan启动失败，请检查端口是否被占用！"
+        echo " trojan启动失败，请检查端口是否被占用！"
         exit 1
     fi
-    echo "trojan安装成功！"
+    echo " trojan安装成功！"
+}
+
+getCert()
+{
+    if [[ -z ${CERT_FILE+x} ]]; then
+        systemctl stop nginx
+        res=`netstat -ntlp| grep -E ':80|:443'`
+        if [[ "${res}" != "" ]]; then
+            echo " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
+            echo " 端口占用信息如下："
+            echo ${res}
+            exit 1
+        fi
+        res=`which pip3`
+        if [[ "$?" != "0" ]]; then
+            $CMD_INSTALL python3 python3-pip
+        fi
+        res=`which pip3`
+        if [[ "$?" != "0" ]]; then
+            echo -e " pip3安装失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
+            exit 1
+        fi
+        pip3 install --upgrade pip
+        pip3 install wheel
+        res=`pip3 list | grep crypto | awk '{print $2}'`
+        if [[ "$res" < "2.8" ]]; then
+            pip3 uninstall -y cryptography
+            cd /usr/lib/python3/dist-packages
+            rm -r cryptoggraphy cryptography-2.1.4.egg-info
+            pip3 install cryptography
+            cd -
+        fi
+        pip3 install certbot
+        res=`which certbot`
+        if [[ "$?" != "0" ]]; then
+            export PATH=$PATH:/usr/local/bin
+        fi
+        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
+        if [[ "$?" != "0" ]]; then
+            echo -e " 获取证书失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
+            exit 1
+        fi
+
+        CERT_FILE="/etc/letsencrypt/archive/${domain}/fullchain1.pem"
+        KEY_FILE="/etc/letsencrypt/archive/${domain}/privkey1.pem"
+    else
+        mkdir -p /usr/local/etc/trojan
+        cp ~/trojan.pem /usr/local/etc/trojan/${domain}.pem
+        cp ~/trojan.key /usr/local/etc/trojan/${domain}.key
+    fi
 }
 
 function installNginx()
@@ -187,47 +270,8 @@ function installNginx()
     else
         apt install -y nginx
     fi
-    systemctl stop nginx
-    res=`netstat -ntlp| grep -E ':80|:443'`
-    if [ "${res}" != "" ]; then
-        echo " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
-        echo " 端口占用信息如下："
-        echo ${res}
-        exit 1
-    fi
-    res=`which pip3`
-    if [ "$?" != "0" ]; then
-        if [ "$pm" = "yum" ]; then
-            yum install -y python3 python3-pip
-        else
-            apt install -y python3-pip python3-setuptools python3-dev
-        fi
-    fi
-    res=`which pip3`
-    if [ "$?" != "0" ]; then
-        echo -e " pip3安装失败，请到 ${red}https://hijk.art${plain} 反馈"
-        exit 1
-    fi
-    pip3 install --upgrade pip
-    pip3 install wheel
-    res=`pip3 list | grep crypto | awk '{print $2}'`
-    if [[ "$res" < "2.8" ]]; then
-        pip3 uninstall -y cryptography
-        cd /usr/lib/python3/dist-packages
-        rm -r cryptoggraphy cryptography-2.1.4.egg-info
-        pip3 install cryptography
-        cd -
-    fi
-    pip3 install certbot
-    res=`which certbot`
-    if [ "$?" != "0" ]; then
-        export PATH=$PATH:/usr/local/bin
-    fi
-    certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
-    if [ "$?" != "0" ]; then
-        echo -e " 获取证书失败，请到 ${red}https://hijk.art${plain} 反馈"
-        exit 1
-    fi
+    
+    getCert
 
     if [ ! -f /etc/nginx/nginx.conf.bak ]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
@@ -326,7 +370,7 @@ function installBBR()
     fi
     res=`hostnamectl | grep -i openvz`
     if [ "$res" != "" ]; then
-        echo "openvz机器，跳过安装"
+        echo " openvz机器，跳过安装"
         bbr=true
         return
     fi
@@ -391,7 +435,7 @@ function bbrReboot()
         echo  
         echo  为使BBR模块生效，系统将在30秒后重启
         echo  
-        echo -e "您可以按 ctrl + c 取消重启，稍后输入 ${red}reboot${plain} 重启系统"
+        echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${red}reboot${plain} 重启系统"
         sleep 30
         reboot
     fi
@@ -409,7 +453,6 @@ function install()
     installBBR
     setFirewall
     installNginx
-    removeTrojan
     installTrojan
     
     info
@@ -420,7 +463,7 @@ function removeTrojan()
 {
     rm -rf /usr/local/bin/trojan
     rm -rf /usr/local/etc/trojan
-    rm -rf /usr/share/nginx/html/trojan
+    rm -rf /usr/share/nginx/html
     rm -rf /etc/systemd/system/trojan.service
 }
 
@@ -450,6 +493,8 @@ function uninstall()
     fi
 }
 
+slogon
+
 action=$1
 [ -z $1 ] && action=install
 case "$action" in
@@ -457,8 +502,8 @@ case "$action" in
         ${action}
         ;;
     *)
-        echo "参数错误"
-        echo "用法: `basename $0` [install|uninstall|info]"
+        echo " 参数错误"
+        echo " 用法: `basename $0` [install|uninstall|info]"
         ;;
 esac
 

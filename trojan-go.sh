@@ -174,6 +174,8 @@ getData()
                 break
             fi
         done
+        echo -e " 主机名(host)：${RED}$DOMAIN${PLAIN}"
+        echo ""
         
         DOMAIN=${DOMAIN,,}
         if [[ -f ~/trojan-go.pem && -f ~/trojan-go.key ]]; then
