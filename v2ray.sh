@@ -461,10 +461,8 @@ EOF
         action=""
     else
         if [[ "${PROXY_URL:0:5}" == "https" ]]; then
-        action=<<EOF
-        proxy_ssl_server_name on;
-        proxy_pass $PROXY_URL;
-EOF
+        action="proxy_ssl_server_name on;
+        proxy_pass $PROXY_URL;"
         else
             action="proxy_pass $PROXY_URL;"
         fi

@@ -76,7 +76,7 @@ slogon() {
 
 function getData()
 {
-    IP=`curl -s -4 icanhazip.com`
+    IP=`curl -s -4 ip.sb`
     echo " "
     echo " 本脚本为带伪装的一键脚本，运行之前请确认如下条件已经具备："
     colorEcho ${YELLOW} "  2. 域名的某个主机名解析指向当前服务器ip（${IP}）"
@@ -318,10 +318,8 @@ function installNginx()
         action=""
     else
         if [[ "${PROXY_URL:0:5}" == "https" ]]; then
-        action=<<EOF
-        proxy_ssl_server_name on;
-        proxy_pass $PROXY_URL;
-EOF
+        action="proxy_ssl_server_name on;
+        proxy_pass $PROXY_URL;"
         else
             action="proxy_pass $PROXY_URL;"
         fi
@@ -472,7 +470,7 @@ function info()
         exit 1
     fi
     
-    ip=`curl -s -4 icanhazip.com`
+    ip=`curl -s -4 ip.sb`
     res=`netstat -nltp | grep v2ray`
     [ -z "$res" ] && v2status="${red}已停止${plain}" || v2status="${green}正在运行${plain}"
     
