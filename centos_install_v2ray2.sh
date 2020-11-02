@@ -540,7 +540,7 @@ function info()
         confpath="/www/server/panel/vhost/nginx/"
     fi
     port=`cat ${confpath}${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
-    security="auto"
+    security="none"
     
     res=`netstat -nltp | grep ${port} | grep nginx`
     [ -z "$res" ] && ngstatus="${red}已停止${plain}" || ngstatus="${green}正在运行${plain}"
@@ -575,9 +575,10 @@ function info()
     echo -e "   额外id(alterid)： ${red}${alterid}${plain}"
     echo -e "   加密方式(security)： ${red}$security${plain}"
     echo -e "   传输协议(network)： ${red}${network}${plain}" 
-    echo -e "   主机名(host)：${red}${domain}${plain}"
+    echo -e "   伪装类型(type)：${red}none${plain}"
+    echo -e "   伪装域名(host)：${red}${domain}${plain}"
     echo -e "   路径(path)：${red}${path}${plain}"
-    echo -e "   安全传输(security)：${red}TLS${plain}"
+    echo -e "   底层安全传输(tls)：${red}TLS${plain}"
     echo  
     echo " vmess链接: $link"
 }

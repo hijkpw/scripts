@@ -1138,7 +1138,6 @@ showInfo() {
     alterid=`grep alterId $CONFIG_FILE  | cut -d: -f2 | tr -d \",' '`
     network=`grep network $CONFIG_FILE  | tail -n1| cut -d: -f2 | tr -d \",' '`
     [[ -z "$network" ]] && network="tcp"
-    security="auto"
     domain=`grep serverName $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     if [[ "$domain" = "" ]]; then
         domain=`grep Host $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
@@ -1200,7 +1199,7 @@ showInfo() {
             echo -e " 端口(port)：${RED}${port}${PLAIN}"
             echo -e " id(uuid)：${RED}${uid}${PLAIN}"
             echo -e " 额外id(alterid)： ${RED}${alterid}${PLAIN}"
-            echo -e " 加密方式(security)： ${RED}$security${PLAIN}"
+            echo -e " 加密方式(security)： ${RED}auto${PLAIN}"
             echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
             echo  
             echo "vmess链接: $RED$link$PLAIN"
@@ -1224,7 +1223,7 @@ showInfo() {
             echo -e " 端口(port)：${RED}${port}${PLAIN}"
             echo -e " id(uuid)：${RED}${uid}${PLAIN}"
             echo -e " 额外id(alterid)： ${RED}${alterid}${PLAIN}"
-            echo -e " 加密方式(security)： ${RED}$security${PLAIN}"
+            echo -e " 加密方式(security)： ${RED}none${PLAIN}"
             echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
             echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
             echo -e " 底层安全传输(tls)：${RED}TLS${PLAIN}"
@@ -1251,8 +1250,9 @@ showInfo() {
             echo -e " 端口(port)：${RED}${port}${PLAIN}"
             echo -e " id(uuid)：${RED}${uid}${PLAIN}"
             echo -e " 额外id(alterid)： ${RED}${alterid}${PLAIN}"
-            echo -e " 加密方式(security)： ${RED}$security${PLAIN}"
+            echo -e " 加密方式(security)： ${RED}none${PLAIN}"
             echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
+            echo -e " 伪装类型(type)：${RED}none{$PLAIN}"
             echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
             echo -e " 路径(path)：${RED}${wspath}${PLAIN}"
             echo -e " 底层安全传输(tls)：${RED}TLS${PLAIN}"
@@ -1268,6 +1268,7 @@ showInfo() {
             echo -e " 流控(flow)：$RED$flow${PLAIN}"
             echo -e " 加密(encryption)： ${RED}none${PLAIN}"
             echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
+            echo -e " 伪装类型(type)：${RED}none{$PLAIN}"
             echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
             echo -e " 底层安全传输(tls)：${RED}XTLS${PLAIN}"
             echo  
@@ -1278,6 +1279,7 @@ showInfo() {
             echo -e " 流控(flow)：$RED$flow${PLAIN}"
             echo -e " 加密(encryption)： ${RED}none${PLAIN}"
             echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
+            echo -e " 伪装类型(type)：${RED}none{$PLAIN}"
             echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
             echo -e " 底层安全传输(tls)：${RED}TLS${PLAIN}"
             echo  
@@ -1288,6 +1290,7 @@ showInfo() {
             echo -e " 流控(flow)：$RED$flow${PLAIN}"
             echo -e " 加密(encryption)： ${RED}none${PLAIN}"
             echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
+            echo -e " 伪装类型(type)：${RED}none{$PLAIN}"
             echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
             echo -e " 路径(path)：${RED}${wspath}${PLAIN}"
             echo -e " 底层安全传输(tls)：${RED}TLS${PLAIN}"
