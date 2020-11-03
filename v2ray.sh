@@ -240,6 +240,7 @@ getData() {
         done
         DOMAIN=${DOMAIN,,}
         colorEcho ${BLUE}  " 主机名(host)：$DOMAIN"
+        echo ""
 
         if [[ -f ~/v2ray.pem && -f ~/v2ray.key ]]; then
             colorEcho ${BLUE}  " 检测到自有证书，将使用其部署"
@@ -270,6 +271,7 @@ getData() {
             fi
         fi
         colorEcho ${BLUE}  " v2ray端口：$PORT"
+        echo ""
         echo
     else
         read -p "请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
@@ -279,6 +281,7 @@ getData() {
             exit 1
         fi
         colorEcho ${BLUE}  " Nginx端口：$PORT"
+        echo ""
         V2PORT=`shuf -i10000-65000 -n1`
     fi
 
@@ -297,6 +300,7 @@ getData() {
             fi
         done
         colorEcho ${BLUE}  " ws路径：$WSPATH"
+        echo ""
         echo 
     fi
 
@@ -1168,7 +1172,7 @@ showInfo() {
     fi
     
     echo 
-    colorEcho $BLUE "  V2ray配置信息："
+    colorEcho $BLUE " V2ray配置信息："
     echo -n " 运行状态："
     statusText
     echo
@@ -1266,7 +1270,7 @@ showInfo() {
             echo -e " 流控(flow)：$RED$flow${PLAIN}"
             echo -e " 加密(encryption)： ${RED}none${PLAIN}"
             echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
-            echo -e " 伪装类型(type)：${RED}none{$PLAIN}"
+            echo -e " 伪装类型(type)：${RED}none$PLAIN"
             echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
             echo -e " 底层安全传输(tls)：${RED}XTLS${PLAIN}"
             echo  
