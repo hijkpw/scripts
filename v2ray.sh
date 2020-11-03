@@ -1204,7 +1204,7 @@ showInfo() {
             echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}auto${PLAIN}"
             echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
             echo  
-            echo " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
+            echo -e " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
         elif [[ "$ws" = "false" ]]; then
             raw="{
   \"v\":\"2\",
@@ -1230,7 +1230,7 @@ showInfo() {
             echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
             echo  
-            echo " ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
+            echo -e " ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
         else
             raw="{
   \"v\":\"2\",
@@ -1259,7 +1259,7 @@ showInfo() {
             echo -e " ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
             echo  
-            echo " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
+            echo -e " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
         fi
     else
         echo -e " ${BLUE}协议: ${PLAIN} ${RED}VLESS${PLAIN}"

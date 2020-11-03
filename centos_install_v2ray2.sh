@@ -575,7 +575,7 @@ function info()
     echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${path}${PLAIN}"
     echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
     echo  
-    echo " ${BLUE}vmess链接:${PLAIN} $link"
+    echo -e " ${BLUE}vmess链接:${PLAIN} $link"
 }
 
 function bbrReboot()
