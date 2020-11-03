@@ -2,9 +2,12 @@
 # v2ray centos系统一键安装脚本
 # Author: hijk<https://hijk.art>
 
-red='\033[0;31m'
-green="\033[0;32m"
-plain='\033[0m'
+
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
+PLAIN='\033[0m'
 
 sites=(
 http://www.zhuizishu.com/
@@ -49,12 +52,6 @@ function checkSystem()
     fi
 }
 
-RED="\033[31m"      # Error message
-GREEN="\033[32m"    # Success message
-YELLOW="\033[33m"   # Warning message
-BLUE="\033[36m"     # Info message
-PLAIN='\033[0m'
-
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
@@ -62,7 +59,7 @@ colorEcho() {
 slogon() {
     clear
     echo "#############################################################"
-    colorEcho $RED "#         CentOS 7/8 v2ray 带伪装一键安装脚本                 #"
+    echo -e "#         ${RED}CentOS 7/8 v2ray 带伪装一键安装脚本${PLAIN}                 #"
     echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
     echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
     echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
@@ -77,8 +74,8 @@ function getData()
     IP=`curl -s -4 ip.sb`
     echo " "
     echo " 本脚本为带伪装的一键脚本，运行之前请确认如下条件已经具备："
-     colorEcho ${YELLOW} "  1. 一个域名"
-    colorEcho ${YELLOW} "  2. 域名的某个主机名解析指向当前服务器ip（${IP}）"
+    colorEcho ${YELLOW} "  1. 一个伪装域名"
+    colorEcho ${YELLOW} "  2. 伪装域名DNS解析指向当前服务器ip（${IP}）"
     colorEcho ${BLUE} "  3. 如果/root目录下有 v2ray.pem 和 v2ray.key 证书密钥文件，无需理会条件2"
     echo " "
     read -p " 确认满足按y，按其他退出脚本：" answer
@@ -89,60 +86,60 @@ function getData()
 
     while true
     do
-        read -p " 请输入您的主机名：" domain
-        if [ -z "${domain}" ]; then
-            echo " 主机名输入错误，请重新输入！"
+        read -p " 请输入伪装域名：" DOMAIN
+        if [ -z "${DOMAIN}" ]; then
+            echo " 域名输入错误，请重新输入！"
         else
             break
         fi
     done
-    domain=${domain,,}
-    colorEcho ${BLUE}  " 主机名(host)：$domain"
+    DOMAIN=${DOMAIN,,}
+    colorEcho ${BLUE}  " 伪装域名(host)：$DOMAIN"
     echo ""
 
     if [[ -f ~/v2ray.pem && -f ~/v2ray.key ]]; then
         colorEcho ${BLUE}  " 检测到自有证书，将使用其部署"
         echo 
-        CERT_FILE="/etc/v2ray/${domain}.pem"
-        KEY_FILE="/etc/v2ray/${domain}.key"
+        CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
+        KEY_FILE="/etc/v2ray/${DOMAIN}.key"
     else
-        resolve=`curl -s https://hijk.art/hostip.php?d=${domain}`
+        resolve=`curl -s https://hijk.art/hostip.php?d=${DOMAIN}`
         res=`echo -n ${resolve} | grep ${IP}`
         if [[ -z "${res}" ]]; then
-            colorEcho ${BLUE}  "${domain} 解析结果：${resolve}"
-            colorEcho ${RED}  " 主机未解析到当前服务器IP(${IP})!"
+            colorEcho ${BLUE}  "${DOMAIN} 解析结果：${resolve}"
+            colorEcho ${RED}  " 域名未解析到当前服务器IP(${IP})!"
             exit 1
         fi
     fi
 
     while true
     do
-        read -p " 请输入伪装路径，以/开头：" path
-        if [ -z "${path}" ]; then
+        read -p " 请输入伪装路径，以/开头：" WSPATH
+        if [ -z "${WSPATH}" ]; then
             echo " 请输入伪装路径，以/开头！"
-        elif [ "${path:0:1}" != "/" ]; then
+        elif [ "${WSPATH:0:1}" != "/" ]; then
             echo " 伪装路径必须以/开头！"
-        elif [ "${path}" = "/" ]; then
+        elif [ "${WSPATH}" = "/" ]; then
             echo  " 不能使用根路径！"
         else
             break
         fi
     done
-    colorEcho ${BLUE}  " 伪装路径：$path"
+    colorEcho ${BLUE}  " 伪装路径：$WSPATH"
     echo 
     
-    read -p " 请输入Nginx端口[100-65535的一个数字，默认443]：" port
-    [ -z "${port}" ] && port=443
-    if [ "${port:0:1}" = "0" ]; then
-        echo -e " ${red}端口不能以0开头${plain}"
+    read -p " 请输入Nginx端口[100-65535的一个数字，默认443]：" PORT
+    [ -z "${PORT}" ] && PORT=443
+    if [ "${PORT:0:1}" = "0" ]; then
+        echo -e " ${RED}端口不能以0开头${PLAIN}"
         exit 1
     fi
-    colorEcho ${BLUE}  " Nginx端口：$port"
+    colorEcho ${BLUE}  " Nginx端口：$PORT"
     echo ""
 
-    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" needBBR
-    [ -z "$needBBR" ] && needBBR=y
-    [ "$needBBR" = "Y" ] && needBBR=y
+    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" NEED_BBR
+    [ -z "$NEED_BBR" ] && NEED_BBR=y
+    [ "$NEED_BBR" = "Y" ] && NEED_BBR=y
     
     echo ""
     colorEcho $BLUE " 请选择伪装站类型:" 
@@ -244,18 +241,18 @@ getCert() {
         if [[ "$?" != "0" ]]; then
             export PATH=$PATH:/usr/local/bin
         fi
-        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
+        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
         if [[ "$?" != "0" ]]; then
             colorEcho ${RED}  " 获取证书失败，请到 https://hijk.art 反馈"
             exit 1
         fi
 
-        CERT_FILE="/etc/letsencrypt/live/${domain}/fullchain.pem"
-        KEY_FILE="/etc/letsencrypt/live/${domain}/privkey.pem"
+        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
+        KEY_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
     else
         mkdir -p /etc/v2ray
-        cp ~/v2ray.pem /etc/v2ray/${domain}.pem
-        cp ~/v2ray.key /etc/v2ray/${domain}.key
+        cp ~/v2ray.pem /etc/v2ray/${DOMAIN}.pem
+        cp ~/v2ray.key /etc/v2ray/${DOMAIN}.key
     fi
 }
 
@@ -276,7 +273,7 @@ function installV2ray()
     alterid=0
     sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" /etc/v2ray/config.json
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
-    v2port=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
+    V2PORT=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
     res=`cat /etc/v2ray/config.json | grep streamSettings`
@@ -284,9 +281,9 @@ function installV2ray()
         line=`grep -n '}]' /etc/v2ray/config.json  | head -n1 | cut -d: -f1`
         line=`expr ${line} - 1`
         sed -i "${line}s/}/},/" /etc/v2ray/config.json
-        sed -i "${line}a\    \"streamSettings\": {\n      \"network\": \"ws\",\n      \"wsSettings\": {\n        \"path\": \"${path}\",\n        \"headers\": {\n          \"Host\": \"${domain}\"\n        }\n      }\n    },\n    \"listen\": \"127.0.0.1\"" /etc/v2ray/config.json
+        sed -i "${line}a\    \"streamSettings\": {\n      \"network\": \"ws\",\n      \"wsSettings\": {\n        \"path\": \"${WSPATH}\",\n        \"headers\": {\n          \"Host\": \"${DOMAIN}\"\n        }\n      }\n    },\n    \"listen\": \"127.0.0.1\"" /etc/v2ray/config.json
     else
-        sed -i -e "s/path\":.*/path\": \"\\${path}\",/" /etc/v2ray/config.json
+        sed -i -e "s/path\":.*/path\": \"\\${WSPATH}\",/" /etc/v2ray/config.json
     fi
 
     if [ -d /etc/systemd/system/v2ray.service.d ]; then
@@ -295,7 +292,7 @@ function installV2ray()
     systemctl enable v2ray
     systemctl restart v2ray
     sleep 3
-    res=`ss -ntlp| grep ${v2port} | grep v2ray`
+    res=`ss -ntlp| grep ${V2PORT} | grep v2ray`
     if [ "${res}" = "" ]; then
         sed -i '/Capabili/d' /etc/systemd/system/v2ray.service
         sed -i '/AmbientCapabilities/d' /etc/systemd/system/v2ray.service
@@ -304,9 +301,9 @@ function installV2ray()
         systemctl daemon-reload
         systemctl restart v2ray
         sleep 3
-        res=`ss -ntlp| grep ${v2port} | grep v2ray`
+        res=`ss -ntlp| grep ${V2PORT} | grep v2ray`
         if [ "${res}" = "" ]; then
-            echo " 端口号：${port}，伪装路径：${path}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
+            echo " 端口号：${PORT}，伪装路径：${WSPATH}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
             exit 1
          fi
     fi
@@ -390,16 +387,16 @@ EOF
             action="proxy_pass $PROXY_URL;"
         fi
     fi
-    cat > ${confpath}${domain}.conf<<-EOF
+    cat > ${confpath}${DOMAIN}.conf<<-EOF
 server {
     listen 80;
-    server_name ${domain};
-    return 301 https://\$server_name:${port}\$request_uri;
+    server_name ${DOMAIN};
+    return 301 https://\$server_name:${PORT}\$request_uri;
 }
 
 server {
-    listen       ${port} ssl http2;
-    server_name ${domain};
+    listen       ${PORT} ssl http2;
+    server_name ${DOMAIN};
     charset utf-8;
 
     # ssl配置
@@ -423,9 +420,9 @@ server {
     location = /robots.txt {
     }
 
-    location ${path} {
+    location ${WSPATH} {
       proxy_redirect off;
-      proxy_pass http://127.0.0.1:${v2port};
+      proxy_pass http://127.0.0.1:${V2PORT};
       proxy_http_version 1.1;
       proxy_set_header Upgrade \$http_upgrade;
       proxy_set_header Connection "upgrade";
@@ -452,9 +449,9 @@ EOF
     systemctl start v2ray
     
     sleep 3
-    res=`netstat -nltp | grep ${port} | grep nginx`
+    res=`netstat -nltp | grep ${PORT} | grep nginx`
     if [ "${res}" = "" ]; then
-        echo -e " nginx启动失败！ 请到 ${red}https://www.hijk.pw${plain} 反馈"
+        echo -e " nginx启动失败！ 请到 ${RED}https://www.hijk.pw${PLAIN} 反馈"
         exit 1
     fi
 }
@@ -465,14 +462,14 @@ function setFirewall()
     if [ $? -eq 0 ];then
         firewall-cmd --permanent --add-service=http
         firewall-cmd --permanent --add-service=https
-        firewall-cmd --permanent --add-port=${port}/tcp
+        firewall-cmd --permanent --add-port=${PORT}/tcp
         firewall-cmd --reload
     fi
 }
 
 function installBBR()
 {
-    if [ "$needBBR" != "y" ]; then
+    if [ "$NEED_BBR" != "y" ]; then
         bbr=true
         return
     fi
@@ -516,13 +513,13 @@ function installBBR()
 function info()
 {
     if [ ! -f /etc/v2ray/config.json ]; then
-        echo -e " ${red}未安装v2ray!${plain}"
+        echo -e " ${RED}未安装v2ray!${PLAIN}"
         exit 1
     fi
     
     ip=`curl -s -4 ip.sb`
     res=`netstat -nltp | grep v2ray`
-    [ -z "$res" ] && v2status="${red}已停止${plain}" || v2status="${green}正在运行${plain}"
+    [ -z "$res" ] && v2status="${RED}已停止${PLAIN}" || v2status="${GREEN}正在运行${PLAIN}"
     
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
     alterid=`cat /etc/v2ray/config.json | grep alterId | cut -d: -f2 | tr -d \",' '`
@@ -541,7 +538,7 @@ function info()
     security="none"
     
     res=`netstat -nltp | grep ${port} | grep nginx`
-    [ -z "$res" ] && ngstatus="${red}已停止${plain}" || ngstatus="${green}正在运行${plain}"
+    [ -z "$res" ] && ngstatus="${RED}已停止${PLAIN}" || ngstatus="${GREEN}正在运行${PLAIN}"
     
     raw="{
   \"v\":\"2\",
@@ -561,24 +558,24 @@ function info()
 
     
     echo ============================================
-    echo -e " v2ray运行状态：${v2status}"
-    echo -e " v2ray配置文件：${red}/etc/v2ray/config.json${plain}"
-    echo -e " nginx运行状态：${ngstatus}"
-    echo -e " nginx配置文件：${red}${confpath}${domain}.conf${plain}"
+    echo -e " ${BLUE}v2ray运行状态：${PLAIN}${v2status}"
+    echo -e " ${BLUE}v2ray配置文件：${PLAIN}${RED}/etc/v2ray/config.json${PLAIN}"
+    echo -e " ${BLUE}nginx运行状态：${PLAIN}${ngstatus}"
+    echo -e " ${BLUE}nginx配置文件：${PLAIN}${RED}${confpath}${domain}.conf${PLAIN}"
     echo ""
-    echo -e " ${red}v2ray配置信息：${plain}               "
-    echo -e "   IP(address):  ${red}${ip}${plain}"
-    echo -e "   端口(port)：${red}${port}${plain}"
-    echo -e "   id(uuid)：${red}${uid}${plain}"
-    echo -e "   额外id(alterid)： ${red}${alterid}${plain}"
-    echo -e "   加密方式(security)： ${red}$security${plain}"
-    echo -e "   传输协议(network)： ${red}${network}${plain}" 
-    echo -e "   伪装类型(type)：${red}none${plain}"
-    echo -e "   伪装域名(host)：${red}${domain}${plain}"
-    echo -e "   路径(path)：${red}${path}${plain}"
-    echo -e "   底层安全传输(tls)：${red}TLS${plain}"
+    echo -e " ${RED}v2ray配置信息：${PLAIN}               "
+    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+    echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+    echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+    echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+    echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}$security${PLAIN}"
+    echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+    echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none${PLAIN}"
+    echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+    echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${path}${PLAIN}"
+    echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
     echo  
-    echo " vmess链接: $link"
+    echo " ${BLUE}vmess链接:${PLAIN} $link"
 }
 
 function bbrReboot()
@@ -587,7 +584,7 @@ function bbrReboot()
         echo  
         colorEcho $BLUE  为使BBR模块生效，系统将在30秒后重启
         echo  
-        echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${red}reboot${plain} 重启系统"
+        echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${RED}reboot${PLAIN} 重启系统"
         sleep 30
         reboot
     fi
@@ -632,7 +629,7 @@ function uninstall()
             mv /usr/share/nginx/html.bak /usr/share/nginx/html
         fi
         rm -rf /etc/nginx/conf.d/${domain}.conf
-        echo -e " ${red}卸载成功${plain}"
+        echo -e " ${RED}卸载成功${PLAIN}"
     fi
 }
 

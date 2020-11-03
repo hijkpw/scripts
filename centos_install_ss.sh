@@ -2,20 +2,22 @@
 # shadowsocks/ss CentOS8一键安装脚本
 # Author: hijk<https://hijk.art>
 
-red='\033[0;31m'
-green="\033[0;32m"
-plain='\033[0m'
+
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
+PLAIN='\033[0m'
 BASE=`pwd`
 
-function checkSystem()
-{
+checkSystem() {
     result=$(id | awk '{print $1}')
-    if [ $result != "uid=0(root)" ]; then
+    if [[ "$result" != "uid=0(root)" ]]; then
         echo "请以root身份执行该脚本"
         exit 1
     fi
 
-    if [ ! -f /etc/centos-release ];then
+    if [[ ! -f /etc/centos-release ]]; then
         res=`which yum`
         if [ "$?" != "0" ]; then
             echo "系统不是CentOS"
@@ -24,19 +26,13 @@ function checkSystem()
     else
         result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
         main=${result%%.*}
-        if [ $main -lt 7 ]; then
+        if [[ $main -lt 7 ]]; then
             echo "不受支持的CentOS版本"
             exit 1
          fi
     fi
 }
 
-
-RED="\033[31m"      # Error message
-GREEN="\033[32m"    # Success message
-YELLOW="\033[33m"   # Warning message
-BLUE="\033[36m"     # Info message
-PLAIN='\033[0m'
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
@@ -45,7 +41,7 @@ colorEcho() {
 slogon() {
     clear
     echo "#############################################################"
-    colorEcho $RED "#         CentOS 7/8 Shadowsocks/SS 一键安装脚本             #"
+    echo -e "#         ${RED}CentOS 7/8 Shadowsocks/SS 一键安装脚本${PLAIN}             #"
     echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
     echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
     echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
@@ -55,37 +51,36 @@ slogon() {
     echo ""
 }
 
-function getData()
-{
-    read -p "请设置SS的密码（不输入则随机生成）:" password
-    [ -z "$password" ] && password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+getData() {
+    read -p "请设置SS的密码（不输入则随机生成）:" PASSWORD
+    [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
-    echo "密码： $password"
+    colorEcho $BLUE "密码： $PASSWORD"
     echo ""
     
     while true
     do
-        read -p "请设置SS的端口号[1025-65535]:" port
-        [ -z "$port" ] && port="12345"
-        if [ "${port:0:1}" = "0" ]; then
-            echo -e "${red}端口不能以0开头${plain}"
+        read -p "请设置SS的端口号[1025-65535]:" PORT
+        [[ -z "$PORT" ]] && PORT="12345"
+        if [[ "${PORT:0:1}" = "0" ]]; then
+            echo -e "${RED}端口不能以0开头${PLAIN}"
             exit 1
         fi
-        expr $port + 0 &>/dev/null
-        if [ $? -eq 0 ]; then
-            if [ $port -ge 1025 ] && [ $port -le 65535 ]; then
+        expr $PORT + 0 &>/dev/null
+        if [[ $? -eq 0 ]]; then
+            if [[ $PORT -ge 1025 ]] && [[ $PORT -le 65535 ]]; then
                 echo ""1234
-                echo "端口号： $port"
+                colorEcho $BLUE "端口号： $PORT"
                 echo ""
                 break
             else
-                echo "输入错误，端口号为1025-65535的数字"
+                colorEcho $RED "输入错误，端口号为1025-65535的数字"
             fi
         else
-            echo "输入错误，端口号为1025-65535的数字"
+            colorEcho $RED "输入错误，端口号为1025-65535的数字"
         fi
     done
-    echo "请选择SS的加密方式:" 
+    colorEcho $RED "请选择SS的加密方式:" 
     echo "1)aes-256-gcm"
     echo "2)aes-192-gcm"
     echo "3)aes-128-gcm"
@@ -102,96 +97,89 @@ function getData()
     echo "14)chacha20-ietf-poly1305"
     echo "15)xchacha20-ietf-poly1305"
     read -p "请选择（默认aes-256-gcm）" answer
-    if [ -z "$answer" ]; then
-        method="aes-256-gcm"
+    if [[ -z "$answer" ]]; then
+        METHOD="aes-256-gcm"
     else
         case $answer in
         1)
-            method="aes-256-gcm"
+            METHOD="aes-256-gcm"
             ;;
         2)
-            method="aes-192-gcm"
+            METHOD="aes-192-gcm"
             ;;
         3)
-            method="aes-128-gcm"
+            METHOD="aes-128-gcm"
             ;;
         4)
-            method="aes-256-ctr"
+            METHOD="aes-256-ctr"
             ;;
         5)
-            method="aes-192-ctr"
+            METHOD="aes-192-ctr"
             ;;
         6)
-            method="aes-128-ctr"
+            METHOD="aes-128-ctr"
             ;;
         7)
-            method="aes-256-cfb"
+            METHOD="aes-256-cfb"
             ;;
         8)
-            method="aes-192-cfb"
+            METHOD="aes-192-cfb"
             ;;
         9)
-            method="aes-128-cfb"
+            METHOD="aes-128-cfb"
             ;;
         10)
-            method="camellia-128-cfb"
+            METHOD="camellia-128-cfb"
             ;;
         11)
-            method="camellia-192-cfb"
+            METHOD="camellia-192-cfb"
             ;;
         12)
-            method="camellia-256-cfb"
+            METHOD="camellia-256-cfb"
             ;;
         13)
-            method="chacha20-ietf"
+            METHOD="chacha20-ietf"
             ;;
         14)
-            method="chacha20-ietf-poly1305"
+            METHOD="chacha20-ietf-poly1305"
             ;;
         15)
-            method="xchacha20-ietf-poly1305"
+            METHOD="xchacha20-ietf-poly1305"
             ;;
         *)
-            echo "无效的选择，使用默认的aes-256-gcm"
-            method="aes-256-gcm"
+            colorEcho $RED "无效的选择，使用默认的aes-256-gcm"
+            METHOD="aes-256-gcm"
         esac
     fi
     echo ""
-    echo "加密方式： $method"
+    colorEcho $BLUE "加密方式： $METHOD"
     echo ""
 }
 
-function preinstall()
-{
-    sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 60/' /etc/ssh/sshd_config
-    systemctl restart sshd
-    ret=`nginx -t`
-    if [ "$?" != "0" ]; then
-        echo "更新系统..."
-        yum update -y
-    fi
+preinstall() {
+    yum clean all
+    yum update -y
     
     echo "安装必要软件"
     yum install -y epel-release telnet wget vim net-tools unzip tar qrencode
     yum install -y openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
     res=`which wget`
-    [ "$?" != "0" ] && yum install -y wget
+    [[ "$?" != "0" ]] && yum install -y wget
     res=`which netstat`
-    [ "$?" != "0" ] && yum install -y net-tools
+    [[ "$?" != "0" ]] && yum install -y net-tools
 
 
-    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+    if [[ -s /etc/selinux/config ]] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
         setenforce 0
     fi
 }
 
-function installSS()
-{
-    echo 安装SS...
+installSS() {
+    colorEcho $BLUE 安装SS...
 
     ssPath=`which ss-server`
-    if [ "$?" != "0" ]; then
+    if [[ "$?" != "0" ]]; then
         if ! wget 'https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.3.4/shadowsocks-libev-3.3.4.tar.gz' -O shadowsocks-libev-3.3.4.tar.gz; then
             echo "下载文件失败！"
             exit 1
@@ -200,31 +188,31 @@ function installSS()
         cd shadowsocks-libev-3.3.4
         ./configure
         make && make install
-        if [ $? -ne 0 ]; then
+        if [[ $? -ne 0 ]]; then
             echo
-            echo -e "[${red}错误${plain}] Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
+            echo -e "[${RED}错误${PLAIN}] Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
             cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
             exit 1
         fi
         cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
         ssPath=/usr/local/bin/ss-server
     else
-        echo "SS 已安装"
+        colorEcho $YELLOW "SS 已安装"
     fi
 
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-    if [ ! -d /etc/shadowsocks-libev ];then
+    if [[ ! -d /etc/shadowsocks-libev ]];then
         mkdir /etc/shadowsocks-libev
     fi
     cat > /etc/shadowsocks-libev/config.json<<-EOF
 {
     "server":"0.0.0.0",
-    "server_port":${port},
+    "server_port":${PORT},
     "local_port":1080,
-    "password":"${password}",
+    "password":"${PASSWORD}",
     "timeout":600,
-    "method":"${method}",
+    "method":"${METHOD}",
     "nameserver":"8.8.8.8",
     "mode":"tcp_and_udp",
     "fast_open":false
@@ -252,30 +240,28 @@ EOF
     systemctl enable shadowsocks-libev
     systemctl restart shadowsocks-libev
     sleep 3
-    res=`netstat -nltp | grep ${port} | grep 'ss-server'`
-    if [ "${res}" = "" ]; then
+    res=`netstat -nltp | grep ${PORT} | grep 'ss-server'`
+    if [[ "${res}" = "" ]]; then
         echo "ss启动失败，请检查端口是否被占用！"
         exit 1
     fi
 }
 
-function setFirewall()
-{
+setFirewall() {
     systemctl status firewalld > /dev/null 2>&1
-    if [ $? -eq 0 ];then
-        firewall-cmd --permanent --add-port=${port}/tcp
-        firewall-cmd --permanent --add-port=${port}/udp
+    if [[ $? -eq 0 ]];then
+        firewall-cmd --permanent --add-port=${PORT}/tcp
+        firewall-cmd --permanent --add-port=${PORT}/udp
         firewall-cmd --reload
     fi
 }
 
-function info()
-{
+info() {
     yum install -y qrencode
     ip=`curl -s -4 icanhazip.com`
     port=`cat /etc/shadowsocks-libev/config.json | grep server_port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep 'ss-server'`
-    [ -z "$res" ] && status="${red}已停止${plain}" || status="${green}正在运行${plain}"
+    [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
     password=`cat /etc/shadowsocks-libev/config.json | grep password | cut -d: -f2 | tr -d \",' '`
     method=`cat /etc/shadowsocks-libev/config.json | grep method | cut -d: -f2 | tr -d \",' '`
     
@@ -283,21 +269,20 @@ function info()
     link="ss://${res}"
 
     echo ============================================
-    echo -e " ss运行状态：${status}"
-    echo -e " ss配置文件：${red}/etc/shadowsocks-libev/config.json${plain}"
+    echo -e " ${BLUE}ss运行状态${PLAIN}：${status}"
+    echo -e " ${BLUE}ss配置文件：${PLAIN}${RED}/etc/shadowsocks-libev/config.json${PLAIN}"
     echo ""
-    echo -e "${red}ss配置信息：${plain}"
-    echo -e " IP(address):  ${red}${ip}${plain}"
-    echo -e " 端口(port)：${red}${port}${plain}"
-    echo -e " 密码(password)：${red}${password}${plain}"
-    echo -e " 加密方式(method)： ${red}${method}${plain}"
+    echo -e " ${RED}ss配置信息：${PLAIN}"
+    echo -e "  ${BLUE}IP(address):${PLAIN}  ${RED}${ip}${PLAIN}"
+    echo -e "  ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+    echo -e "  ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
+    echo -e "  ${BLUE}加密方式(method)：${PLAIN} ${RED}${method}${PLAIN}"
     echo
-    echo " ss链接： ${link}"
+    echo " ${BLUE}ss链接${PLAIN}： ${link}"
     qrencode -o - -t utf8 ${link}
 }
 
-function install()
-{
+install() {
     echo -n "系统版本:  "
     cat /etc/centos-release
     checkSystem
@@ -309,12 +294,11 @@ function install()
     info
 }
 
-function uninstall()
-{
+uninstall() {
     read -p "您确定真的要卸载SS吗？(y/n)" answer
-    [ -z ${answer} ] && answer="n"
+    [[ -z ${answer} ]] && answer="n"
 
-    if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
+    if [[ "${answer}" == "y" ]] || [[ "${answer}" == "Y" ]]; then
         systemctl stop shadowsocks-libev && systemctl disable shadowsocks-libev
         rm -rf /usr/lib/systemd/system/shadowsocks-libev.service
         cd /usr/local/bin && rm -rf ss-local ss-manager ss-nat ss-redir ss-server ss-tunnel
@@ -322,7 +306,7 @@ function uninstall()
         rm -rf /usr/share/doc/shadowsocks-libev
         rm -rf /usr/share/man/man1/ss-*.1.gz
         rm -rf /usr/share/man/man8/shadowsocks-libev.8.gz
-        echo "SS卸载完成"
+        colorEcho $GREEN "SS卸载完成"
     fi
 }
 
@@ -331,7 +315,7 @@ checkSystem
 slogon
 
 action=$1
-[ -z $1 ] && action=install
+[[ -z $1 ]] && action=install
 case "$action" in
     install|uninstall|info)
         ${action}

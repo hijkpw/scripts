@@ -156,8 +156,8 @@ getData()
         IP=`curl -s -4 ip.sb`
         echo " "
         echo " trojan-go一键脚本，运行之前请确认如下条件已经具备："
-        echo -e "  ${RED}1. 一个域名${PLAIN}"
-        echo -e "  ${RED}2. 域名的某个主机名解析指向当前服务器ip（${IP}）${PLAIN}"
+        echo -e "  ${RED}1. 一个伪装域名${PLAIN}"
+        echo -e "  ${RED}2. 伪装域名DNS解析指向当前服务器ip（${IP}）${PLAIN}"
         echo -e "  3. 如果/root目录下有 ${GREEN}trojan-go.pem${PLAIN} 和 ${GREEN}trojan-go.key${PLAIN} 证书密钥文件，无需理会条件2"
         echo " "
         read -p " 确认满足按y，按其他退出脚本：" answer
@@ -167,14 +167,14 @@ getData()
 
         while true
         do
-            read -p " 请输入您的主机名：" DOMAIN
+            read -p " 请输入伪装域名：" DOMAIN
             if [[ -z "${DOMAIN}" ]]; then
-                echo -e " ${RED}主机名输入错误，请重新输入！${PLAIN}"
+                echo -e " ${RED}伪装域名输入错误，请重新输入！${PLAIN}"
             else
                 break
             fi
         done
-        echo -e " 主机名(host)：${RED}$DOMAIN${PLAIN}"
+        echo -e " 伪装域名(host)：${RED}$DOMAIN${PLAIN}"
         echo ""
         
         DOMAIN=${DOMAIN,,}
@@ -188,7 +188,7 @@ getData()
             res=`echo -n ${resolve} | grep ${IP}`
             if [[ -z "${res}" ]]; then
                 echo "${DOMAIN} 解析结果：${resolve}"
-                echo -e "${RED}主机未解析到当前服务器IP(${IP})!${PLAIN}"
+                echo -e " ${RED}伪装域名未解析到当前服务器IP(${IP})!${PLAIN}"
                 exit 1
             fi
         fi
@@ -734,7 +734,7 @@ showInfo()
     echo -n "  当前状态："
     statusText
     echo -e "  IP：${RED}$ip${PLAIN}"
-    echo -e "  域名/主机名(host)：${RED}$domain${PLAIN}"
+    echo -e "  伪装域名/主机名(host)：${RED}$domain${PLAIN}"
     echo -e "  端口(port)：${RED}$port${PLAIN}"
     echo -e "  密码(password)：${RED}$password${PLAIN}"
     if [[ $ws = "true" ]]; then

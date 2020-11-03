@@ -220,8 +220,8 @@ getData() {
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
         echo " "
         echo " V2ray一键脚本，运行之前请确认如下条件已经具备："
-        colorEcho ${YELLOW} "  1. 一个域名"
-        colorEcho ${YELLOW} "  2. 域名的某个主机名解析指向当前服务器ip（${IP}）"
+        colorEcho ${YELLOW} "  1. 一个伪装域名"
+        colorEcho ${YELLOW} "  2. 伪装域名DNS解析指向当前服务器ip（${IP}）"
         colorEcho ${BLUE} "  3. 如果/root目录下有 v2ray.pem 和 v2ray.key 证书密钥文件，无需理会条件2"
         echo " "
         read -p " 确认满足按y，按其他退出脚本：" answer
@@ -231,15 +231,15 @@ getData() {
 
         while true
         do
-            read -p " 请输入您的主机名：" DOMAIN
+            read -p " 请输入伪装域名：" DOMAIN
             if [[ -z "${DOMAIN}" ]]; then
-                colorEcho ${RED} " 主机名输入错误，请重新输入！"
+                colorEcho ${RED} " 域名输入错误，请重新输入！"
             else
                 break
             fi
         done
         DOMAIN=${DOMAIN,,}
-        colorEcho ${BLUE}  " 主机名(host)：$DOMAIN"
+        colorEcho ${BLUE}  " 伪装域名(host)：$DOMAIN"
         echo ""
 
         if [[ -f ~/v2ray.pem && -f ~/v2ray.key ]]; then
@@ -252,7 +252,7 @@ getData() {
             res=`echo -n ${resolve} | grep ${IP}`
             if [[ -z "${res}" ]]; then
                 colorEcho ${BLUE}  "${DOMAIN} 解析结果：${resolve}"
-                colorEcho ${RED}  " 主机未解析到当前服务器IP(${IP})!"
+                colorEcho ${RED}  " 域名未解析到当前服务器IP(${IP})!"
                 exit 1
             fi
         fi
@@ -1173,13 +1173,13 @@ showInfo() {
     
     echo 
     colorEcho $BLUE " V2ray配置信息："
-    echo -n " 运行状态："
+    echo -n -e " ${BLUE}运行状态：${PLAIN}"
     statusText
     echo
 
 
     if [[ "$vless" = "false" ]]; then
-        echo -e " 协议:  ${RED}VMess${PLAIN}"
+        echo -e " ${BLUE}协议: ${PLAIN} ${RED}VMess${PLAIN}"
         if [[ "$tls" = "false" ]]; then
             raw="{
   \"v\":\"2\",
@@ -1197,14 +1197,14 @@ showInfo() {
             link=`echo -n ${raw} | base64 -w 0`
             link="vmess://${link}"
 
-            echo -e " IP(address):  ${RED}${ip}${PLAIN}"
-            echo -e " 端口(port)：${RED}${port}${PLAIN}"
-            echo -e " id(uuid)：${RED}${uid}${PLAIN}"
-            echo -e " 额外id(alterid)： ${RED}${alterid}${PLAIN}"
-            echo -e " 加密方式(security)： ${RED}auto${PLAIN}"
-            echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+            echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+            echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}auto${PLAIN}"
+            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
             echo  
-            echo "vmess链接: $RED$link$PLAIN"
+            echo " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
         elif [[ "$ws" = "false" ]]; then
             raw="{
   \"v\":\"2\",
@@ -1221,16 +1221,16 @@ showInfo() {
 }"
             link=`echo -n ${raw} | base64 -w 0`
             link="vmess://${link}"
-            echo -e " IP(address):  ${RED}${ip}${PLAIN}"
-            echo -e " 端口(port)：${RED}${port}${PLAIN}"
-            echo -e " id(uuid)：${RED}${uid}${PLAIN}"
-            echo -e " 额外id(alterid)： ${RED}${alterid}${PLAIN}"
-            echo -e " 加密方式(security)： ${RED}none${PLAIN}"
-            echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
-            echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
-            echo -e " 底层安全传输(tls)：${RED}TLS${PLAIN}"
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+            echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+            echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
+            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+            echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+            echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
             echo  
-            echo "vmess链接: $RED$link$PLAIN"
+            echo " ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
         else
             raw="{
   \"v\":\"2\",
@@ -1248,54 +1248,54 @@ showInfo() {
             link=`echo -n ${raw} | base64 -w 0`
             link="vmess://${link}"
 
-            echo -e " IP(address):  ${RED}${ip}${PLAIN}"
-            echo -e " 端口(port)：${RED}${port}${PLAIN}"
-            echo -e " id(uuid)：${RED}${uid}${PLAIN}"
-            echo -e " 额外id(alterid)： ${RED}${alterid}${PLAIN}"
-            echo -e " 加密方式(security)： ${RED}none${PLAIN}"
-            echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
-            echo -e " 伪装类型(type)：${RED}none{$PLAIN}"
-            echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
-            echo -e " 路径(path)：${RED}${wspath}${PLAIN}"
-            echo -e " 底层安全传输(tls)：${RED}TLS${PLAIN}"
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+            echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+            echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
+            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none{$PLAIN}"
+            echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+            echo -e " ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
+            echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
             echo  
-            echo "vmess链接: $RED$link$PLAIN"
+            echo " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
         fi
     else
-        echo -e " 协议:  ${RED}VLESS${PLAIN}"
+        echo -e " ${BLUE}协议: ${PLAIN} ${RED}VLESS${PLAIN}"
         if [[ "$xtls" = "true" ]]; then
-            echo -e " IP(address):  ${RED}${ip}${PLAIN}"
-            echo -e " 端口(port)：${RED}${port}${PLAIN}"
-            echo -e " id(uuid)：${RED}${uid}${PLAIN}"
-            echo -e " 流控(flow)：$RED$flow${PLAIN}"
-            echo -e " 加密(encryption)： ${RED}none${PLAIN}"
-            echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
-            echo -e " 伪装类型(type)：${RED}none$PLAIN"
-            echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
-            echo -e " 底层安全传输(tls)：${RED}XTLS${PLAIN}"
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+            echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
+            echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
+            echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+            echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
             echo  
         elif [[ "$ws" = "false" ]]; then
-            echo -e " IP(address):  ${RED}${ip}${PLAIN}"
-            echo -e " 端口(port)：${RED}${port}${PLAIN}"
-            echo -e " id(uuid)：${RED}${uid}${PLAIN}"
-            echo -e " 流控(flow)：$RED$flow${PLAIN}"
-            echo -e " 加密(encryption)： ${RED}none${PLAIN}"
-            echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
-            echo -e " 伪装类型(type)：${RED}none{$PLAIN}"
-            echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
-            echo -e " 底层安全传输(tls)：${RED}TLS${PLAIN}"
+            echo -e " ${BLUE}IP(address):  ${PLAIN}${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+            echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
+            echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none{$PLAIN}"
+            echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+            echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
             echo  
         else
-            echo -e " IP(address):  ${RED}${ip}${PLAIN}"
-            echo -e " 端口(port)：${RED}${port}${PLAIN}"
-            echo -e " id(uuid)：${RED}${uid}${PLAIN}"
-            echo -e " 流控(flow)：$RED$flow${PLAIN}"
-            echo -e " 加密(encryption)： ${RED}none${PLAIN}"
-            echo -e " 传输协议(network)： ${RED}${network}${PLAIN}" 
-            echo -e " 伪装类型(type)：${RED}none{$PLAIN}"
-            echo -e " 伪装域名(host)：${RED}${domain}${PLAIN}"
-            echo -e " 路径(path)：${RED}${wspath}${PLAIN}"
-            echo -e " 底层安全传输(tls)：${RED}TLS${PLAIN}"
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+            echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
+            echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none{$PLAIN}"
+            echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+            echo -e " ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
+            echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
             echo  
         fi
     fi

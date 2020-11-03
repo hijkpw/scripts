@@ -2,9 +2,11 @@
 # trojan一键安装脚本
 # Author: hijk<https://hijk.art>
 
-red='\033[0;31m'
-green="\033[0;32m"
-plain='\033[0m'
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
+PLAIN='\033[0m'
 
 sites=(
 http://www.zhuizishu.com/
@@ -48,11 +50,6 @@ function checkSystem()
     fi
 }
 
-RED="\033[31m"      # Error message
-GREEN="\033[32m"    # Success message
-YELLOW="\033[33m"   # Warning message
-BLUE="\033[36m"     # Info message
-PLAIN='\033[0m'
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
@@ -61,7 +58,7 @@ colorEcho() {
 slogon() {
     clear
     echo "#############################################################"
-    colorEcho $RED "#                      trojan一键安装脚本                    #"
+    echo -e  "#                      ${RED}trojan一键安装脚本${PLAIN}                    #"
     echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
     echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
     echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
@@ -76,8 +73,8 @@ function getData()
     IP=`curl -s -4 ip.sb`
     echo " "
     echo " 本脚本为trojan一键脚本，运行之前请确认如下条件已经具备："
-    echo -e "  ${red}1. 一个域名${plain}"
-    echo -e "  ${red}2. 域名的某个主机名解析指向当前服务器ip（${IP}）${plain}"
+    echo -e "  ${RED}1. 一个伪装域名${PLAIN}"
+    echo -e "  ${RED}2. 伪装域名DNS解析指向当前服务器ip（${IP}）${PLAIN}"
     echo -e "  3. 如果/root目录下有 ${GREEN}trojan.pem${PLAIN} 和 ${GREEN}trojan.key${PLAIN} 证书密钥文件，无需理会条件2"
     echo " "
     read -p " 确认满足按y，按其他退出脚本：" answer
@@ -88,57 +85,57 @@ function getData()
 
     while true
     do
-        read -p " 请输入您的主机名：" domain
-        if [ -z "${domain}" ]; then
-            echo " 主机名输入错误，请重新输入！"
+        read -p " 请输入伪装域名：" DOMAIN
+        if [ -z "${DOMAIN}" ]; then
+            echo " 域名输入错误，请重新输入！"
         else
             break
         fi
     done
-    domain=${domain,,}
-    colorEcho $BLUE " 主机名(host)： $domain"
+    DOMAIN=${DOMAIN,,}
+    colorEcho $BLUE " 伪装域名(host)： $DOMAIN"
     echo ""
 
     if [[ -f ~/trojan.pem && -f ~/trojan.key ]]; then
         echo -e "${GREEN} 检测到自有证书，将使用其部署${PLAIN}"
         echo 
-        CERT_FILE="/usr/local/etc/trojan/${domain}.pem"
-        KEY_FILE="/usr/local/etc/trojan/${domain}.key"
+        CERT_FILE="/usr/local/etc/trojan/${DOMAIN}.pem"
+        KEY_FILE="/usr/local/etc/trojan/${DOMAIN}.key"
     else
-        resolve=`curl -s https://hijk.art/hostip.php?d=${domain}`
+        resolve=`curl -s https://hijk.art/hostip.php?d=${DOMAIN}`
         res=`echo -n ${resolve} | grep ${IP}`
         if [[ -z "${res}" ]]; then
-            echo " ${domain} 解析结果：${resolve}"
-            echo -e " ${RED}主机未解析到当前服务器IP(${IP})!${PLAIN}"
+            echo " ${DOMAIN} 解析结果：${resolve}"
+            echo -e " ${RED}域名未解析到当前服务器IP(${IP})!${PLAIN}"
             exit 1
         fi
     fi
 
-    read -p " 请设置trojan密码（不输入则随机生成）:" password
-    [ -z "$password" ] && password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
-    colorEcho $BLUE " 密码： " $password
+    read -p " 请设置trojan密码（不输入则随机生成）:" PASSWORD
+    [ -z "$PASSWORD" ] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+    colorEcho $BLUE " 密码： " $PASSWORD
     echo ""
     
-    read -p " 请输入trojan端口[100-65535的一个数字，默认443]：" port
-    [ -z "${port}" ] && port=443
-    if [ "${port:0:1}" = "0" ]; then
-        echo -e " ${red}端口不能以0开头${plain}"
+    read -p " 请输入trojan端口[100-65535的一个数字，默认443]：" PORT
+    [ -z "${PORT}" ] && PORT=443
+    if [ "${PORT:0:1}" = "0" ]; then
+        echo -e " ${RED}端口不能以0开头${PLAIN}"
         exit 1
     fi
-    colorEcho $BLUE " trojan端口： " $port
+    colorEcho $BLUE " trojan端口： " $PORT
     echo ""
 
-    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" needBBR
-    [ -z "$needBBR" ] && needBBR=y
-    [ "$needBBR" = "Y" ] && needBBR=y
+    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" NEED_BBR
+    [ -z "$NEED_BBR" ] && NEED_BBR=y
+    [ "$NEED_BBR" = "Y" ] && NEED_BBR=y
     
     len=${#sites[@]}
     ((len--))
     index=`shuf -i0-${len} -n1`
     site=${sites[$index]}
-    host=`echo ${site} | cut -d/ -f3`
+    REMOTE_PORT=`echo ${site} | cut -d/ -f3`
     protocol=`echo ${site} | cut -d/ -f1`
-    [ "$protocol" != "http:" ] && remotePort=80 || remotePort=443
+    [ "$protocol" != "http:" ] && REMOTE_PORT=80 || REMOTE_PORT=443
 }
 
 function preinstall()
@@ -191,21 +188,21 @@ function installTrojan()
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
 
-    sed -i -e "s/local_port\":\s*[0-9]*/local_port\": ${port}/" $CONFIG_FILE
-    sed -i -e "s/remote_addr\":\s*\".*\",/remote_addr\": \"$host\",/" $CONFIG_FILE
-    sed -i -e "s/remote_port\":\s*[0-9]*/remote_port\": $remotePort/" $CONFIG_FILE
-    sed -i -e "s/cert\":\s*\".*\",/cert\": \"\/etc\/letsencrypt\/live\/${domain}\/fullchain.pem\",/" $CONFIG_FILE
-    sed -i -e "s/key\":\s*\".*\",/key\": \"\/etc\/letsencrypt\/live\/${domain}\/privkey.pem\",/" $CONFIG_FILE
+    sed -i -e "s/local_port\":\s*[0-9]*/local_port\": ${PORT}/" $CONFIG_FILE
+    sed -i -e "s/remote_addr\":\s*\".*\",/remote_addr\": \"$REMOTE_PORT\",/" $CONFIG_FILE
+    sed -i -e "s/remote_port\":\s*[0-9]*/remote_port\": $REMOTE_PORT/" $CONFIG_FILE
+    sed -i -e "s/cert\":\s*\".*\",/cert\": \"\/etc\/letsencrypt\/live\/${DOMAIN}\/fullchain.pem\",/" $CONFIG_FILE
+    sed -i -e "s/key\":\s*\".*\",/key\": \"\/etc\/letsencrypt\/live\/${DOMAIN}\/privkey.pem\",/" $CONFIG_FILE
     line1=`grep -n 'password' $CONFIG_FILE  | head -n1 | cut -d: -f1`
     line11=`expr $line1 + 1`
     line2=`grep -n '],' $CONFIG_FILE  | head -n1 | cut -d: -f1`
     line22=`expr $line2 - 1`
     sed -i "${line11},${line22}d" $CONFIG_FILE
-    sed -i "${line1}a\        \"$password\"" $CONFIG_FILE
+    sed -i "${line1}a\        \"$PASSWORD\"" $CONFIG_FILE
 
     systemctl enable trojan && systemctl restart trojan
     sleep 3
-    res=`netstat -nltp | grep ${port} | grep trojan`
+    res=`netstat -nltp | grep ${PORT} | grep trojan`
     if [ "${res}" = "" ]; then
         echo " trojan启动失败，请检查端口是否被占用！"
         exit 1
@@ -248,18 +245,18 @@ getCert()
         if [[ "$?" != "0" ]]; then
             export PATH=$PATH:/usr/local/bin
         fi
-        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${domain}
+        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
         if [[ "$?" != "0" ]]; then
             echo -e " 获取证书失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
             exit 1
         fi
 
-        CERT_FILE="/etc/letsencrypt/archive/${domain}/fullchain1.pem"
-        KEY_FILE="/etc/letsencrypt/archive/${domain}/privkey1.pem"
+        CERT_FILE="/etc/letsencrypt/archive/${DOMAIN}/fullchain1.pem"
+        KEY_FILE="/etc/letsencrypt/archive/${DOMAIN}/privkey1.pem"
     else
         mkdir -p /usr/local/etc/trojan
-        cp ~/trojan.pem /usr/local/etc/trojan/${domain}.pem
-        cp ~/trojan.key /usr/local/etc/trojan/${domain}.key
+        cp ~/trojan.pem /usr/local/etc/trojan/${DOMAIN}.pem
+        cp ~/trojan.key /usr/local/etc/trojan/${DOMAIN}.key
     fi
 }
 
@@ -323,13 +320,13 @@ http {
 EOF
 
     mkdir -p /etc/nginx/conf.d;
-    cat > /etc/nginx/conf.d/${domain}.conf<<-EOF
+    cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
-    server_name ${domain};
+    server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
-        return 301 https://\$server_name:${port}\$request_uri;
+        return 301 https://\$server_name:${PORT}\$request_uri;
     }
     
     location = /robots.txt {
@@ -348,14 +345,14 @@ function setFirewall()
     if [ $? -eq 0 ];then
         firewall-cmd --permanent --add-service=http
         firewall-cmd --permanent --add-service=https
-        firewall-cmd --permanent --add-port=${port}/tcp
+        firewall-cmd --permanent --add-port=${PORT}/tcp
         firewall-cmd --reload
     fi
 }
 
 function installBBR()
 {
-    if [ "$needBBR" != "y" ]; then
+    if [ "$NEED_BBR" != "y" ]; then
         bbr=true
         return
     fi
@@ -405,7 +402,7 @@ function installBBR()
 function info()
 {
     res=`netstat -nltp | grep trojan`
-    [ -z "$res" ] && status="${red}已停止${plain}" || status="${green}正在运行${plain}"
+    [ -z "$res" ] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
     
     CONFIG_FILE=/usr/local/etc/trojan/config.json
     ip=`cat $CONFIG_FILE | grep -m1 cert | cut -d/ -f5`
@@ -415,16 +412,16 @@ function info()
     password=`sed -n "${line11}p" $CONFIG_FILE | tr -d \",' '`
     
     res=`netstat -nltp | grep ${port} | grep nginx`
-    [ -z "$res" ] && ngstatus="${red}已停止${plain}" || ngstatus="${green}正在运行${plain}"
+    [ -z "$res" ] && ngstatus="${RED}已停止${PLAIN}" || ngstatus="${GREEN}正在运行${PLAIN}"
     
     echo ============================================
     echo -e " trojan运行状态：${status}"
-    echo -e " trojan配置文件：${red}$CONFIG_FILE${plain}"
+    echo -e " trojan配置文件：${RED}$CONFIG_FILE${PLAIN}"
     echo ""
-    echo -e "${red}trojan配置信息：${plain}               "
-    echo -e " IP(address):  ${red}${ip}${plain}"
-    echo -e " 端口(port)：${red}${port}${plain}"
-    echo -e " 密码(password)：${red}$password${plain}"
+    echo -e "${RED}trojan配置信息：${PLAIN}               "
+    echo -e " IP/域名(address):  ${RED}${ip}${PLAIN}"
+    echo -e " 端口(port)：${RED}${port}${PLAIN}"
+    echo -e " 密码(password)：${RED}$password${PLAIN}"
     echo  
     echo ============================================
 }
@@ -435,7 +432,7 @@ function bbrReboot()
         echo  
         echo  为使BBR模块生效，系统将在30秒后重启
         echo  
-        echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${red}reboot${plain} 重启系统"
+        echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${RED}reboot${PLAIN} 重启系统"
         sleep 30
         reboot
     fi
@@ -444,7 +441,7 @@ function bbrReboot()
 
 function install()
 {
-    echo -n "系统版本:  "
+    echo -n " 系统版本:  "
     cat /etc/centos-release
 
     checkSystem
@@ -469,7 +466,7 @@ function removeTrojan()
 
 function uninstall()
 {
-    read -p "您确定真的要卸载trojan吗？(y/n)" answer
+    read -p " 您确定真的要卸载trojan吗？(y/n)" answer
     [ -z ${answer} ] && answer="n"
 
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
@@ -489,7 +486,7 @@ function uninstall()
             mv /usr/share/nginx/html.bak /usr/share/nginx/html
         fi
         rm -rf /etc/nginx/conf.d/${domain}.conf
-        echo -e " ${red}卸载成功${plain}"
+        echo -e " ${RED}卸载成功${PLAIN}"
     fi
 }
 
