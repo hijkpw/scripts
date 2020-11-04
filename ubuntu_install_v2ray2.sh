@@ -430,13 +430,13 @@ function setFirewall()
 function installBBR()
 {
     if [ "$NEED_BBR" != "y" ]; then
-        bbr=true
+        INSTALL_BBR=false
         return
     fi
     result=$(lsmod | grep bbr)
     if [ "$result" != "" ]; then
-        colorEcho $YELLOW BBR模块已安装
-        bbr=true
+        colorEcho $YELLOW " BBR模块已安装"
+        INSTALL_BBR=false
         echo "3" > /proc/sys/net/ipv4/tcp_fastopen
         echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
         return;
@@ -444,12 +444,12 @@ function installBBR()
     
     res=`hostnamectl | grep -i openvz`
     if [ "$res" != "" ]; then
-        colorEcho $YELLOW openvz机器，跳过安装
-        bbr=true
+        colorEcho $YELLOW " openvz机器，跳过安装"
+        INSTALL_BBR=false
         return
     fi
 
-    echo 安装BBR模块...
+    colorEcho $BLUE " 安装BBR模块..."
     apt install -y --install-recommends linux-generic-hwe-16.04
     grub-set-default 0
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
@@ -457,7 +457,7 @@ function installBBR()
     echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-    bbr=false
+    INSTALL_BBR=true
 }
 
 function info()
@@ -525,9 +525,9 @@ function info()
 
 function bbrReboot()
 {
-    if [ "${bbr}" == "false" ]; then
+    if [ "${INSTALL_BBR}" == "true" ]; then
         echo  
-        colorEcho $BLUE  为使BBR模块生效，系统将在30秒后重启
+        colorEcho $BLUE " 为使BBR模块生效，系统将在30秒后重启"
         echo  
         echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${RED}reboot${PLAIN} 重启系统"
         sleep 30

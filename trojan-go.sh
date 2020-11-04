@@ -30,7 +30,7 @@ checkSystem()
 {
     result=$(id | awk '{print $1}')
     if [[ $result != "uid=0(root)" ]]; then
-        echo -e "${RED}请以root身份执行该脚本${PLAIN}"
+        echo -e " ${RED}请以root身份执行该脚本${PLAIN}"
         exit 1
     fi
 
@@ -38,7 +38,7 @@ checkSystem()
     if [[ "$?" != "0" ]]; then
         res=`which apt`
         if [[ "$?" != "0" ]]; then
-            echo -e "${RED}不受支持的Linux系统${PLAIN}"
+            echo -e " ${RED}不受支持的Linux系统${PLAIN}"
             exit 1
         fi
         res=`hostnamectl | grep -i ubuntu`
@@ -60,7 +60,7 @@ checkSystem()
     fi
     res=`which systemctl`
     if [[ "$?" != "0" ]]; then
-        echo -e "${RED}系统版本过低，请升级到最新版本${PLAIN}"
+        echo -e " ${RED}系统版本过低，请升级到最新版本${PLAIN}"
         exit 1
     fi
 }
@@ -187,7 +187,7 @@ getData()
             resolve=`curl -s https://hijk.art/hostip.php?d=${DOMAIN}`
             res=`echo -n ${resolve} | grep ${IP}`
             if [[ -z "${res}" ]]; then
-                echo "${DOMAIN} 解析结果：${resolve}"
+                echo " ${DOMAIN} 解析结果：${resolve}"
                 echo -e " ${RED}伪装域名未解析到当前服务器IP(${IP})!${PLAIN}"
                 exit 1
             fi
@@ -533,7 +533,7 @@ installBBR()
     fi
     res=`hostnamectl | grep -i openvz`
     if [[ "$res" != "" ]]; then
-        echo " openvz机器，跳过安装"
+        echo  " openvz机器，跳过安装"
         INSTALL_BBR=false
         return
     fi
@@ -559,6 +559,7 @@ installBBR()
         apt install -y --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
     fi
+    echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
     INSTALL_BBR=true
 }
 

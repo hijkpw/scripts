@@ -8,34 +8,35 @@ GREEN="\033[32m"    # Success message
 YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
+
 BASE=`pwd`
+
+
+colorEcho() {
+    echo -e "${1}${@:2}${PLAIN}"
+}
 
 checkSystem() {
     result=$(id | awk '{print $1}')
     if [[ "$result" != "uid=0(root)" ]]; then
-        echo "请以root身份执行该脚本"
+        colorEcho $RED " 请以root身份执行该脚本"
         exit 1
     fi
 
     if [[ ! -f /etc/centos-release ]]; then
         res=`which yum`
         if [ "$?" != "0" ]; then
-            echo "系统不是CentOS"
+            colorEcho $RED " 系统不是CentOS"
             exit 1
          fi
     else
         result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
         main=${result%%.*}
         if [[ $main -lt 7 ]]; then
-            echo "不受支持的CentOS版本"
+            colorEcho $RED " 不受支持的CentOS版本"
             exit 1
          fi
     fi
-}
-
-
-colorEcho() {
-    echo -e "${1}${@:2}${PLAIN}"
 }
 
 slogon() {
@@ -52,51 +53,51 @@ slogon() {
 }
 
 getData() {
-    read -p "请设置SS的密码（不输入则随机生成）:" PASSWORD
+    read -p " 请设置SS的密码（不输入则随机生成）:" PASSWORD
     [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
-    colorEcho $BLUE "密码： $PASSWORD"
+    colorEcho $BLUE " 密码： $PASSWORD"
     echo ""
     
     while true
     do
-        read -p "请设置SS的端口号[1025-65535]:" PORT
+        read -p " 请设置SS的端口号[1025-65535]:" PORT
         [[ -z "$PORT" ]] && PORT="12345"
         if [[ "${PORT:0:1}" = "0" ]]; then
-            echo -e "${RED}端口不能以0开头${PLAIN}"
+            echo -e " ${RED}端口不能以0开头${PLAIN}"
             exit 1
         fi
         expr $PORT + 0 &>/dev/null
         if [[ $? -eq 0 ]]; then
             if [[ $PORT -ge 1025 ]] && [[ $PORT -le 65535 ]]; then
                 echo ""1234
-                colorEcho $BLUE "端口号： $PORT"
+                colorEcho $BLUE " 端口号： $PORT"
                 echo ""
                 break
             else
-                colorEcho $RED "输入错误，端口号为1025-65535的数字"
+                colorEcho $RED " 输入错误，端口号为1025-65535的数字"
             fi
         else
-            colorEcho $RED "输入错误，端口号为1025-65535的数字"
+            colorEcho $RED " 输入错误，端口号为1025-65535的数字"
         fi
     done
-    colorEcho $RED "请选择SS的加密方式:" 
-    echo "1)aes-256-gcm"
-    echo "2)aes-192-gcm"
-    echo "3)aes-128-gcm"
-    echo "4)aes-256-ctr"
-    echo "5)aes-192-ctr"
-    echo "6)aes-128-ctr"
-    echo "7)aes-256-cfb"
-    echo "8)aes-192-cfb"
-    echo "9)aes-128-cfb"
-    echo "10)camellia-128-cfb"
-    echo "11)camellia-192-cfb"
-    echo "12)camellia-256-cfb"
-    echo "13)chacha20-ietf"
-    echo "14)chacha20-ietf-poly1305"
-    echo "15)xchacha20-ietf-poly1305"
-    read -p "请选择（默认aes-256-gcm）" answer
+    colorEcho $RED " 请选择加密方式:" 
+    echo "  1)aes-256-gcm"
+    echo "  2)aes-192-gcm"
+    echo "  3)aes-128-gcm"
+    echo "  4)aes-256-ctr"
+    echo "  5)aes-192-ctr"
+    echo "  6)aes-128-ctr"
+    echo "  7)aes-256-cfb"
+    echo "  8)aes-192-cfb"
+    echo "  9)aes-128-cfb"
+    echo "  10)camellia-128-cfb"
+    echo "  11)camellia-192-cfb"
+    echo "  12)camellia-256-cfb"
+    echo "  13)chacha20-ietf"
+    echo "  14)chacha20-ietf-poly1305"
+    echo "  15)xchacha20-ietf-poly1305"
+    read -p " 请选择（默认aes-256-gcm）" answer
     if [[ -z "$answer" ]]; then
         METHOD="aes-256-gcm"
     else
@@ -147,7 +148,7 @@ getData() {
             METHOD="xchacha20-ietf-poly1305"
             ;;
         *)
-            colorEcho $RED "无效的选择，使用默认的aes-256-gcm"
+            colorEcho $RED " 无效的选择，使用默认的aes-256-gcm"
             METHOD="aes-256-gcm"
         esac
     fi
@@ -160,7 +161,7 @@ preinstall() {
     yum clean all
     yum update -y
     
-    echo "安装必要软件"
+    colorEcho $BULE " 安装必要软件"
     yum install -y epel-release telnet wget vim net-tools unzip tar qrencode
     yum install -y openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
     res=`which wget`
@@ -176,12 +177,12 @@ preinstall() {
 }
 
 installSS() {
-    colorEcho $BLUE 安装SS...
+    colorEcho $BLUE " 安装SS..."
 
     ssPath=`which ss-server`
     if [[ "$?" != "0" ]]; then
         if ! wget 'https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.3.4/shadowsocks-libev-3.3.4.tar.gz' -O shadowsocks-libev-3.3.4.tar.gz; then
-            echo "下载文件失败！"
+            colorEcho $RED " 下载安装文件失败！"
             exit 1
         fi
         tar zxf shadowsocks-libev-3.3.4.tar.gz
@@ -190,14 +191,14 @@ installSS() {
         make && make install
         if [[ $? -ne 0 ]]; then
             echo
-            echo -e "[${RED}错误${PLAIN}] Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
+            echo -e " [${RED}错误${PLAIN}] Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
             cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
             exit 1
         fi
         cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
         ssPath=/usr/local/bin/ss-server
     else
-        colorEcho $YELLOW "SS 已安装"
+        colorEcho $YELLOW " SS已安装"
     fi
 
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
@@ -242,7 +243,7 @@ EOF
     sleep 3
     res=`netstat -nltp | grep ${PORT} | grep 'ss-server'`
     if [[ "${res}" = "" ]]; then
-        echo "ss启动失败，请检查端口是否被占用！"
+        colorEcho $RED " ss启动失败，请检查端口是否被占用！"
         exit 1
     fi
 }
@@ -278,12 +279,12 @@ info() {
     echo -e "  ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
     echo -e "  ${BLUE}加密方式(method)：${PLAIN} ${RED}${method}${PLAIN}"
     echo
-    echo " ${BLUE}ss链接${PLAIN}： ${link}"
+    echo -e " ${BLUE}ss链接${PLAIN}： ${link}"
     qrencode -o - -t utf8 ${link}
 }
 
 install() {
-    echo -n "系统版本:  "
+    echo -n -e " ${BLUE}系统版本:$PLAIN "
     cat /etc/centos-release
     checkSystem
     getData
@@ -295,7 +296,8 @@ install() {
 }
 
 uninstall() {
-    read -p "您确定真的要卸载SS吗？(y/n)" answer
+    echo ""
+    read -p " 确定卸载SS吗？(y/n)" answer
     [[ -z ${answer} ]] && answer="n"
 
     if [[ "${answer}" == "y" ]] || [[ "${answer}" == "Y" ]]; then
@@ -306,7 +308,7 @@ uninstall() {
         rm -rf /usr/share/doc/shadowsocks-libev
         rm -rf /usr/share/man/man1/ss-*.1.gz
         rm -rf /usr/share/man/man8/shadowsocks-libev.8.gz
-        colorEcho $GREEN "SS卸载完成"
+        colorEcho $GREEN " SS卸载成功"
     fi
 }
 
@@ -321,7 +323,7 @@ case "$action" in
         ${action}
         ;;
     *)
-        echo "参数错误"
-        echo "用法: `basename $0` [install|uninstall|info]"
+        echo " 参数错误"
+        echo "  用法: `basename $0` [install|uninstall|info]"
         ;;
 esac

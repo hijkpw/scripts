@@ -2,32 +2,6 @@
 # centos7/8 trojan WordPress一键安装脚本
 # Author: hijk<https://hijk.art>
 
-red='\033[0;31m'
-plain='\033[0m'
-
-function checkSystem()
-{
-    result=$(id | awk '{print $1}')
-    if [ $result != "uid=0(root)" ]; then
-        echo "请以root身份执行该脚本"
-        exit 1
-    fi
-
-    if [ ! -f /etc/centos-release ];then
-        res=`which yum`
-        if [ "$?" != "0" ]; then
-            echo "系统不是CentOS"
-            exit 1
-         fi
-    else
-        result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
-        main=${result%%.*}
-        if [ $main -lt 7 ]; then
-            echo "不受支持的CentOS版本"
-            exit 1
-         fi
-    fi
-}
 
 RED="\033[31m"      # Error message
 GREEN="\033[32m"    # Success message
@@ -35,14 +9,40 @@ YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
+CONFIG_FILE=/usr/local/etc/trojan/config.json
+
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
+}
+
+function checkSystem()
+{
+    result=$(id | awk '{print $1}')
+    if [ $result != "uid=0(root)" ]; then
+        colorEcho $RED " 请以root身份执行该脚本"
+        exit 1
+    fi
+
+    if [ ! -f /etc/centos-release ];then
+        res=`which yum`
+        if [ "$?" != "0" ]; then
+            colorEcho $RED " 系统不是CentOS"
+            exit 1
+         fi
+    else
+        result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
+        main=${result%%.*}
+        if [ $main -lt 7 ]; then
+            colorEcho $RED " 不受支持的CentOS版本"
+            exit 1
+         fi
+    fi
 }
 
 slogon() {
     clear
     echo "#############################################################"
-    colorEcho $RED "#             CentOS 7/8 WordPress一键安装脚本                #"
+    echo -e "#             ${RED}CentOS 7/8 WordPress一键安装脚本${PLAIN}                #"
     echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
     echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
     echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
@@ -54,18 +54,17 @@ slogon() {
 
 function checkTrojan()
 {
-    echo "该脚本仅适用于 https://hijk.art 网站的trojan一键脚本 安装wordpress用！"
-    read -p "退出请按n，按其他键继续：" answer
+    colorEcho $YELLOW " 该脚本仅适用于 https://hijk.art 网站的trojan一键脚本 安装wordpress用！"
+    read -p " 退出请按n，按其他键继续：" answer
     [ "$answer" = "n" ] && exit 0
 
-    if [ ! -f /usr/local/etc/trojan/config.json ]; then
-        echo "未安装trojan"
+    if [ ! -f ${CONFIG_FILE} ]; then
+        colorEcho $RED " 未安装trojan"
         exit 1
     fi
-    CONFIG_FILE=/usr/local/etc/trojan/config.json
     domain=`grep -m1 cert $CONFIG_FILE | awk 'BEGIN { FS = "/" } ; { print $5 }'`
     if [ ! -f /etc/nginx/conf.d/${domain}.conf ]; then
-        echo "未找到域名的nginx配置文件"
+        colorEcho $RED " 未找到域名的nginx配置文件"
         exit 1
     fi
 }
@@ -108,7 +107,7 @@ function installWordPress()
     mkdir -p /var/www;
     wget https://cn.wordpress.org/latest-zh_CN.tar.gz
     if [ ! -f latest-zh_CN.tar.gz ]; then
-    	echo "下载WordPress失败，请稍后重试"
+    	colorEcho $RED " 下载WordPress失败，请稍后重试"
 	exit 1
     fi
     tar -zxf latest-zh_CN.tar.gz
@@ -213,13 +212,13 @@ EOF
 
 function info()
 {
-    echo "WordPress安装成功！"
+    colorEcho $BLUE " WordPress安装成功！"
     echo "==============================="
-    echo -e "WordPress安装路径：${red}/var/www/${domain}${plain}"
-    echo -e "WordPress数据库：${red}${dbname}${plain}"
-    echo -e "WordPress数据库用户名：${red}${dbuser}${plain}"
-    echo -e "WordPress数据库密码：${red}${dbpass}${plain}"
-    echo -e "博客访问地址：${red}https://${domain}:${port}${plain}"
+    echo -e "   ${BLUE}WordPress安装路径：${PLAIN}${RED}/var/www/${domain}${PLAIN}"
+    echo -e "   ${BLUE}WordPress数据库：${PLAIN}${RED}${dbname}${PLAIN}"
+    echo -e "   ${BLUE}WordPress数据库用户名：${PLAIN}${RED}${dbuser}${PLAIN}"
+    echo -e "   ${BLUE}WordPress数据库密码：${PLAIN}${RED}${dbpass}${PLAIN}"
+    echo -e "   ${BLUE}博客访问地址：${PLAIN}${RED}https://${domain}:${port}${PLAIN}"
     echo "==============================="
 }
 

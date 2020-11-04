@@ -2,10 +2,11 @@
 # MTProto一键安装脚本
 # Author: hijk<https://hijk.art>
 
-
-red='\033[0;31m'
-green="\033[0;32m"
-plain='\033[0m'
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
+PLAIN='\033[0m'
 
 export MTG_CONFIG="${MTG_CONFIG:-$HOME/.config/mtg}"
 export MTG_ENV="$MTG_CONFIG/env"
@@ -15,11 +16,15 @@ export MTG_IMAGENAME="${MTG_IMAGENAME:-nineseconds/mtg:stable}"
 
 DOCKER_CMD="$(command -v docker)"
 
+colorEcho() {
+    echo -e "${1}${@:2}${PLAIN}"
+}
+
 function checkSystem()
 {
     result=$(id | awk '{print $1}')
     if [ $result != "uid=0(root)" ]; then
-        echo "请以root身份执行该脚本"
+        colorEcho $RED " 请以root身份执行该脚本"
         exit 1
     fi
 
@@ -27,7 +32,7 @@ function checkSystem()
     if [ "$?" != "0" ]; then
         res=`which apt`
         if [ "$?" != "0" ]; then
-            echo "不受支持的Linux系统"
+            colorEcho $RED " 不受支持的Linux系统"
             exit 1
         fi
         res=`hostnamectl | grep -i ubuntu`
@@ -47,7 +52,7 @@ function checkSystem()
     fi
     res=`which systemctl`
     if [ "$?" != "0" ]; then
-        echo "系统版本过低，请升级到最新版本"
+        colorEcho $RED " 系统版本过低，请升级到最新版本"
         exit 1
     fi
 }
@@ -79,13 +84,13 @@ statusText()
     res=`status`
     case $res in
         3)
-            echo -e ${green}已安装${plain} ${red}未运行${plain}
+            echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN}
             ;;
         4)
-            echo -e ${green}已安装${plain} ${green}正在运行${plain}
+            echo -e ${GREEN}已安装${PLAIN} ${GREEN}正在运行${PLAIN}
             ;;
         *)
-            echo -e ${red}未安装${plain}
+            echo -e ${RED}未安装${PLAIN}
             ;;
     esac
 }
@@ -93,13 +98,13 @@ statusText()
 getData()
 {
     IP=`curl -s -4 ip.sb`
-    read -p "请输入MTProto端口[100-65535的一个数字]：" PORT
+    read -p " 请输入MTProto端口[100-65535的一个数字]：" PORT
     [ -z "${PORT}" ] && {
-        echo -e "${red}请输入MTProto端口！${plain}"
+        echo -e " ${RED}请输入MTProto端口！${PLAIN}"
         exit 1
     }
     if [ "${PORT:0:1}" = "0" ]; then
-        echo -e "${red}端口不能以0开头${plain}"
+        echo -e " ${RED}端口不能以0开头${PLAIN}"
         exit 1
     fi
     MTG_PORT=$PORT
@@ -140,7 +145,7 @@ installDocker()
 
     DOCKER_CMD="$(command -v docker)"
     if [ "$DOCKER_CMD" = "" ]; then
-        echo -e "${red}docker安装失败，请到https://hijk.art反馈${plain}"
+        echo -e " ${RED}docker安装失败，请到https://hijk.art反馈${PLAIN}"
         exit 1
     fi
     systemctl enable docker
@@ -152,7 +157,7 @@ installDocker()
 pullImage()
 {
     if [ "$DOCKER_CMD" = "" ]; then
-        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         exit 1
     fi
 
@@ -221,7 +226,7 @@ start()
     res=`ss -ntlp| grep ${MTG_PORT} | grep docker`
     if [ "$res" = "" ]; then
         docker logs $MTG_CONTAINER | tail
-        echo -e "${red}启动docker镜像失败，请到 https://hijk.art 反馈${plain}"
+        echo -e " ${RED}启动docker镜像失败，请到 https://hijk.art 反馈${PLAIN}"
         exit 1
     fi
 }
@@ -230,7 +235,7 @@ stop()
 {
     res=`status`
     if [ $res -lt 3 ]; then
-        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
 
@@ -245,7 +250,7 @@ showInfo()
 {
     res=`status`
     if [ $res -lt 3 ]; then
-        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
 
@@ -256,15 +261,15 @@ showInfo()
     set +a
 
     echo 
-    echo -e "  ${red}MTProto代理信息：${plain}"
+    echo -e " ${RED}MTProto代理信息：${PLAIN}"
     echo 
-    echo -n "  当前状态："
+    echo -n "  ${BLUE}当前状态：${PLAIN}"
     statusText
-    echo -e "  IP：${red}$IP${plain}"
-    echo -e "  端口：${red}$MTG_PORT${plain}"
-    echo -e "  密钥：${red}$SECRET${plain}"
+    echo -e "  ${BLUE}IP：${PLAIN}${RED}$IP${PLAIN}"
+    echo -e "  ${BLUE}端口：${PLAIN}${RED}$MTG_PORT${PLAIN}"
+    echo -e "  ${BLUE}密钥：${PLAIN}${RED}$SECRET${PLAIN}"
     echo ""
-    echo -e "  如需获取tg://proxy形式的链接，请打开telegrame关注${green}@MTProxybot${plain}生成"
+    echo -e "  如需获取tg://proxy形式的链接，请打开telegrame关注${GREEN}@MTProxybot${PLAIN}生成"
     echo ""
 }
 
@@ -282,7 +287,7 @@ update()
 {
     res=`status`
     if [ $res -lt 2 ]; then
-        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
 
@@ -302,6 +307,7 @@ uninstall()
         systemctl stop docker
         systemctl disable docker
         $CMD_REMOVE docker-ce docker-ce-cli containerd.io
+        colorEcho $GREEN " 卸载成功"
     fi
 }
 
@@ -309,7 +315,7 @@ run()
 {
     res=`status`
     if [ $res -lt 3 ]; then
-        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
 
@@ -329,7 +335,7 @@ restart()
 {
     res=`status`
     if [ $res -lt 3 ]; then
-        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
 
@@ -341,7 +347,7 @@ reconfig()
 {
     res=`status`
     if [ $res -lt 2 ]; then
-        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
 
@@ -356,7 +362,7 @@ showLog()
 {
     res=`status`
     if [ $res -lt 3 ]; then
-        echo -e "${red}MTProto未安装，请先安装！${plain}"
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
 
@@ -371,34 +377,34 @@ function menu()
 {
     clear
     echo "#############################################################"
-    echo -e "#                    ${red}MTProto一键安装脚本${plain}                    #"
-    echo -e "# ${green}作者${plain}: 网络跳越(hijk)                                      #"
-    echo -e "# ${green}网址${plain}: https://hijk.art                                    #"
-    echo -e "# ${green}论坛${plain}: https://hijk.club                                   #"
-    echo -e "# ${green}TG群${plain}: https://t.me/hijkclub                               #"
-    echo -e "# ${green}Youtube频道${plain}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+    echo -e "#                    ${RED}MTProto一键安装脚本${PLAIN}                    #"
+    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
+    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
     echo "#############################################################"
     echo ""
 
-    echo -e "  ${green}1.${plain} 安装MTProto代理"
-    echo -e "  ${green}2.${plain} 更新MTProto代理"
-    echo -e "  ${green}3.${plain} 卸载MTProto代理"
+    echo -e "  ${GREEN}1.${PLAIN} 安装MTProto代理"
+    echo -e "  ${GREEN}2.${PLAIN} 更新MTProto代理"
+    echo -e "  ${GREEN}3.${PLAIN} 卸载MTProto代理"
     echo " -------------"
-    echo -e "  ${green}4.${plain} 启动MTProto代理"
-    echo -e "  ${green}5.${plain} 重启MTProto代理"
-    echo -e "  ${green}6.${plain} 停止MTProto代理"
+    echo -e "  ${GREEN}4.${PLAIN} 启动MTProto代理"
+    echo -e "  ${GREEN}5.${PLAIN} 重启MTProto代理"
+    echo -e "  ${GREEN}6.${PLAIN} 停止MTProto代理"
     echo " -------------"
-    echo -e "  ${green}7.${plain} 查看MTProto信息"
-    echo -e "  ${green}8.${plain} 修改MTProto配置"
-    echo -e "  ${green}9.${plain} 查看MTProto日志"
+    echo -e "  ${GREEN}7.${PLAIN} 查看MTProto信息"
+    echo -e "  ${GREEN}8.${PLAIN} 修改MTProto配置"
+    echo -e "  ${GREEN}9.${PLAIN} 查看MTProto日志"
     echo " -------------"
-    echo -e "  ${green}0.${plain} 退出"
+    echo -e "  ${GREEN}0.${PLAIN} 退出"
     echo 
     echo -n " 当前状态："
     statusText
     echo 
 
-    read -p "请选择操作[0-9]：" answer
+    read -p " 请选择操作[0-9]：" answer
     case $answer in
         0)
             exit 0
@@ -431,7 +437,7 @@ function menu()
             showLog
             ;;
         *)
-            echo -e $red 请选择正确的操作！${plain}
+            echo -e " ${RED}请选择正确的操作！${PLAIN}"
             exit 1
             ;;
     esac
