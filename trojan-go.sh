@@ -369,7 +369,7 @@ server {
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
-        return 301 https://\$server_name:${port}\$request_uri;
+        return 301 https://\$server_name:${PORT}\$request_uri;
     }
     
     location = /robots.txt {
