@@ -18,8 +18,7 @@ colorEcho() {
 }
 
 
-function checkSystem()
-{
+checkSystem() {
     result=$(id | awk '{print $1}')
     if [ $result != "uid=0(root)" ]; then
         colorEcho $RED " 请以root身份执行该脚本"
@@ -55,8 +54,7 @@ slogon() {
     echo ""
 }
 
-function getData()
-{
+getData() {
     read -p " 请设置SSR的密码（不输入则随机生成）:" PASSWORD
     [ -z "$PASSWORD" ] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
@@ -250,8 +248,7 @@ function getData()
     echo ""
 }
 
-function preinstall()
-{
+preinstall() {
     colorEcho $BLUE " 更新系统..."
     yum update -y
     colorEcho $BLUE " 安装必要软件"
@@ -272,8 +269,7 @@ function preinstall()
     fi
 }
 
-function installSSR()
-{
+installSSR() {
     if [ ! -d /usr/local/shadowsocks ]; then
         echo 下载安装文件
         if ! wget --no-check-certificate -O ${FILENAME}.tar.gz ${URL}; then
@@ -338,8 +334,7 @@ EOF
     fi
 }
 
-function setFirewall()
-{
+setFirewall() {
     systemctl status firewalld > /dev/null 2>&1
     if [ $? -eq 0 ];then
         firewall-cmd --permanent --add-port=${PORT}/tcp
@@ -349,8 +344,7 @@ function setFirewall()
     fi
 }
 
-function installBBR()
-{
+installBBR() {
     result=$(lsmod | grep bbr)
     if [ "$result" != "" ]; then
         colorEcho $GREEN " BBR模块已安装"
@@ -388,8 +382,7 @@ function installBBR()
     INSTALL_BBR=true
 }
 
-function info()
-{
+info() {
     yum install -y qrencode
     ip=`curl -s -4 icanhazip.com`
     port=`cat /etc/shadowsocksR.json | grep server_port | cut -d: -f2 | tr -d \",' '`
@@ -423,8 +416,7 @@ function info()
     qrencode -o - -t utf8 $link
 }
 
-function bbrReboot()
-{
+bbrReboot() {
     if [ "${INSTALL_BBR}" == "true" ]; then
         echo  
         echo  为使BBR模块生效，系统将在30秒后重启
@@ -436,8 +428,7 @@ function bbrReboot()
 }
 
 
-function install()
-{
+install() {
     echo -n "系统版本:  "
     cat /etc/centos-release
     checkSystem
@@ -454,8 +445,7 @@ function install()
     bbrReboot
 }
 
-function uninstall()
-{
+uninstall() {
     echo ""
     read -p " 确定卸载SSR吗？(y/n)" answer
     [ -z ${answer} ] && answer="n"

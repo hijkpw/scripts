@@ -8,6 +8,8 @@ YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
+# 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
+# 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
 sites=(
 http://www.zhuizishu.com/
 http://xs.56dyc.com/
@@ -394,10 +396,7 @@ function installBBR()
         grub-set-default 0
     fi
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-    echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
     INSTALL_BBR=true
 }
 

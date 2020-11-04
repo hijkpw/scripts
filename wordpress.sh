@@ -12,8 +12,7 @@ colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
 
-function checkSystem()
-{
+checkSystem() {
     result=$(id | awk '{print $1}')
     if [ $result != "uid=0(root)" ]; then
         colorEcho $RED " 请以root身份执行该脚本"
@@ -49,8 +48,7 @@ slogon() {
     echo ""
 }
 
-function checkV2()
-{
+checkV2() {
     colorEcho $YELLOW " 该脚本仅适用于 https://hijk.art 网站的v2ray带伪装一键脚本 安装wordpress用！"
     read -p " 退出请按n，按其他键继续：" answer
     [ "$answer" = "n" ] && exit 0
@@ -70,8 +68,7 @@ function checkV2()
     fi
 }
 
-function installPHP()
-{
+installPHP() {
     yum install -y epel-release
     if [ $main -eq 7 ]; then
         rpm -iUh https://rpms.remirepo.net/enterprise/remi-release-7.rpm
@@ -85,8 +82,7 @@ function installPHP()
     systemctl enable php-fpm.service
 }
 
-function installMysql()
-{
+installMysql() {
     yum remove -y MariaDB-server
     rm -rf /var/lib/mysql
     if [ ! -f /etc/yum.repos.d/mariadb.repo ]; then
@@ -113,8 +109,7 @@ gpgcheck=1' >>  /etc/yum.repos.d/mariadb.repo
     systemctl enable mariadb.service
 }
 
-function installWordPress()
-{
+installWordPress() {
     yum install -y wget
     mkdir -p /var/www;
     wget https://cn.wordpress.org/latest-zh_CN.tar.gz
@@ -128,8 +123,7 @@ function installWordPress()
     rm -rf latest-zh_CN.tar.gz
 }
 
-function config()
-{
+config() {
     # config mariadb
     systemctl start mariadb
     dbname="wordpress"
@@ -191,8 +185,7 @@ EOF
     systemctl restart php-fpm mariadb nginx
 }
 
-function info()
-{
+info() {
     colorEcho $BLUE " WordPress安装成功！"
     echo "==============================="
     echo -e "   ${BLUE}WordPress安装路径：${PLAIN}${RED}/var/www/${domain}${PLAIN}"
@@ -203,8 +196,7 @@ function info()
     echo "==============================="
 }
 
-function main()
-{
+main() {
     checkSystem
     slogon
     checkV2

@@ -15,8 +15,7 @@ colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
 
-function checkSystem()
-{
+checkSystem() {
     result=$(id | awk '{print $1}')
     if [ $result != "uid=0(root)" ]; then
         colorEcho $RED " 请以root身份执行该脚本"
@@ -52,8 +51,7 @@ slogon() {
     echo ""
 }
 
-function checkTrojan()
-{
+checkTrojan() {
     colorEcho $YELLOW " 该脚本仅适用于 https://hijk.art 网站的trojan一键脚本 安装wordpress用！"
     read -p " 退出请按n，按其他键继续：" answer
     [ "$answer" = "n" ] && exit 0
@@ -69,8 +67,7 @@ function checkTrojan()
     fi
 }
 
-function installPHP()
-{
+installPHP() {
     rpm -iUh https://rpms.remirepo.net/enterprise/remi-release-${main}.rpm
     if [ $main -eq 7 ]; then
 	    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/remi-php74.repo
@@ -82,8 +79,7 @@ function installPHP()
     systemctl enable php-fpm.service
 }
 
-function installMysql()
-{
+installMysql() {
     echo "# MariaDB 10.4 CentOS repository list
 # http://downloads.mariadb.org/mariadb/repositories/
 [mariadb]
@@ -101,8 +97,7 @@ gpgcheck=1" > /etc/yum.repos.d/mariadb.repo
     systemctl enable mariadb.service
 }
 
-function installWordPress()
-{
+installWordPress() {
     yum install -y wget
     mkdir -p /var/www;
     wget https://cn.wordpress.org/latest-zh_CN.tar.gz
@@ -116,8 +111,7 @@ function installWordPress()
     rm -rf latest-zh_CN.tar.gz
 }
 
-function config()
-{
+config() {
     # config mariadb
     systemctl start mariadb
     dbname="wordpress"
@@ -210,8 +204,7 @@ EOF
     systemctl restart php-fpm mariadb nginx trojan
 }
 
-function info()
-{
+info() {
     colorEcho $BLUE " WordPress安装成功！"
     echo "==============================="
     echo -e "   ${BLUE}WordPress安装路径：${PLAIN}${RED}/var/www/${domain}${PLAIN}"
@@ -222,8 +215,7 @@ function info()
     echo "==============================="
 }
 
-function main()
-{
+main() {
     checkSystem
     slogon
     checkTrojan

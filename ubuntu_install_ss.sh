@@ -14,8 +14,7 @@ colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
 
-function checkSystem()
-{
+checkSystem() {
     result=$(id | awk '{print $1}')
     if [ $result != "uid=0(root)" ]; then
         colorEcho $RED " 请以root身份执行该脚本"
@@ -52,8 +51,7 @@ slogon() {
     echo ""
 }
 
-function getData()
-{
+getData() {
     read -p " 请设置SS的密码（不输入则随机生成）:" PASSWORD
     [ -z "$PASSWORD" ] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
@@ -158,8 +156,7 @@ function getData()
     echo ""
 }
 
-function preinstall()
-{
+preinstall() {
     colorEcho $BLUE "更新系统..."
     apt update && apt upgrade -y
     
@@ -181,8 +178,7 @@ function preinstall()
     [ "$?" != "0" ] && apt install -y net-tools
 }
 
-function installSS()
-{
+installSS() {
     colorEcho $BLUE " 安装SS..."
 
     res=`which ss-server`
@@ -254,8 +250,7 @@ EOF
     fi
 }
 
-function setFirewall()
-{
+setFirewall() {
     res=`ufw status | grep -i inactive`
     if [ "$res" = "" ];then
         ufw allow ${PORT}/tcp
@@ -263,8 +258,7 @@ function setFirewall()
     fi
 }
 
-function installBBR()
-{
+installBBR() {
     result=$(lsmod | grep bbr)
     if [ "$result" != "" ]; then
         colorEcho $BLUE " BBR模块已安装"
@@ -300,8 +294,7 @@ function installBBR()
     INSTALL_BBR=true
 }
 
-function info()
-{
+info() {
     apt install -y qrencode
     ip=`curl -s -4 icanhazip.com`
     port=`cat /etc/shadowsocks-libev/config.json | grep server_port | cut -d: -f2 | tr -d \",' '`
@@ -327,8 +320,7 @@ function info()
     qrencode -o - -t utf8 ${link}
 }
 
-function bbrReboot()
-{
+bbrReboot() {
     if [ "${INSTALL_BBR}" == "true" ]; then
         echo  
         colorEcho $BLUE " 为使BBR模块生效，系统将在30秒后重启"
@@ -339,8 +331,7 @@ function bbrReboot()
     fi
 }
 
-function install()
-{
+install() {
     echo -n " 系统版本:  "
     lsb_release -a
 
@@ -354,8 +345,7 @@ function install()
     bbrReboot
 }
 
-function uninstall()
-{
+uninstall() {
     read -p " 确定卸载SS吗？(y/n)" answer
     [ -z ${answer} ] && answer="n"
 

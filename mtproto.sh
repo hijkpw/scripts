@@ -20,8 +20,7 @@ colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
 
-function checkSystem()
-{
+checkSystem() {
     result=$(id | awk '{print $1}')
     if [ $result != "uid=0(root)" ]; then
         colorEcho $RED " 请以root身份执行该脚本"
@@ -57,8 +56,7 @@ function checkSystem()
     fi
 }
 
-status()
-{
+status() {
     if [ "$DOCKER_CMD" = "" ]; then
         echo 0
         return
@@ -79,8 +77,7 @@ status()
     fi
 }
 
-statusText()
-{
+statusText() {
     res=`status`
     case $res in
         3)
@@ -95,8 +92,7 @@ statusText()
     esac
 }
 
-getData()
-{
+getData() {
     IP=`curl -s -4 ip.sb`
     read -p " 请输入MTProto端口[100-65535的一个数字]：" PORT
     [ -z "${PORT}" ] && {
@@ -114,8 +110,7 @@ getData()
     echo "MTG_CONTAINER=$MTG_CONTAINER" >> "$MTG_ENV"
 }
 
-installDocker()
-{
+installDocker() {
     if [ "$DOCKER_CMD" != "" ]; then
         systemctl enable docker
         systemctl start docker
@@ -154,8 +149,7 @@ installDocker()
     selinux
 }
 
-pullImage()
-{
+pullImage() {
     if [ "$DOCKER_CMD" = "" ]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         exit 1
@@ -168,16 +162,14 @@ pullImage()
     $DOCKER_CMD pull "$MTG_IMAGENAME" > /dev/null
 }
 
-selinux()
-{
+selinux() {
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
         setenforce 0
     fi
 }
 
-firewall()
-{
+firewall() {
     port=$1
     systemctl status firewalld > /dev/null 2>&1
     if [ $? -eq 0 ];then
@@ -199,8 +191,7 @@ firewall()
     fi
 }
 
-start()
-{
+start() {
     set -a
     source "$MTG_ENV"
     set +a
@@ -231,8 +222,7 @@ start()
     fi
 }
 
-stop()
-{
+stop() {
     res=`status`
     if [ $res -lt 3 ]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
@@ -246,8 +236,7 @@ stop()
     $DOCKER_CMD stop $MTG_CONTAINER >> /dev/null
 }
 
-showInfo()
-{
+showInfo() {
     res=`status`
     if [ $res -lt 3 ]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
@@ -273,8 +262,7 @@ showInfo()
     echo ""
 }
 
-install()
-{
+install() {
     getData
     installDocker
     pullImage
@@ -283,8 +271,7 @@ install()
     showInfo
 }
 
-update()
-{
+update() {
     res=`status`
     if [ $res -lt 2 ]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
@@ -297,8 +284,7 @@ update()
     showInfo
 }
 
-uninstall()
-{
+uninstall() {
     read -p " 确定卸载MTProto？[y/n]：" answer
     if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
         stop
@@ -311,8 +297,7 @@ uninstall()
     fi
 }
 
-run()
-{
+run() {
     res=`status`
     if [ $res -lt 3 ]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
@@ -331,8 +316,7 @@ run()
     showInfo
 }
 
-restart()
-{
+restart() {
     res=`status`
     if [ $res -lt 3 ]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
@@ -358,8 +342,7 @@ reconfig()
     showInfo
 }
 
-showLog()
-{
+showLog() {
     res=`status`
     if [ $res -lt 3 ]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
@@ -373,8 +356,7 @@ showLog()
     $DOCKER_CMD logs $MTG_CONTAINER | tail -f
 }
 
-function menu()
-{
+menu() {
     clear
     echo "#############################################################"
     echo -e "#                    ${RED}MTProto一键安装脚本${PLAIN}                    #"

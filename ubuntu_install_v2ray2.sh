@@ -9,6 +9,8 @@ YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
+# 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
+# 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
 sites=(
 http://www.zhuizishu.com/
 http://xs.56dyc.com/
@@ -23,8 +25,9 @@ http://www.39shubao.com/
 https://www.23xsw.cc/
 )
 
-function checkSystem()
-{
+CONFIG_FILE="/etc/v2ray/config.json"
+
+checkSystem() {
     result=$(id | awk '{print $1}')
     if [ $result != "uid=0(root)" ]; then
         echo "请以root身份执行该脚本"
@@ -70,8 +73,7 @@ slogon() {
     echo ""
 }
 
-function getData()
-{
+getData() {
     IP=`curl -s -4 ip.sb`
     echo " "
     echo " 本脚本为带伪装的一键脚本，运行之前请确认如下条件已经具备："
@@ -186,14 +188,10 @@ function getData()
     fi
 }
 
-function preinstall()
-{
-    ret=`nginx -t`
-    if [ "$?" != "0" ]; then
-        echo " 更新系统..."
-        apt update && apt -y upgrade
-    fi
-    echo " 安装必要软件"
+preinstall() {
+    colorEcho $BLUE " 更新系统..."
+    apt update && apt -y upgrade
+    colorEcho $BLUE " 安装必要软件"
     apt install -y telnet wget vim net-tools ntpdate unzip gcc g++
     apt autoremove -y
     res=`which wget`
@@ -202,34 +200,29 @@ function preinstall()
     [ "$?" != "0" ] && apt install -y net-tools
 }
 
-function installV2ray()
-{
+installV2ray() {
     colorEcho $BLUE 安装v2ray...
     bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
 
-    if [ ! -f /etc/v2ray/config.json ]; then
+    if [ ! -f $CONFIG_FILE ]; then
         colorEcho $RED " 安装失败，请到 https://hijk.art 网站反馈"
         exit 1
     fi
 
-    #logsetting=`cat /etc/v2ray/config.json|grep loglevel`
-    #if [ "${logsetting}" = "" ]; then
-    #    sed -i '1a\  "log": {\n    "loglevel": "info",\n    "access": "/var/log/v2ray/access.log",\n    "error": "/var/log/v2ray/error.log"\n  },' /etc/v2ray/config.json
-    #fi
     alterid=0
-    sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" /etc/v2ray/config.json
-    uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
-    V2PORT=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
+    sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" $CONFIG_FILE
+    uid=`grep id $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    V2PORT=`grep port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
-    res=`cat /etc/v2ray/config.json | grep streamSettings`
+    res=`grep streamSettings $CONFIG_FILE`
     if [ "$res" = "" ]; then
-        line=`grep -n '}]' /etc/v2ray/config.json  | head -n1 | cut -d: -f1`
+        line=`grep -n '}]' $CONFIG_FILE  | head -n1 | cut -d: -f1`
         line=`expr ${line} - 1`
-        sed -i "${line}s/}/},/" /etc/v2ray/config.json
-        sed -i "${line}a\    \"streamSettings\": {\n      \"network\": \"ws\",\n      \"wsSettings\": {\n        \"path\": \"${WSPATH}\",\n        \"headers\": {\n          \"Host\": \"${DOMAIN}\"\n        }\n      }\n    },\n    \"listen\": \"127.0.0.1\"" /etc/v2ray/config.json
+        sed -i "${line}s/}/},/" $CONFIG_FILE
+        sed -i "${line}a\    \"streamSettings\": {\n      \"network\": \"ws\",\n      \"wsSettings\": {\n        \"path\": \"${WSPATH}\",\n        \"headers\": {\n          \"Host\": \"${DOMAIN}\"\n        }\n      }\n    },\n    \"listen\": \"127.0.0.1\"" $CONFIG_FILE
     else
-        sed -i -e "s/path\":.*/path\": \"\\${WSPATH}\",/" /etc/v2ray/config.json
+        sed -i -e "s/path\":.*/path\": \"\\${WSPATH}\",/" $CONFIG_FILE
     fi
     #echo "0 3 */3 * * root echo '' > /var/log/v2ray/access.log; echo ''>/var/log/v2ray/error.log" >> /etc/crontab
     systemctl enable v2ray
@@ -250,7 +243,7 @@ function installV2ray()
             exit 1
          fi
     fi
-    colorEcho $BLUE "v2ray安装成功！"
+    colorEcho $BLUE " v2ray安装成功！"
 }
 getCert() {
     if [[ -z ${CERT_FILE+x} ]]; then
@@ -300,8 +293,7 @@ getCert() {
     fi
 }
 
-function installNginx()
-{
+installNginx() {
     apt install -y nginx
     
     getCert
@@ -417,8 +409,7 @@ EOF
     fi
 }
 
-function setFirewall()
-{
+setFirewall() {
     res=`ufw status | grep -i inactive`
     if [ "$res" = "" ];then
         ufw allow http/tcp
@@ -427,8 +418,7 @@ function setFirewall()
     fi
 }
 
-function installBBR()
-{
+installBBR() {
     if [ "$NEED_BBR" != "y" ]; then
         INSTALL_BBR=false
         return
@@ -449,20 +439,27 @@ function installBBR()
         return
     fi
 
+    echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
+    sysctl -p
+    result=$(lsmod | grep bbr)
+    if [[ "$result" != "" ]]; then
+        colorEcho $GREEN " BBR模块已启用"
+        INSTALL_BBR=false
+        return
+    fi
+
     colorEcho $BLUE " 安装BBR模块..."
     apt install -y --install-recommends linux-generic-hwe-16.04
     grub-set-default 0
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-    echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
     INSTALL_BBR=true
 }
 
-function info()
-{
-    if [ ! -f /etc/v2ray/config.json ]; then
+info() {
+    if [ ! -f $CONFIG_FILE ]; then
         colorEcho $RED " v2ray未安装"
         exit 1
     fi
@@ -471,15 +468,15 @@ function info()
     res=`netstat -nltp | grep v2ray`
     [ -z "$res" ] && v2status="${RED}已停止${PLAIN}" || v2status="${GREEN}正在运行${PLAIN}"
     
-    uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
-    alterid=`cat /etc/v2ray/config.json | grep alterId | cut -d: -f2 | tr -d \",' '`
-    network=`cat /etc/v2ray/config.json | grep network | cut -d: -f2 | tr -d \",' '`
-    domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
+    uid=`grep id $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    alterid=`grep alterId $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    network=`grep network $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    domain=`grep Host $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     if [ -z "$domain" ]; then
         colorEcho $RED " 不是伪装版本的v2ray"
         exit 1
     fi
-    path=`cat /etc/v2ray/config.json | grep path | cut -d: -f2 | tr -d \",' '`
+    path=`grep path $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     port=`cat /etc/nginx/conf.d/${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
     security="none"
     res=`netstat -nltp | grep ${port} | grep nginx`
@@ -504,7 +501,7 @@ function info()
     
     echo ============================================
     echo -e " ${BLUE}v2ray运行状态：${PLAIN}${v2status}"
-    echo -e " ${BLUE}v2ray配置文件：${PLAIN}${RED}/etc/v2ray/config.json${PLAIN}"
+    echo -e " ${BLUE}v2ray配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo -e " ${BLUE}nginx运行状态：${PLAIN}${ngstatus}"
     echo -e " ${BLUE}nginx配置文件：${PLAIN}${RED}${confpath}${domain}.conf${PLAIN}"
     echo ""
@@ -523,8 +520,7 @@ function info()
     echo -e " ${BLUE}vmess链接:${PLAIN} $link"
 }
 
-function bbrReboot()
-{
+bbrReboot() {
     if [ "${INSTALL_BBR}" == "true" ]; then
         echo  
         colorEcho $BLUE " 为使BBR模块生效，系统将在30秒后重启"
@@ -536,8 +532,7 @@ function bbrReboot()
 }
 
 
-function install()
-{
+install() {
     echo -n "系统版本:  "
     lsb_release -a
 
@@ -553,15 +548,14 @@ function install()
     bbrReboot
 }
 
-function uninstall()
-{
+uninstall() {
     read -p " 确定卸载v2ray吗？(y/n)" answer
     [ -z ${answer} ] && answer="n"
 
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
         systemctl stop v2ray
         systemctl disable v2ray
-        domain=`cat /etc/v2ray/config.json | grep Host | cut -d: -f2 | tr -d \",' '`
+        domain=`grep Host $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
         rm -rf /etc/v2ray/*
         rm -rf /usr/bin/v2ray/*
         rm -rf /var/log/v2ray/*

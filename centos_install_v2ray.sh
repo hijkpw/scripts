@@ -12,8 +12,7 @@ colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
 
-function checkSystem()
-{
+checkSystem() {
     result=$(id | awk '{print $1}')
     if [ $result != "uid=0(root)" ]; then
         colorEcho $RED " 请以root身份执行该脚本"
@@ -54,8 +53,7 @@ slogon() {
     echo ""
 }
 
-function getData()
-{
+getData() {
     while true
     do
         read -p " 请输入v2ray的端口[1-65535]:" PORT
@@ -80,8 +78,7 @@ function getData()
     done
 }
 
-function preinstall()
-{
+preinstall() {
 
     colorEcho $BLUE " 更新系统..."
     yum update -y
@@ -101,8 +98,7 @@ function preinstall()
     fi
 }
 
-function installV2ray()
-{
+installV2ray() {
     colorEcho $BLUE " 安装v2ray..."
     bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
 
@@ -141,8 +137,7 @@ function installV2ray()
     colorEcho $GREEN " v2ray安装成功！"
 }
 
-function setFirewall()
-{
+setFirewall() {
     systemctl status firewalld > /dev/null 2>&1
     if [ $? -eq 0 ];then
         firewall-cmd --permanent --add-port=${PORT}/tcp
@@ -152,8 +147,7 @@ function setFirewall()
     fi
 }
 
-function installBBR()
-{
+installBBR() {
     result=$(lsmod | grep bbr)
     if [ "$result" != "" ]; then
         colorEcho $YELLOW " BBR模块已安装"
@@ -191,8 +185,7 @@ function installBBR()
     INSTALL_BBR=true
 }
 
-function info()
-{
+info() {
     if [ ! -f /etc/v2ray/config.json ]; then
         echo -e " ${RED}未安装v2ray!${PLAIN}"
         exit 1
@@ -238,8 +231,7 @@ function info()
     echo -e " ${BLUE}vmess链接:${PLAIN}  $link"
 }
 
-function bbrReboot()
-{
+bbrReboot() {
     if [ "$INSTALL_BBR" == "true" ]; then
         echo  
         colorEcho $BLUE " 为使BBR模块生效，系统将在30秒后重启"
@@ -250,8 +242,7 @@ function bbrReboot()
     fi
 }
 
-function install()
-{
+install() {
     echo -n "系统版本:  "
     cat /etc/centos-release
 
@@ -267,8 +258,7 @@ function install()
     bbrReboot
 }
 
-function uninstall()
-{
+uninstall() {
     echo ""
     read -p " 确定卸载v2ray吗？(y/n)" answer
     [ -z ${answer} ] && answer="n"

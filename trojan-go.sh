@@ -3,10 +3,14 @@
 # Author: hijk<https://hijk.art>
 
 
-RED='\033[0;31m'
-GREEN="\033[0;32m"
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
+# 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
+# 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
 SITES=(
 http://www.zhuizishu.com/
 http://xs.56dyc.com/
@@ -26,8 +30,7 @@ CONFIG_FILE="/etc/trojan-go/config.json"
 
 WS="false"
 
-checkSystem()
-{
+checkSystem() {
     result=$(id | awk '{print $1}')
     if [[ $result != "uid=0(root)" ]]; then
         echo -e " ${RED}请以root身份执行该脚本${PLAIN}"
@@ -65,8 +68,7 @@ checkSystem()
     fi
 }
 
-status()
-{
+status() {
     trojan_cmd="$(command -v trojan-go)"
     if [[ "$trojan_cmd" = "" ]]; then
         echo 0
@@ -85,8 +87,7 @@ status()
     fi
 }
 
-statusText()
-{
+statusText() {
     res=`status`
     case $res in
         2)
@@ -101,15 +102,14 @@ statusText()
     esac
 }
 
-getVersion()
-{
+getVersion() {
     VERSION=$(curl -fsSL https://api.github.com/repos/p4gefau1t/trojan-go/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/'| head -n1)
     if [[ ${VERSION:0:1} != "v" ]];then
         VERSION="v${VERSION}"
     fi
 }
 
-archAffix(){
+archAffix() {
     case "${1:-"$(uname -m)"}" in
         i686|i386)
             echo '386'
@@ -149,8 +149,7 @@ archAffix(){
 	return 0
 }
 
-getData()
-{
+getData() {
     can_change=$1
     if [[ "$can_change" != "yes" ]]; then
         IP=`curl -s -4 ip.sb`
@@ -259,8 +258,7 @@ getData()
     [[ "$protocol" != "http:" ]] && REMOTE_PORT=80 || REMOTE_PORT=443
 }
 
-installNginx()
-{
+installNginx() {
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release 
     fi
@@ -276,8 +274,7 @@ installNginx()
     fi
 }
 
-getCert()
-{
+getCert() {
     if [[ -z ${CERT_FILE+x} ]]; then
         res=`which pip3`
         if [[ "$?" != "0" ]]; then
@@ -314,8 +311,7 @@ getCert()
     fi
 }
 
-configNginx()
-{
+configNginx() {
     if [[ ! -f /etc/nginx/nginx.conf.bak ]]; then
         mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
     fi
@@ -386,8 +382,7 @@ EOF
     systemctl enable nginx
 }
 
-downloadFile()
-{
+downloadFile() {
     SUFFIX=`archAffix`
     DOWNLOAD_URL="https://github.com/p4gefau1t/trojan-go/releases/download/${VERSION}/trojan-go-linux-${SUFFIX}.zip"
     wget -O /tmp/${ZIP_FILE}.zip $DOWNLOAD_URL
@@ -397,8 +392,7 @@ downloadFile()
     fi
 }
 
-installTrojan()
-{
+installTrojan() {
     rm -rf /tmp/${ZIP_FILE}
     unzip /tmp/${ZIP_FILE}.zip  -d /tmp/${ZIP_FILE}
     cp /tmp/${ZIP_FILE}/trojan-go /usr/bin
@@ -410,8 +404,7 @@ installTrojan()
     rm -rf /tmp/${ZIP_FILE}
 }
 
-configTrojan()
-{
+configTrojan() {
     rm -rf /etc/trojan-go
     mkdir -p /etc/trojan-go
     if [[ -f ~/trojan-go.pem ]]; then
@@ -468,16 +461,14 @@ configTrojan()
 EOF
 }
 
-setSelinux()
-{
+setSelinux() {
     if [[ -s /etc/selinux/config ]] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
         setenforce 0
     fi
 }
 
-setFirewall()
-{
+setFirewall() {
     res=`which firewall-cmd`
     if [[ $? -eq 0 ]]; then
         systemctl status firewalld > /dev/null 2>&1
@@ -517,8 +508,7 @@ setFirewall()
     fi
 }
 
-installBBR()
-{
+installBBR() {
     if [[ "$NEED_BBR" != "y" ]]; then
         INSTALL_BBR=false
         return
@@ -563,8 +553,7 @@ installBBR()
     INSTALL_BBR=true
 }
 
-install()
-{
+install() {
     $CMD_UPGRADE
     $CMD_INSTALL wget net-tools unzip vim
     res=`which unzip`
@@ -594,8 +583,7 @@ install()
     showInfo
 }
 
-bbrReboot()
-{
+bbrReboot() {
     if [[ "${INSTALL_BBR}" == "true" ]]; then
         echo  
         echo " 为使BBR模块生效，系统将在30秒后重启"
@@ -606,8 +594,7 @@ bbrReboot()
     fi
 }
 
-update()
-{
+update() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         echo -e " ${RED}trojan-go未安装，请先安装！${PLAIN}"
@@ -624,8 +611,7 @@ update()
     showInfo
 }
 
-uninstall()
-{
+uninstall() {
     read -p " 确定卸载trojan-go？[y/n]：" answer
     if [[ "${answer,,}" = "y" ]]; then
         stop
@@ -647,8 +633,7 @@ uninstall()
     fi
 }
 
-run()
-{
+run() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         echo -e "${RED}trojan-go未安装，请先安装！${PLAIN}"
@@ -664,22 +649,19 @@ run()
     showInfo
 }
 
-start()
-{
+start() {
     systemctl restart nginx
     systemctl restart trojan-go
     sleep 3
 }
 
-stop()
-{
+stop() {
     systemctl stop nginx
     systemctl stop trojan-go
 }
 
 
-restart()
-{
+restart() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         echo -e " ${RED}trojan-go未安装，请先安装！${PLAIN}"
@@ -690,8 +672,7 @@ restart()
     start
 }
 
-reconfig()
-{
+reconfig() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         echo -e " ${RED}trojan-go未安装，请先安装！${PLAIN}"
@@ -712,8 +693,7 @@ reconfig()
 }
 
 
-showInfo()
-{
+showInfo() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         echo -e " ${RED}trojan-go未安装，请先安装！${PLAIN}"
@@ -746,8 +726,7 @@ showInfo()
     echo ""
 }
 
-showLog()
-{
+showLog() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         echo -e "${RED}trojan-go未安装，请先安装！${PLAIN}"
@@ -757,8 +736,7 @@ showLog()
     journalctl -xen -u trojan-go --no-pager
 }
 
-menu()
-{
+menu() {
     clear
     echo "#############################################################"
     echo -e "#                    ${RED}trojan-go一键安装脚本${PLAIN}                  #"
