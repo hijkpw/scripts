@@ -1,5 +1,5 @@
 #!/bin/bash
-# centos7/8 trojan WordPress一键安装脚本
+# centos7/8 trojan-go WordPress一键安装脚本
 # Author: hijk<https://hijk.art>
 
 
@@ -9,7 +9,7 @@ YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
-CONFIG_FILE=/usr/local/etc/trojan/config.json
+CONFIG_FILE="/etc/trojan-go/config.json"
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
@@ -17,21 +17,21 @@ colorEcho() {
 
 checkSystem() {
     result=$(id | awk '{print $1}')
-    if [ $result != "uid=0(root)" ]; then
+    if [[ $result != "uid=0(root)" ]]; then
         colorEcho $RED " 请以root身份执行该脚本"
         exit 1
     fi
 
-    if [ ! -f /etc/centos-release ];then
+    if [[ ! -f /etc/centos-release ]];then
         res=`which yum`
-        if [ "$?" != "0" ]; then
+        if [[ "$?" != "0" ]]; then
             colorEcho $RED " 系统不是CentOS"
             exit 1
          fi
     else
-        result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
+        result=`grep -oE "[0-9.]+" /etc/centos-release`
         MAIN=${result%%.*}
-        if [ $MAIN -lt 7 ]; then
+        if [[ $MAIN -lt 7 ]]; then
             colorEcho $RED " 不受支持的CentOS版本"
             exit 1
          fi
@@ -52,16 +52,16 @@ slogon() {
 }
 
 checkTrojan() {
-    colorEcho $YELLOW " 该脚本仅适用于 https://hijk.art 网站的trojan一键脚本 安装wordpress用！"
+    colorEcho $YELLOW " 该脚本仅适用于 https://hijk.art 网站的 trojan-go 一键脚本安装wordpress用！"
     read -p " 退出请按n，按其他键继续：" answer
-    [ "$answer" = "n" ] && exit 0
+    [[ "$answer" = "n" ]] && exit 0
 
-    if [ ! -f ${CONFIG_FILE} ]; then
-        colorEcho $RED " 未安装trojan"
+    if [[ ! -f ${CONFIG_FILE} ]]; then
+        colorEcho $RED " 未安装trojan-go"
         exit 1
     fi
-    DOMAIN=`grep -m1 cert $CONFIG_FILE | awk 'BEGIN { FS = "/" } ; { print $5 }'`
-    if [ ! -f /etc/nginx/conf.d/${DOMAIN}.conf ]; then
+    DOMAIN=`grep sni $CONFIG_FILE | cut -d\" -f4`
+    if [[ ! -f /etc/nginx/conf.d/${DOMAIN}.conf ]]; then
         colorEcho $RED " 未找到域名的nginx配置文件"
         exit 1
     fi
@@ -70,7 +70,7 @@ checkTrojan() {
 
 installPHP() {
     rpm -iUh https://rpms.remirepo.net/enterprise/remi-release-${MAIN}.rpm
-    if [ $MAIN -eq 7 ]; then
+    if [[ $MAIN -eq 7 ]]; then
 	    sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/remi-php74.repo
     else
         sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/remi.repo
@@ -88,7 +88,7 @@ name = MariaDB
 baseurl = http://yum.mariadb.org/10.5/centos${MAIN}-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1" > /etc/yum.repos.d/mariadb.repo
-    if [ $MAIN -eq 8 ]; then
+    if [[ $MAIN -eq 8 ]]; then
         echo "module_hotfixes=1" >>  /etc/yum.repos.d/mariadb.repo
     fi
 
@@ -102,7 +102,7 @@ installWordPress() {
     yum install -y wget
     mkdir -p /var/www;
     wget https://cn.wordpress.org/latest-zh_CN.tar.gz
-    if [ ! -f latest-zh_CN.tar.gz ]; then
+    if [[ ! -f latest-zh_CN.tar.gz ]]; then
     	colorEcho $RED " 下载WordPress失败，请稍后重试"
 	    exit 1
     fi
@@ -131,7 +131,7 @@ EOF
     line=`cat -n /etc/php.ini | grep 'date.timezone' | tail -n1 | awk '{print $1}'`
     sed -i "${line}a date.timezone = Asia/Shanghai" /etc/php.ini
     sed -i 's/;opcache.revalidate_freq=2/opcache.revalidate_freq=30/' /etc/php.d/10-opcache.ini
-    if [ $MAIN -eq 7 ]; then
+    if [[ $MAIN -eq 7 ]]; then
         sed -i 's/listen = 127.0.0.1:9000/listen = \/run\/php-fpm\/www.sock/' /etc/php-fpm.d/www.conf
     fi
     line=`cat -n /etc/php-fpm.d/www.conf | grep 'listen.mode' | tail -n1 | awk '{print $1}'`
@@ -153,8 +153,6 @@ EOF
   }
   s/put your unique phrase here/salt()/ge
 ' wp-config.php
-    #sed -i "23a define( 'WP_HOME', 'https://${DOMAIN}:${PORT}' );" wp-config.php
-    #sed -i "24a define( 'WP_SITEURL', 'https://${DOMAIN}:${PORT}' );" wp-config.php
 
     chown -R apache:apache /var/www/$DOMAIN
 
@@ -196,12 +194,14 @@ server {
 }
 EOF
 
-    # config trojan
+    # config trojan-go
     sed -i -e "s/remote_addr\":\s*\".*\",/remote_addr\": \"127.0.0.1\",/" $CONFIG_FILE
     sed -i -e "s/remote_port\":\s*[0-9]*/remote_port\": 8080/" $CONFIG_FILE
+    sed -i -e "s/fallback_addr\":\s*\".*\",/fallback_addr\": \"127.0.0.1\",/" $CONFIG_FILE
+    sed -i -e "s/fallback_port\":\s*[0-9]*/fallback_port\": 8080/" $CONFIG_FILE
 
     # restart service
-    systemctl restart php-fpm mariadb nginx trojan
+    systemctl restart php-fpm mariadb nginx trojan-go
 }
 
 info() {

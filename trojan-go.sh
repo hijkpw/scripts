@@ -615,7 +615,7 @@ uninstall() {
     read -p " 确定卸载trojan-go？[y/n]：" answer
     if [[ "${answer,,}" = "y" ]]; then
         stop
-        domain=`cat $CONFIG_FILE | grep sni | cut -d: -f2`
+        domain=`grep sni $CONFIG_FILE | cut -d\" -f4`
 
         rm -rf /etc/trojan-go
         rm -rf /usr/bin/trojan-go
