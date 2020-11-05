@@ -12,6 +12,10 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 
 联系邮箱：hijk.pw@protonmail.ch
 
+[本站脚本资源汇总](https://v2raytech.com/script-collection/)
+
+> **PS**： 本站所有文章和Github上所有脚本均可随意转载和修改使用，无任何约束，无需附上原文链接和本人名字
+
 ## CentOS
 
 1. CentOS 7/8系统Shadowsocks/SS一键脚本：centos_install_ss.sh，使用教程：<https://hijk.art/shadowsocks-ss-one-click-script>
@@ -100,6 +104,8 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 
 [trojan建站教程](https://hijk.art/build-website-with-trojan/)
 
+[trojan-go建站教程](https://v2raytech.com/trojan-go-with-website/)
+
 # VPS教程
 
 [CN2 GIA商家推荐](https://hijk.art/cn2-gia-merchants/)
@@ -145,6 +151,8 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 [阿里云卸载云盾/安骑士](https://hijk.art/uninstall-aliyun-dun/)
 
 [腾讯云监控软件一键卸载脚本](https://hijk.art/uninstall-tencent-cloud-monitors/)
+
+[致富经：每天1000+京豆，京东薅羊毛全攻略（星推官、红包、游戏、签到等）](https://v2raytech.com/jd-script-to-get-rich/)
 
 # Just My Socks
 
