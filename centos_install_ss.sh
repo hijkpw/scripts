@@ -10,6 +10,7 @@ BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
 BASE=`pwd`
+OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 
 colorEcho() {
@@ -191,7 +192,7 @@ installSS() {
         make && make install
         if [[ $? -ne 0 ]]; then
             echo
-            echo -e " [${RED}错误${PLAIN}] Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
+            echo -e " [${RED}错误${PLAIN}]: $OS Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
             cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
             exit 1
         fi

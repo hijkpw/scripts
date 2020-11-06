@@ -9,6 +9,8 @@ YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
+OS=`hostnamectl | grep -i system | cut -d: -f2`
+
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
 # 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
 SITES=(
@@ -53,13 +55,13 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt update; apt upgrade -y"
+        CMD_UPGRADE="apt autoremove -y; apt update; apt upgrade -y"
     else
         OS="centos"
         PMT="yum"
         CMD_INSTALL="yum install -y "
         CMD_REMOVE="yum remove -y "
-        CMD_UPGRADE="yum update -y"
+        CMD_UPGRADE="yum clean all; yum update -y"
     fi
     res=`which systemctl`
     if [[ "$?" != "0" ]]; then
@@ -282,7 +284,7 @@ getCert() {
         fi
         res=`which pip3`
         if [[ "$?" != "0" ]]; then
-            echo -e " pip3安装失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
+            echo -e " $OS pip3安装失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
             exit 1
         fi
         pip3 install --upgrade pip
@@ -302,7 +304,7 @@ getCert() {
         fi
         certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
         if [[ "$?" != "0" ]]; then
-            echo -e " 获取证书失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
+            echo -e " $OS 获取证书失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
             exit 1
         fi
 

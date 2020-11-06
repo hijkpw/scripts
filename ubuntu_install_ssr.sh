@@ -12,6 +12,7 @@ PLAIN='\033[0m'
 FILENAME="ShadowsocksR-v3.2.2"
 URL="https://github.com/shadowsocksrr/shadowsocksr/archive/3.2.2.tar.gz"
 BASE=`pwd`
+OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 
 colorEcho() {
@@ -248,6 +249,8 @@ getData() {
 }
 
 preinstall() {
+    colorEcho $BLUE " 更新系统"
+    auto autoremove -y
     apt update && apt upgrade -y
 
     colorEcho $BLUE " 安装必要软件"
@@ -274,7 +277,7 @@ installSSR() {
         tar -zxf ${FILENAME}.tar.gz
         mv shadowsocksr-3.2.2/shadowsocks /usr/local
         if [ ! -f /usr/local/shadowsocks/server.py ]; then
-            colorEcho $RED " 安装失败，请到 https://hijk.art 网站反馈"
+            colorEcho $RED " $OS 安装SSR失败，请到 https://hijk.art 网站反馈"
             cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
             exit 1
         fi
@@ -323,7 +326,7 @@ EOF
     sleep 3
     res=`netstat -nltp | grep ${PORT} | grep python`
     if [ "${res}" = "" ]; then
-        colorEcho $RED " ssr启动失败，请检查端口是否被占用！"
+        colorEcho $RED " $OS ssr启动失败，请检查端口是否被占用！"
         exit 1
     fi
 }

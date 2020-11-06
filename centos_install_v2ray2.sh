@@ -27,6 +27,8 @@ https://www.23xsw.cc/
 
 CONFIG_FILE="/etc/v2ray/config.json"
 
+OS=`hostnamectl | grep -i system | cut -d: -f2`
+
 checkSystem() {
     result=$(id | awk '{print $1}')
     if [[ $result != "uid=0(root)" ]]; then
@@ -192,6 +194,7 @@ getData() {
 
 preinstall() {
     colorEcho $BLUE " 更新系统..."
+    yum clean all
     yum update -y
     colorEcho $BLUE " 安装必要软件"
     yum install -y epel-release telnet wget vim net-tools ntpdate unzip
@@ -224,7 +227,7 @@ getCert() {
         fi
         res=`which pip3`
         if [[ "$?" != "0" ]]; then
-            colorEcho ${RED}  " pip3安装失败，请到 https://hijk.art 反馈"
+            colorEcho ${RED}  " $OS pip3安装失败，请到 https://hijk.art 反馈"
             exit 1
         fi
         pip3 install --upgrade pip
@@ -241,7 +244,7 @@ getCert() {
         fi
         certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
         if [[ "$?" != "0" ]]; then
-            colorEcho ${RED}  " 获取证书失败，请到 https://hijk.art 反馈"
+            colorEcho ${RED}  " $OS 获取证书失败，请到 https://hijk.art 反馈"
             exit 1
         fi
 
@@ -259,7 +262,7 @@ installV2ray() {
     bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
 
     if [[ ! -f $CONFIG_FILE ]]; then
-        colorEcho $RED " 安装失败，请到 https://hijk.art 网站反馈"
+        colorEcho $RED " $OS 安装V2ray失败，请到 https://hijk.art 网站反馈"
         exit 1
     fi
 
@@ -296,7 +299,7 @@ installV2ray() {
         sleep 3
         res=`ss -ntlp| grep ${V2PORT} | grep v2ray`
         if [[ "${res}" = "" ]]; then
-            colorEcho $RED " 端口号：${PORT}，伪装路径：${WSPATH}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
+            colorEcho $RED " $OS 端口号：${PORT}，伪装路径：${WSPATH}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
             exit 1
          fi
     fi

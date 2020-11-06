@@ -8,6 +8,8 @@ YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
+OS=`hostnamectl | grep -i system | cut -d: -f2`
+
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
@@ -80,8 +82,8 @@ getData() {
 }
 
 preinstall() {
-
     colorEcho $BLUE " 更新系统..."
+    apt autoremove -y
     apt update && apt -y upgrade
     colorEcho $BLUE " 安装必要软件"
     apt install -y telnet wget vim net-tools ntpdate unzip
@@ -97,7 +99,7 @@ installV2ray() {
     bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
 
     if [ ! -f /etc/v2ray/config.json ]; then
-        colorEcho $RED " 安装失败，请到 https://hijk.art 网站反馈"
+        colorEcho $RED " $OS 安装V2ray失败，请到 https://hijk.art 网站反馈"
         exit 1
     fi
 
@@ -121,7 +123,7 @@ installV2ray() {
         sleep 3
         res=`netstat -ntlp| grep ${PORT} | grep v2ray`
         if [ "${res}" = "" ]; then
-            colorEcho $red " 端口号：${PORT}，v2启动失败，请检查端口是否被占用！"
+            colorEcho $red " $OS 端口号：${PORT}，v2启动失败，请检查端口是否被占用！"
             exit 1
          fi
     fi

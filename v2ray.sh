@@ -26,6 +26,7 @@ https://www.23xsw.cc/
 )
 
 CONFIG_FILE="/etc/v2ray/config.json"
+OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 VLESS="false"
 TLS="false"
@@ -55,13 +56,13 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt update; apt upgrade -y"
+        CMD_UPGRADE="apt autoremove -y; apt update; apt upgrade -y"
     else
         OS="centos"
         PMT="yum"
         CMD_INSTALL="yum install -y "
         CMD_REMOVE="yum remove -y "
-        CMD_UPGRADE="yum update -y"
+        CMD_UPGRADE="yum clean all; yum update -y"
     fi
     res=`which systemctl`
     if [[ "$?" != "0" ]]; then
@@ -382,7 +383,7 @@ getCert() {
         fi
         res=`which pip3`
         if [[ "$?" != "0" ]]; then
-            colorEcho ${RED}  " pip3安装失败，请到 https://hijk.art 反馈"
+            colorEcho ${RED}  " $OS pip3安装失败，请到 https://hijk.art 反馈"
             exit 1
         fi
         pip3 install --upgrade pip
@@ -399,7 +400,7 @@ getCert() {
         fi
         certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
         if [[ "$?" != "0" ]]; then
-            colorEcho ${RED}  " 获取证书失败，请到 https://hijk.art 反馈"
+            colorEcho ${RED}  " $OS 获取证书失败，请到 https://hijk.art 反馈"
             exit 1
         fi
 

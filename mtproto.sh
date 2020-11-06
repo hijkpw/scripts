@@ -15,6 +15,7 @@ export MTG_CONTAINER="${MTG_CONTAINER:-mtg}"
 export MTG_IMAGENAME="${MTG_IMAGENAME:-nineseconds/mtg:stable}"
 
 DOCKER_CMD="$(command -v docker)"
+OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
@@ -118,10 +119,10 @@ installDocker() {
         return
     fi
 
-    $CMD_REMOVE docker docker-engine docker.io containerd runc
+    #$CMD_REMOVE docker docker-engine docker.io containerd runc
     $CMD_INSTALL wget curl
     if [ $PMT = "apt" ]; then
-		apt-get install \
+		apt-get -y install \
 			apt-transport-https \
 			ca-certificates \
 			curl \
@@ -132,7 +133,7 @@ installDocker() {
             "deb [arch=amd64] https://download.docker.com/linux/$OS \
             $(lsb_release -cs) \
             stable"
-        apt update
+        apt update -y
     else
         wget -O /etc/yum.repos.d/docker-ce.repo https://download.docker.com/linux/centos/docker-ce.repo
     fi
@@ -140,7 +141,7 @@ installDocker() {
 
     DOCKER_CMD="$(command -v docker)"
     if [ "$DOCKER_CMD" = "" ]; then
-        echo -e " ${RED}docker安装失败，请到https://hijk.art反馈${PLAIN}"
+        echo -e " ${RED}$OS docker安装失败，请到https://hijk.art反馈${PLAIN}"
         exit 1
     fi
     systemctl enable docker
@@ -217,7 +218,7 @@ start() {
     res=`ss -ntlp| grep ${MTG_PORT} | grep docker`
     if [ "$res" = "" ]; then
         docker logs $MTG_CONTAINER | tail
-        echo -e " ${RED}启动docker镜像失败，请到 https://hijk.art 反馈${PLAIN}"
+        echo -e " ${RED}$OS 启动docker镜像失败，请到 https://hijk.art 反馈${PLAIN}"
         exit 1
     fi
 }
