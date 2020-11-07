@@ -47,18 +47,11 @@ checkSystem() {
             colorEcho $RED " 不受支持的Linux系统"
             exit 1
         fi
-        res=`hostnamectl | grep -i ubuntu`
-        if [[ "${res}" != "" ]]; then
-            OS="ubuntu"
-        else
-            OS="debian"
-        fi
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
         CMD_UPGRADE="apt autoremove -y; apt update; apt upgrade -y"
     else
-        OS="centos"
         PMT="yum"
         CMD_INSTALL="yum install -y "
         CMD_REMOVE="yum remove -y "
@@ -640,7 +633,7 @@ installBBR() {
         yum --enablerepo=elrepo-kernel install kernel-ml -y
         grub2-set-default 0
     else
-        apt install -y --install-recommends linux-generic-hwe-16.04
+        $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
     fi
     INSTALL_BBR=true

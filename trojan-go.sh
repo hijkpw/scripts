@@ -46,18 +46,11 @@ checkSystem() {
             echo -e " ${RED}不受支持的Linux系统${PLAIN}"
             exit 1
         fi
-        res=`hostnamectl | grep -i ubuntu`
-        if [[ "${res}" != "" ]]; then
-            OS="ubuntu"
-        else
-            OS="debian"
-        fi
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
         CMD_UPGRADE="apt autoremove -y; apt update; apt upgrade -y"
     else
-        OS="centos"
         PMT="yum"
         CMD_INSTALL="yum install -y "
         CMD_REMOVE="yum remove -y "
@@ -477,14 +470,18 @@ setFirewall() {
         if [[ $? -eq 0 ]];then
             firewall-cmd --permanent --add-service=http
             firewall-cmd --permanent --add-service=https
-            firewall-cmd --permanent --add-port=${PORT}/tcp
+            if [[ "$PORT" != "443" ]]; then
+                firewall-cmd --permanent --add-port=${PORT}/tcp
+            fi
             firewall-cmd --reload
         else
             nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
             if [[ "$nl" != "3" ]]; then
                 iptables -I INPUT -p tcp --dport 80 -j ACCEPT
                 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-                iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                if [[ "$PORT" != "443" ]]; then
+                    iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                fi
             fi
         fi
     else
@@ -494,7 +491,9 @@ setFirewall() {
             if [[ "$nl" != "3" ]]; then
                 iptables -I INPUT -p tcp --dport 80 -j ACCEPT
                 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-                iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                if [[ "$PORT" != "443" ]]; then
+                    iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                fi
             fi
         else
             res=`which ufw`
@@ -503,7 +502,9 @@ setFirewall() {
                 if [[ "$res" = "" ]]; then
                     ufw allow http/tcp
                     ufw allow https/tcp
-                    ufw allow ${PORT}/tcp
+                    if [[ "$PORT" != "443" ]]; then
+                        ufw allow ${PORT}/tcp
+                    fi
                 fi
             fi
         fi
@@ -548,7 +549,7 @@ installBBR() {
         yum --enablerepo=elrepo-kernel install kernel-ml -y
         grub2-set-default 0
     else
-        apt install -y --install-recommends linux-generic-hwe-16.04
+        $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
     fi
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf

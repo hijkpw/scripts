@@ -46,12 +46,16 @@ function checkSystem()
         if [ "$?" != "0" ]; then
             colorEcho $RED " 不受支持的Linux系统"
             exit 1
-         fi
-         OS=ubuntu
-         pm=apt
+        fi
+        PMT=apt
+        CMD_INSTALL="apt install -y "
+        CMD_REMOVE="apt remove -y "
+        CMD_UPGRADE="apt autoremove -y; apt update; apt upgrade -y"
     else
-        OS=centos
-        pm=yum
+        PMT=yum
+        CMD_INSTALL="yum install -y "
+        CMD_REMOVE="yum remove -y "
+        CMD_UPGRADE="yum clean all; yum update -y"
     fi
     res=`which systemctl`
     if [ "$?" != "0" ]; then
@@ -140,40 +144,27 @@ function getData()
     site=${sites[$index]}
     REMOTE_PORT=`echo ${site} | cut -d/ -f3`
     protocol=`echo ${site} | cut -d/ -f1`
-    [ "$protocol" != "http:" ] && REMOTE_PORT=80 || REMOTE_PORT=443
+    [[ "$protocol" != "http:" ]] && REMOTE_PORT=80 || REMOTE_PORT=443
 }
 
 function preinstall()
 {
     colorEcho $BLUE " 更新系统..."
-    if [ "$pm" = "yum" ]; then
-        yum clean all
-        yum update -y
-    else
-        apt autoremove -y
-        apt update && apt -y upgrade
-    fi
+    $CMD_UPGRADE
+
     colorEcho $BLUE " 安装必要软件"
-    if [ "$pm" = "yum" ]; then
-        yum install -y epel-release telnet wget vim unzip tar
-        res=`which wget`
-        [ "$?" != "0" ] && yum install -y wget
-        yum install -y net-tools
-        yum install -y ntpdate
-        res=`which netstat`
-        [ "$?" != "0" ] && yum install -y net-tools
-    else
-        apt install -y telnet wget vim unzip gcc g++ tar
-        res=`which wget`
-        [ "$?" != "0" ] && apt install -y wget
-        apt install -y net-tools
-        apt install -y ntpdate
-        res=`which netstat`
-        [ "$?" != "0" ] && apt install -y net-tools
+    if [[ "$PMT" = "yum" ]]; then
+        $CMD_INSTALL epel-release
+    fi
+    $CMD_INSTALL telnet wget vim unzip tar
+    $CMD_INSTALL net-tools
+    $CMD_INSTALL ntpdate
+    if [[ "$PMT" = "apt" ]]; then
+        $CMD_INSTALL gcc g++
         apt autoremove -y
     fi
 
-    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+    if [[ -s /etc/selinux/config ]] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
         setenforce 0
     fi
@@ -186,7 +177,7 @@ function installTrojan()
     rm -rf /etc/systemd/system/trojan.service
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/trojan-gfw/trojan-quickstart/master/trojan-quickstart.sh)"
 
-    if [ ! -f $CONFIG_FILE ]; then
+    if [[ ! -f $CONFIG_FILE ]]; then
         colorEcho $RED " $OS 安装trojan失败，请到 https://hijk.art 反馈"
         exit 1
     fi
@@ -268,11 +259,7 @@ getCert()
 
 function installNginx()
 {
-    if [ "$pm" = "yum" ]; then
-        yum install -y nginx
-    else
-        apt install -y nginx
-    fi
+    $CMD_INSTALL nginx
     
     getCert
 
@@ -347,12 +334,50 @@ EOF
 
 function setFirewall()
 {
-    systemctl status firewalld > /dev/null 2>&1
-    if [ $? -eq 0 ];then
-        firewall-cmd --permanent --add-service=http
-        firewall-cmd --permanent --add-service=https
-        firewall-cmd --permanent --add-port=${PORT}/tcp
-        firewall-cmd --reload
+    res=`which firewall-cmd`
+    if [[ $? -eq 0 ]]; then
+        systemctl status firewalld > /dev/null 2>&1
+        if [[ $? -eq 0 ]];then
+            firewall-cmd --permanent --add-service=http
+            firewall-cmd --permanent --add-service=https
+            if [[ "$PORT" != "443" ]]; then
+                firewall-cmd --permanent --add-port=${PORT}/tcp
+            fi
+            firewall-cmd --reload
+        else
+            nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
+            if [[ "$nl" != "3" ]]; then
+                iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+                if [[ "$PORT" != "443" ]]; then
+                    iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                fi
+            fi
+        fi
+    else
+        res=`which iptables`
+        if [[ $? -eq 0 ]]; then
+            nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
+            if [[ "$nl" != "3" ]]; then
+                iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+                if [[ "$PORT" != "443" ]]; then
+                    iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                fi
+            fi
+        else
+            res=`which ufw`
+            if [[ $? -eq 0 ]]; then
+                res=`ufw status | grep -i inactive`
+                if [[ "$res" = "" ]]; then
+                    ufw allow http/tcp
+                    ufw allow https/tcp
+                    if [[ "$PORT" != "443" ]]; then
+                        ufw allow ${PORT}/tcp
+                    fi
+                fi
+            fi
+        fi
     fi
 }
 
@@ -390,13 +415,13 @@ function installBBR()
     fi
 
     colorEcho $BLUE " 安装BBR模块..."
-    if [ "$pm" = "yum" ]; then
+    if [[ "$PMT" = "yum" ]]; then
         rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
         rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
         yum --enablerepo=elrepo-kernel install kernel-ml -y
         grub2-set-default 0
     else
-        apt install -y --install-recommends linux-generic-hwe-16.04
+        $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
     fi
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
@@ -407,7 +432,7 @@ function installBBR()
 function info()
 {
     res=`netstat -nltp | grep trojan`
-    [ -z "$res" ] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
+    [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
     
     ip=`cat $CONFIG_FILE | grep -m1 cert | cut -d/ -f5`
     port=`cat $CONFIG_FILE | grep local_port | cut -d: -f2 | tr -d \",' '`
@@ -416,7 +441,7 @@ function info()
     password=`sed -n "${line11}p" $CONFIG_FILE | tr -d \",' '`
     
     res=`netstat -nltp | grep ${port} | grep nginx`
-    [ -z "$res" ] && ngstatus="${RED}已停止${PLAIN}" || ngstatus="${GREEN}正在运行${PLAIN}"
+    [[ -z "$res" ]] && ngstatus="${RED}已停止${PLAIN}" || ngstatus="${GREEN}正在运行${PLAIN}"
     
     echo ============================================
     echo -e " ${BLUE}trojan运行状态：${PLAIN}${status}"
@@ -471,20 +496,16 @@ function removeTrojan()
 function uninstall()
 {
     read -p " 确定卸载trojan？(y/n)" answer
-    [ -z ${answer} ] && answer="n"
+    [[ -z ${answer} ]] && answer="n"
 
-    if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
+    if [[ "${answer}" == "y" ]] || [[ "${answer}" == "Y" ]]; then
         systemctl stop trojan
         systemctl disable trojan
         domain=`cat $CONFIG_FILE | grep cert | cut -d/ -f5`
         removeTrojan
 
-        if [[ "$pm" = "yum" ]]; then
-            yum remove -y nginx
-        else
-            apt remove -y nginx
-        fi
-        if [ -d /usr/share/nginx/html.bak ]; then
+        $CMD_REMOVE nginx
+        if [[ -d /usr/share/nginx/html.bak ]]; then
             rm -rf /usr/share/nginx/html
             mv /usr/share/nginx/html.bak /usr/share/nginx/html
         fi
@@ -496,7 +517,7 @@ function uninstall()
 slogon
 
 action=$1
-[ -z $1 ] && action=install
+[[ -z $1 ]] && action=install
 case "$action" in
     install|uninstall|info)
         ${action}
