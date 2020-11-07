@@ -255,6 +255,12 @@ setFirewall() {
         firewall-cmd --permanent --add-port=${PORT}/tcp
         firewall-cmd --permanent --add-port=${PORT}/udp
         firewall-cmd --reload
+    else
+        nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
+        if [[ "$nl" != "3" ]]; then
+            iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
+            iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
+        fi
     fi
 }
 

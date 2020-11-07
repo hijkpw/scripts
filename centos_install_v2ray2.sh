@@ -457,8 +457,19 @@ function setFirewall()
     if [[ $? -eq 0 ]];then
         firewall-cmd --permanent --add-service=http
         firewall-cmd --permanent --add-service=https
-        firewall-cmd --permanent --add-port=${PORT}/tcp
+        if [[ "$PORT" != "443" ]]; then
+            firewall-cmd --permanent --add-port=${PORT}/tcp
+        fi
         firewall-cmd --reload
+    else
+        nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
+        if [[ "$nl" != "3" ]]; then
+            iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+            iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+            if [[ "$PORT" != "443" ]]; then
+                iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
+            fi
+        fi
     fi
 }
 

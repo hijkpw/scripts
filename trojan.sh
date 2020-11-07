@@ -55,7 +55,7 @@ function checkSystem()
         PMT=yum
         CMD_INSTALL="yum install -y "
         CMD_REMOVE="yum remove -y "
-        CMD_UPGRADE="yum clean all; yum update -y"
+        CMD_UPGRADE="yum clean all && yum update -y"
     fi
     res=`which systemctl`
     if [ "$?" != "0" ]; then
@@ -142,7 +142,7 @@ function getData()
     ((len--))
     index=`shuf -i0-${len} -n1`
     site=${sites[$index]}
-    REMOTE_PORT=`echo ${site} | cut -d/ -f3`
+    REMOTE_ADDR=`echo ${site} | cut -d/ -f3`
     protocol=`echo ${site} | cut -d/ -f1`
     [[ "$protocol" != "http:" ]] && REMOTE_PORT=80 || REMOTE_PORT=443
 }
@@ -186,7 +186,7 @@ function installTrojan()
     ntpdate -u time.nist.gov
 
     sed -i -e "s/local_port\":\s*[0-9]*/local_port\": ${PORT}/" $CONFIG_FILE
-    sed -i -e "s/remote_addr\":\s*\".*\",/remote_addr\": \"$REMOTE_PORT\",/" $CONFIG_FILE
+    sed -i -e "s/remote_addr\":\s*\".*\",/remote_addr\": \"$REMOTE_ADDR\",/" $CONFIG_FILE
     sed -i -e "s/remote_port\":\s*[0-9]*/remote_port\": $REMOTE_PORT/" $CONFIG_FILE
     sed -i -e "s/cert\":\s*\".*\",/cert\": \"\/etc\/letsencrypt\/live\/${DOMAIN}\/fullchain.pem\",/" $CONFIG_FILE
     sed -i -e "s/key\":\s*\".*\",/key\": \"\/etc\/letsencrypt\/live\/${DOMAIN}\/privkey.pem\",/" $CONFIG_FILE
@@ -348,9 +348,9 @@ function setFirewall()
             nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
             if [[ "$nl" != "3" ]]; then
                 iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+                iptables -I INPUT -p tcp --dport 443 -j ACCEPT
                 if [[ "$PORT" != "443" ]]; then
-                    iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                    iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
                 fi
             fi
         fi
@@ -360,9 +360,9 @@ function setFirewall()
             nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
             if [[ "$nl" != "3" ]]; then
                 iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+                iptables -I INPUT -p tcp --dport 443 -j ACCEPT
                 if [[ "$PORT" != "443" ]]; then
-                    iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                    iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
                 fi
             fi
         else

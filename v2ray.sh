@@ -55,7 +55,7 @@ checkSystem() {
         PMT="yum"
         CMD_INSTALL="yum install -y "
         CMD_REMOVE="yum remove -y "
-        CMD_UPGRADE="yum clean all; yum update -y"
+        CMD_UPGRADE="yum clean all && yum update -y"
     fi
     res=`which systemctl`
     if [[ "$?" != "0" ]]; then
@@ -562,9 +562,9 @@ setFirewall() {
             nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
             if [[ "$nl" != "3" ]]; then
                 iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+                iptables -I INPUT -p tcp --dport 443 -j ACCEPT
                 if [[ "$PORT" != "443" ]]; then
-                    iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                    iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
                 fi
             fi
         fi
@@ -574,9 +574,9 @@ setFirewall() {
             nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
             if [[ "$nl" != "3" ]]; then
                 iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+                iptables -I INPUT -p tcp --dport 443 -j ACCEPT
                 if [[ "$PORT" != "443" ]]; then
-                    iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+                    iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
                 fi
             fi
         else
