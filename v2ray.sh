@@ -379,7 +379,7 @@ getCert() {
 
         res=`which pip3`
         if [[ "$?" != "0" ]]; then
-            $CMD_INSTALL python3 python3-pip
+            $CMD_INSTALL python3 python3-setuptools python3-pip
         fi
         res=`which pip3`
         if [[ "$?" != "0" ]]; then
