@@ -157,6 +157,7 @@ EOF
     chown -R apache:apache /var/www/${DOMAIN}
 
     # config nginx
+    sed -i '/proxy_ssl_server_name/d' /etc/nginx/conf.d/${DOMAIN}.conf
     sed -i '26,29d' /etc/nginx/conf.d/${DOMAIN}.conf
     sed -i '$d' /etc/nginx/conf.d/${DOMAIN}.conf
     if [ $MAIN -eq 7 ]; then
