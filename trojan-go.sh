@@ -49,7 +49,7 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt autoremove -y; apt update; apt upgrade -y"
+        CMD_UPGRADE="apt clean all && apt update && apt upgrade -y"
     else
         PMT="yum"
         CMD_INSTALL="yum install -y "

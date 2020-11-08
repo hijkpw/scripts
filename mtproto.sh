@@ -122,6 +122,7 @@ installDocker() {
     #$CMD_REMOVE docker docker-engine docker.io containerd runc
     $CMD_INSTALL wget curl
     if [[ $PMT = "apt" ]]; then
+        apt clean all
 		apt-get -y install \
 			apt-transport-https \
 			ca-certificates \
@@ -136,6 +137,7 @@ installDocker() {
         apt update -y
     else
         wget -O /etc/yum.repos.d/docker-ce.repo https://download.docker.com/linux/centos/docker-ce.repo
+        yum clean all
     fi
     $CMD_INSTALL docker-ce docker-ce-cli containerd.io
 

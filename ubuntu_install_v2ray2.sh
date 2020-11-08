@@ -191,8 +191,9 @@ getData() {
 
 preinstall() {
     colorEcho $BLUE " 更新系统..."
-    apt autoremove -y
-    apt update && apt -y upgrade
+    apt clean all
+    apt update
+    apt -y upgrade
     colorEcho $BLUE " 安装必要软件"
     apt install -y telnet wget vim net-tools ntpdate unzip gcc g++
     apt autoremove -y

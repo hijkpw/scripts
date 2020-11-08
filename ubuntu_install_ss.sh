@@ -159,8 +159,9 @@ getData() {
 
 preinstall() {
     colorEcho $BLUE " 更新系统..."
-    apt autoremove -y
-    apt update && apt upgrade -y
+    apt clean all
+    apt update
+    apt upgrade -y
     
     colorEcho $BLUE " 安装必要软件"
     apt install -y telnet wget vim net-tools unzip tar qrencode
