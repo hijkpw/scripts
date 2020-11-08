@@ -658,10 +658,10 @@ installV2ray() {
         exit 1
     }
 
-    if [[ ! -f /etc/systemd/system/v2ray.service ]]; then
-        wget -O /etc/systemd/system/v2ray.service https://raw.githubusercontent.com/hijkpw/scripts/master/v2ray.service
-        systemctl enable v2ray.service
-    fi
+    rm -rf /etc/systemd/system/v2ray.service
+    rm -rf /etc/systemd/system/multi-user.target.wants/v2ray.service
+    wget -O /etc/systemd/system/v2ray.service https://raw.githubusercontent.com/hijkpw/scripts/master/v2ray.service
+    systemctl enable v2ray.service
 }
 
 configV2ray() {
@@ -1053,8 +1053,6 @@ update() {
 uninstall() {
     read -p " 确定卸载V2ray？[y/n]：" answer
     if [[ "${answer,,}" = "y" ]]; then
-        stop
-        systemctl disable v2ray
         if [[ "$(configNeedNginx)" = "yes" ]]; then
             domain=`grep Host $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
             if [[ "$domain" = "" ]]; then
@@ -1062,10 +1060,13 @@ uninstall() {
             fi
         fi
         
-
+        stop
+        systemctl disable v2ray
+        rm -rf /etc/systemd/system/v2ray.service
+        rm -rf /etc/systemd/system/multi-user.target.wants/v2ray.service
         rm -rf /etc/v2ray
         rm -rf /usr/bin/v2ray
-
+        
         systemctl disable nginx
         $CMD_REMOVE nginx
         rm -rf /etc/nginx/nginx.conf

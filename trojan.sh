@@ -485,24 +485,19 @@ function install()
     bbrReboot
 }
 
-function removeTrojan()
-{
-    rm -rf /usr/local/bin/trojan
-    rm -rf /usr/local/etc/trojan
-    rm -rf /usr/share/nginx/html
-    rm -rf /etc/systemd/system/trojan.service
-}
-
 function uninstall()
 {
     read -p " 确定卸载trojan？(y/n)" answer
     [[ -z ${answer} ]] && answer="n"
 
     if [[ "${answer}" == "y" ]] || [[ "${answer}" == "Y" ]]; then
+        domain=`cat $CONFIG_FILE | grep cert | cut -d/ -f5`
+
         systemctl stop trojan
         systemctl disable trojan
-        domain=`cat $CONFIG_FILE | grep cert | cut -d/ -f5`
-        removeTrojan
+        rm -rf /usr/local/bin/trojan
+        rm -rf /usr/local/etc/trojan
+        rm -rf /etc/systemd/system/trojan.service
 
         $CMD_REMOVE nginx
         if [[ -d /usr/share/nginx/html.bak ]]; then

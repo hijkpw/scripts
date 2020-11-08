@@ -617,12 +617,13 @@ update() {
 uninstall() {
     read -p " 确定卸载trojan-go？[y/n]：" answer
     if [[ "${answer,,}" = "y" ]]; then
-        stop
         domain=`grep sni $CONFIG_FILE | cut -d\" -f4`
-
+        
+        stop
         rm -rf /etc/trojan-go
         rm -rf /usr/bin/trojan-go
         systemctl disable trojan-go
+        rm -rf /etc/systemd/system/trojan-go.service
 
         systemctl disable nginx
         $CMD_REMOVE nginx
