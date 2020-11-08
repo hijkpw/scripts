@@ -281,6 +281,29 @@ getData() {
         V2PORT=`shuf -i10000-65000 -n1`
     fi
 
+    if [[ "$XTLS" = "true" ]]; then
+        colorEcho $BLUE " 请选择流控模式:" 
+        echo -e "   1) xtls-rprx-direct [$RED推荐$PLAIN]"
+        echo "   2) tls-rprx-origin"
+        read -p "  请选择流控模式[默认:direct]" answer
+        [[ -z "$answer" ]] && FLOW="xtls-rprx-direct"
+        case $answer in
+            1)
+                FLOW="xtls-rprx-direct"
+                ;;
+            2)
+                FLOW="xtls-rprx-origin"
+                ;;
+            *)
+                colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct"
+                FLOW="xtls-rprx-direct"
+                ;;
+        esac
+        echo ""
+        colorEcho $BLUE " 流控模式：$FLOW"
+        echo ""
+    fi
+
     if [[ "${WS}" = "true" ]]; then
         while true
         do
@@ -875,7 +898,7 @@ EOF
       "clients": [
         {
           "id": "$uuid",
-          "flow": "xtls-rprx-origin",
+          "flow": "$FLOW",
           "level": 0
         }
       ],
@@ -1162,7 +1185,7 @@ showInfo() {
         xtls=`grep xtlsSettings $CONFIG_FILE`
         if [[ "$xtls" != "" ]]; then
             xtls="true"
-            flow="xtls-rprx-origin"
+            flow=`grep flow $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
         else
             flow="无"
         fi
