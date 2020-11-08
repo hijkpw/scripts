@@ -15,7 +15,7 @@ export MTG_CONTAINER="${MTG_CONTAINER:-mtg}"
 export MTG_IMAGENAME="${MTG_IMAGENAME:-nineseconds/mtg:stable}"
 
 DOCKER_CMD="$(command -v docker)"
-OS=`hostnamectl | grep -i system | cut -d: -f2`
+OSNAME=`hostnamectl | grep -i system | cut -d: -f2`
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
@@ -23,20 +23,20 @@ colorEcho() {
 
 checkSystem() {
     result=$(id | awk '{print $1}')
-    if [ $result != "uid=0(root)" ]; then
+    if [[ $result != "uid=0(root)" ]]; then
         colorEcho $RED " 请以root身份执行该脚本"
         exit 1
     fi
 
     res=`which yum`
-    if [ "$?" != "0" ]; then
+    if [[ "$?" != "0" ]]; then
         res=`which apt`
         if [ "$?" != "0" ]; then
             colorEcho $RED " 不受支持的Linux系统"
             exit 1
         fi
         res=`hostnamectl | grep -i ubuntu`
-        if [ "${res}" != "" ]; then
+        if [[ "${res}" != "" ]]; then
             OS="ubuntu"
         else
             OS="debian"
@@ -51,27 +51,27 @@ checkSystem() {
         CMD_REMOVE="yum remove -y "
     fi
     res=`which systemctl`
-    if [ "$?" != "0" ]; then
+    if [[ "$?" != "0" ]]; then
         colorEcho $RED " 系统版本过低，请升级到最新版本"
         exit 1
     fi
 }
 
 status() {
-    if [ "$DOCKER_CMD" = "" ]; then
+    if [[ "$DOCKER_CMD" = "" ]]; then
         echo 0
         return
-    elif [ ! -f $MTG_ENV ]; then
+    elif [[ ! -f $MTG_ENV ]]; then
         echo 1
         return
     fi
     port=`grep MTG_PORT $MTG_ENV|cut -d= -f2`
-    if [ -z "$port" ]; then
+    if [[ -z "$port" ]]; then
         echo 2
         return
     fi
     res=`ss -ntlp| grep ${port} | grep docker`
-    if [ -z "$res" ]; then
+    if [[ -z "$res" ]]; then
         echo 3
     else
         echo 4
@@ -96,11 +96,11 @@ statusText() {
 getData() {
     IP=`curl -s -4 ip.sb`
     read -p " 请输入MTProto端口[100-65535的一个数字]：" PORT
-    [ -z "${PORT}" ] && {
+    [[ -z "${PORT}" ]] && {
         echo -e " ${RED}请输入MTProto端口！${PLAIN}"
         exit 1
     }
-    if [ "${PORT:0:1}" = "0" ]; then
+    if [[ "${PORT:0:1}" = "0" ]]; then
         echo -e " ${RED}端口不能以0开头${PLAIN}"
         exit 1
     fi
@@ -112,7 +112,7 @@ getData() {
 }
 
 installDocker() {
-    if [ "$DOCKER_CMD" != "" ]; then
+    if [[ "$DOCKER_CMD" != "" ]]; then
         systemctl enable docker
         systemctl start docker
         selinux
@@ -121,7 +121,7 @@ installDocker() {
 
     #$CMD_REMOVE docker docker-engine docker.io containerd runc
     $CMD_INSTALL wget curl
-    if [ $PMT = "apt" ]; then
+    if [[ $PMT = "apt" ]]; then
 		apt-get -y install \
 			apt-transport-https \
 			ca-certificates \
@@ -140,8 +140,8 @@ installDocker() {
     $CMD_INSTALL docker-ce docker-ce-cli containerd.io
 
     DOCKER_CMD="$(command -v docker)"
-    if [ "$DOCKER_CMD" = "" ]; then
-        echo -e " ${RED}$OS docker安装失败，请到https://hijk.art反馈${PLAIN}"
+    if [[ "$DOCKER_CMD" = "" ]]; then
+        echo -e " ${RED}$OSNAME docker安装失败，请到https://hijk.art反馈${PLAIN}"
         exit 1
     fi
     systemctl enable docker
@@ -151,7 +151,7 @@ installDocker() {
 }
 
 pullImage() {
-    if [ "$DOCKER_CMD" = "" ]; then
+    if [[ "$DOCKER_CMD" = "" ]]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         exit 1
     fi
@@ -164,7 +164,7 @@ pullImage() {
 }
 
 selinux() {
-    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+    if [[ -s /etc/selinux/config ]] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
         setenforce 0
     fi
@@ -173,20 +173,17 @@ selinux() {
 firewall() {
     port=$1
     systemctl status firewalld > /dev/null 2>&1
-    if [ $? -eq 0 ];then
-        systemctl disable firewalld
-        systemctl stop firewalld
+    if [[ $? -eq 0 ]];then
+        firewall-cmd --permanent --add-port=$port/tcp
+        firewall-cmd --reload
     else
         nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
         if [ "$nl" != "3" ]; then
-            iptables -P INPUT ACCEPT
-            iptables -P FORWARD ACCEPT
-            iptables -P OUTPUT ACCEPT
-            iptables -F
+            iptables -I INPUT -p tcp --dport=$port -j ACCEPT
         else
             res=`ufw status | grep -i inactive`
             if [ "$res" = "" ]; then
-                ufw disable
+                ufw allow $port/tcp
             fi
         fi
     fi
@@ -197,7 +194,7 @@ start() {
     source "$MTG_ENV"
     set +a
 
-    if [ ! -f "$MTG_SECRET" ]; then
+    if [[ ! -f "$MTG_SECRET" ]]; then
         $DOCKER_CMD run \
                 --rm \
                 "$MTG_IMAGENAME" \
@@ -216,16 +213,16 @@ start() {
 
     sleep 3
     res=`ss -ntlp| grep ${MTG_PORT} | grep docker`
-    if [ "$res" = "" ]; then
+    if [[ "$res" = "" ]]; then
         docker logs $MTG_CONTAINER | tail
-        echo -e " ${RED}$OS 启动docker镜像失败，请到 https://hijk.art 反馈${PLAIN}"
+        echo -e " ${RED}$OSNAME 启动docker镜像失败，请到 https://hijk.art 反馈${PLAIN}"
         exit 1
     fi
 }
 
 stop() {
     res=`status`
-    if [ $res -lt 3 ]; then
+    if [[ $res -lt 3 ]]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
@@ -239,7 +236,7 @@ stop() {
 
 showInfo() {
     res=`status`
-    if [ $res -lt 3 ]; then
+    if [[ $res -lt 3 ]]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
@@ -253,7 +250,7 @@ showInfo() {
     echo 
     echo -e " ${RED}MTProto代理信息：${PLAIN}"
     echo 
-    echo -n "  ${BLUE}当前状态：${PLAIN}"
+    echo -n -e "  ${BLUE}当前状态：${PLAIN}"
     statusText
     echo -e "  ${BLUE}IP：${PLAIN}${RED}$IP${PLAIN}"
     echo -e "  ${BLUE}端口：${PLAIN}${RED}$MTG_PORT${PLAIN}"
@@ -274,7 +271,7 @@ install() {
 
 update() {
     res=`status`
-    if [ $res -lt 2 ]; then
+    if [[ $res -lt 2 ]]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
@@ -287,7 +284,7 @@ update() {
 
 uninstall() {
     read -p " 确定卸载MTProto？[y/n]：" answer
-    if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+    if [[ "$answer" = "y" ]] || [[ "$answer" = "Y" ]]; then
         stop
         rm -rf $MTG_CONFIG
         docker system prune -af
@@ -300,7 +297,7 @@ uninstall() {
 
 run() {
     res=`status`
-    if [ $res -lt 3 ]; then
+    if [[ $res -lt 3 ]]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
@@ -309,7 +306,7 @@ run() {
     source "$MTG_ENV"
     set +a
     res=`ss -ntlp| grep ${MTG_PORT} | grep docker`
-    if [ "$res" != "" ]; then
+    if [[ "$res" != "" ]]; then
         return
     fi
 
@@ -319,7 +316,7 @@ run() {
 
 restart() {
     res=`status`
-    if [ $res -lt 3 ]; then
+    if [[ $res -lt 3 ]]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
@@ -331,7 +328,7 @@ restart() {
 reconfig()
 {
     res=`status`
-    if [ $res -lt 2 ]; then
+    if [[ $res -lt 2 ]]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
@@ -345,7 +342,7 @@ reconfig()
 
 showLog() {
     res=`status`
-    if [ $res -lt 3 ]; then
+    if [[ $res -lt 3 ]]; then
         echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
         return
     fi
