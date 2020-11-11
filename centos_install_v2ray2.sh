@@ -11,7 +11,7 @@ PLAIN='\033[0m'
 
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
 # 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
-sites=(
+SITES=(
 http://www.zhuizishu.com/
 http://xs.56dyc.com/
 http://www.xiaoshuosk.com/
@@ -140,12 +140,7 @@ getData() {
     fi
     colorEcho ${BLUE}  " Nginx端口：$PORT"
     echo ""
-
-    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" NEED_BBR
-    [[ -z "$NEED_BBR" ]] && NEED_BBR=y
-    [[ "$NEED_BBR" = "Y" ]] && NEED_BBR=y
     
-    echo ""
     colorEcho $BLUE " 请选择伪装站类型:" 
     echo "   1) 静态网站(位于/usr/share/nginx/html)"
     echo "   2) 小说站(随机选择)"
@@ -161,12 +156,12 @@ getData() {
             PROXY_URL=""
             ;;
         2)
-            len=${#sites[@]}
+            len=${#SITES[@]}
             ((len--))
             while true
             do
                 index=`shuf -i0-${len} -n1`
-                PROXY_URL=${sites[$index]}
+                PROXY_URL=${SITES[$index]}
             done
             ;;
         3)
@@ -190,6 +185,25 @@ getData() {
             exit 1
         esac
     fi
+
+    colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
+    echo "    y)允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
+    echo "    n)不允许，爬虫不会访问网站，访问ip比较单一，但能节省vps流量"
+    read -p "  请选择：[y/n]" answer
+    if [[ -z "$answer" ]]; then
+        ALLOW_SPIDER="n"
+    elif [[ "${answer,,}" = "y" ]]; then
+        ALLOW_SPIDER="y"
+    else
+        ALLOW_SPIDER="n"
+    fi
+    echo ""
+    colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
+    echo ""
+
+    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" NEED_BBR
+    [[ -z "$NEED_BBR" ]] && NEED_BBR=y
+    [[ "$NEED_BBR" = "Y" ]] && NEED_BBR=y
 }
 
 preinstall() {
@@ -370,8 +384,10 @@ EOF
     fi
     
     mkdir -p /usr/share/nginx/html;
-    echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
-    echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+    if [[ "$ALLOW_SPIDER" = "n" ]]; then
+        echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
+        echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+    fi
     if [[ "$PROXY_URL" = "" ]]; then
         action=""
     else

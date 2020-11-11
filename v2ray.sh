@@ -284,8 +284,8 @@ getData() {
     if [[ "$XTLS" = "true" ]]; then
         colorEcho $BLUE " 请选择流控模式:" 
         echo -e "   1) xtls-rprx-direct [$RED推荐$PLAIN]"
-        echo "   2) tls-rprx-origin"
-        read -p "  请选择流控模式[默认:direct]" answer
+        echo "   2) xtls-rprx-origin"
+        read -p "  请选择流控模式[默认:origin]" answer
         [[ -z "$answer" ]] && FLOW="xtls-rprx-direct"
         case $answer in
             1)
@@ -295,8 +295,8 @@ getData() {
                 FLOW="xtls-rprx-origin"
                 ;;
             *)
-                colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct"
-                FLOW="xtls-rprx-direct"
+                colorEcho $RED " 无效选项，使用默认的xtls-rprx-origin"
+                FLOW="xtls-rprx-origin"
                 ;;
         esac
         echo ""
@@ -322,55 +322,73 @@ getData() {
         echo ""
         echo 
     fi
+    
+    if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
+        colorEcho $BLUE " 请选择伪装站类型:"
+        echo "   1) 静态网站(位于/usr/share/nginx/html)"
+        echo "   2) 小说站(随机选择)"
+        echo "   3) 美女站(https://imeizi.me)"
+        echo "   4) VPS优惠博客(https://vpsgongyi.com)"
+        echo "   5) 自定义反代站点(需以http或者https开头)"
+        read -p "  请选择伪装网站类型[默认:美女站]" answer
+        if [[ -z "$answer" ]]; then
+            PROXY_URL="https://imeizi.me"
+        else
+            case $answer in
+            1)
+                PROXY_URL=""
+                ;;
+            2)
+                len=${#SITES[@]}
+                ((len--))
+                while true
+                do
+                    index=`shuf -i0-${len} -n1`
+                    PROXY_URL=${SITES[$index]}
+                done
+                ;;
+            3)
+                PROXY_URL="https://imeizi.me"
+                ;;
+            4)
+                PROXY_URL="https://vpsgongyi.com"
+                ;;
+            5)
+                read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
+                if [[ -z "$PROXY_URL" ]]; then
+                    colorEcho $RED " 请输入反代网站！"
+                    exit 1
+                elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+                    colorEcho $RED " 反代网站必须以http或https开头！"
+                    exit 1
+                fi
+                ;;
+            *)
+                colorEcho $RED " 请输入正确的选项！"
+                exit 1
+            esac
+        fi
+
+
+        colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
+        echo "    y)允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
+        echo "    n)不允许，爬虫不会访问网站，访问ip比较单一，但能节省vps流量"
+        read -p "  请选择：[y/n]" answer
+        if [[ -z "$answer" ]]; then
+            ALLOW_SPIDER="n"
+        elif [[ "${answer,,}" = "y" ]]; then
+            ALLOW_SPIDER="y"
+        else
+            ALLOW_SPIDER="n"
+        fi
+        echo ""
+        colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
+        echo ""
+    fi
 
     read -p " 是否安装BBR(默认安装)?[y/n]:" NEED_BBR
     [[ -z "$NEED_BBR" ]] && NEED_BBR=y
     [[ "$NEED_BBR" = "Y" ]] && NEED_BBR=y
-    
-    colorEcho $BLUE " 请选择伪装站类型:" 
-    echo "   1) 静态网站(位于/usr/share/nginx/html)"
-    echo "   2) 小说站(随机选择)"
-    echo "   3) 美女站(https://imeizi.me)"
-    echo "   4) VPS优惠博客(https://vpsgongyi.com)"
-    echo "   5) 自定义反代站点(需以http或者https开头)"
-    read -p "  请选择伪装网站类型[默认:美女站]" answer
-    if [[ -z "$answer" ]]; then
-        PROXY_URL="https://imeizi.me"
-    else
-        case $answer in
-        1)
-            PROXY_URL=""
-            ;;
-        2)
-            len=${#SITES[@]}
-            ((len--))
-            while true
-            do
-                index=`shuf -i0-${len} -n1`
-                PROXY_URL=${SITES[$index]}
-            done
-            ;;
-        3)
-            PROXY_URL="https://imeizi.me"
-            ;;
-        4)
-            PROXY_URL="https://vpsgongyi.com"
-            ;;
-        5)
-            read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
-            if [[ -z "$PROXY_URL" ]]; then
-                colorEcho $RED " 请输入反代网站！"
-                exit 1
-            elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
-                colorEcho $RED " 反代网站必须以http或https开头！"
-                exit 1
-            fi
-            ;;
-        *)
-            colorEcho $RED " 请输入正确的选项！"
-            exit 1
-        esac
-    fi
 }
 
 installNginx() {
@@ -440,8 +458,10 @@ configNginx() {
         user="nginx"
     fi
     mkdir -p /usr/share/nginx/html;
-    echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
-    echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+    if [[ "$ALLOW_SPIDER" = "n" ]]; then
+        echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
+        echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+    fi
     cat > /etc/nginx/nginx.conf<<-EOF
 user $user;
 worker_processes auto;
@@ -484,7 +504,7 @@ EOF
         action=""
     else
         if [[ "${PROXY_URL:0:5}" == "https" ]]; then
-        action="proxy_ssl_server_name on;
+            action="proxy_ssl_server_name on;
         proxy_pass $PROXY_URL;"
         else
             action="proxy_pass $PROXY_URL;"

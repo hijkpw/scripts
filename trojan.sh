@@ -12,7 +12,7 @@ OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
 # 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
-sites=(
+SITES=(
 http://www.zhuizishu.com/
 http://xs.56dyc.com/
 http://www.xiaoshuosk.com/
@@ -134,17 +134,78 @@ function getData()
     colorEcho $BLUE " trojan端口： " $PORT
     echo ""
 
+    colorEcho $BLUE " 请选择伪装站类型:"
+    echo "   1) 静态网站(位于/usr/share/nginx/html)"
+    echo "   2) 小说站(随机选择)"
+    echo "   3) 美女站(https://imeizi.me)"
+    echo "   4) VPS优惠博客(https://vpsgongyi.com)"
+    echo "   5) 自定义反代站点(需以http或者https开头)"
+    read -p "  请选择伪装网站类型[默认:美女站]" answer
+    if [[ -z "$answer" ]]; then
+        PROXY_URL="https://imeizi.me"
+    else
+        case $answer in
+        1)
+            PROXY_URL=""
+            ;;
+        2)
+            len=${#SITES[@]}
+            ((len--))
+            while true
+            do
+                index=`shuf -i0-${len} -n1`
+                PROXY_URL=${SITES[$index]}
+            done
+            ;;
+        3)
+            PROXY_URL="https://imeizi.me"
+            ;;
+        4)
+            PROXY_URL="https://vpsgongyi.com"
+            ;;
+        5)
+            read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
+            if [[ -z "$PROXY_URL" ]]; then
+                colorEcho $RED " 请输入反代网站！"
+                exit 1
+            elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+                colorEcho $RED " 反代网站必须以http或https开头！"
+                exit 1
+            fi
+            ;;
+        *)
+            colorEcho $RED " 请输入正确的选项！"
+            exit 1
+        esac
+    fi
+    if [[ "$PROXY_URL" = "" ]]; then
+        REMOTE_ADDR="127.0.0.1"
+        REMOTE_PORT=80
+    else
+        REMOTE_ADDR=`echo ${PROXY_URL} | cut -d/ -f3`
+        protocol=`echo ${PROXY_URL} | cut -d/ -f1`
+        [[ "$protocol" != "http:" ]] && REMOTE_PORT=80 || REMOTE_PORT=443
+    fi
+
+    echo ""
+    colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
+    echo "    y)允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
+    echo "    n)不允许，爬虫不会访问网站，访问ip比较单一，但能节省vps流量"
+    read -p "  请选择：[y/n]" answer
+    if [[ -z "$answer" ]]; then
+        ALLOW_SPIDER="n"
+    elif [[ "${answer,,}" = "y" ]]; then
+        ALLOW_SPIDER="y"
+    else
+        ALLOW_SPIDER="n"
+    fi
+    echo ""
+    colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
+    echo ""
+
     read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" NEED_BBR
     [ -z "$NEED_BBR" ] && NEED_BBR=y
     [ "$NEED_BBR" = "Y" ] && NEED_BBR=y
-    
-    len=${#sites[@]}
-    ((len--))
-    index=`shuf -i0-${len} -n1`
-    site=${sites[$index]}
-    REMOTE_ADDR=`echo ${site} | cut -d/ -f3`
-    protocol=`echo ${site} | cut -d/ -f1`
-    [[ "$protocol" != "http:" ]] && REMOTE_PORT=80 || REMOTE_PORT=443
 }
 
 function preinstall()
@@ -272,9 +333,11 @@ function installNginx()
     else
         user="nginx"
     fi
-    mkdir -p /usr/share/nginx/html;
-    echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
-    echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+    mkdir -p /usr/share/nginx/html
+    if [[ "$ALLOW_SPIDER" = "n" ]]; then
+        echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
+        echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+    fi
     cat > /etc/nginx/nginx.conf<<-EOF
 user $user;
 worker_processes auto;
@@ -312,8 +375,17 @@ http {
 }
 EOF
 
-    mkdir -p /etc/nginx/conf.d;
-    cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
+    mkdir -p /etc/nginx/conf.d
+    if [[ "$REMOTE_ADDR" = "127.0.0.1" ]]; then
+        cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
+server {
+    listen 80;
+    server_name ${DOMAIN};
+    root /usr/share/nginx/html;
+}
+EOF
+    else
+        cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
     server_name ${DOMAIN};
@@ -326,6 +398,7 @@ server {
     }
 }
 EOF
+    fi
     sed -i '/certbot/d' /etc/crontab
     certbotpath=`which certbot`
     echo "0 3 1 */2 0 root systemctl stop nginx ; ${certbotpath} renew ; systemctl restart nginx" >> /etc/crontab
