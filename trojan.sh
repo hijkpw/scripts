@@ -151,11 +151,8 @@ function getData()
         2)
             len=${#SITES[@]}
             ((len--))
-            while true
-            do
-                index=`shuf -i0-${len} -n1`
-                PROXY_URL=${SITES[$index]}
-            done
+            index=`shuf -i0-${len} -n1`
+            PROXY_URL=${SITES[$index]}
             ;;
         3)
             PROXY_URL="https://imeizi.me"
@@ -186,6 +183,8 @@ function getData()
         protocol=`echo ${PROXY_URL} | cut -d/ -f1`
         [[ "$protocol" != "http:" ]] && REMOTE_PORT=443 || REMOTE_PORT=80
     fi
+    echo ""
+    colorEcho $BLUE " 伪装域名：$PROXY_URL"
 
     echo ""
     colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"

@@ -260,11 +260,8 @@ getData() {
         2)
             len=${#SITES[@]}
             ((len--))
-            while true
-            do
-                index=`shuf -i0-${len} -n1`
-                PROXY_URL=${SITES[$index]}
-            done
+            index=`shuf -i0-${len} -n1`
+            PROXY_URL=${SITES[$index]}
             ;;
         3)
             PROXY_URL="https://imeizi.me"
@@ -287,6 +284,8 @@ getData() {
             exit 1
         esac
     fi
+    echo ""
+    colorEcho $BLUE " 伪装域名：$PROXY_URL"
 
     echo ""
     colorEcho $BLUE " 是否允许搜索引擎爬取网站？[默认：不允许]"
