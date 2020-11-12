@@ -287,14 +287,6 @@ getData() {
             exit 1
         esac
     fi
-    if [[ "$PROXY_URL" = "" ]]; then
-        REMOTE_ADDR="127.0.0.1"
-        REMOTE_PORT=80
-    else
-        REMOTE_ADDR=`echo ${PROXY_URL} | cut -d/ -f3`
-        protocol=`echo ${PROXY_URL} | cut -d/ -f1`
-        [[ "$protocol" != "http:" ]] && REMOTE_PORT=443 || REMOTE_PORT=80
-    fi
 
     echo ""
     colorEcho $BLUE " 是否允许搜索引擎爬取网站？[默认：不允许]"
@@ -424,7 +416,7 @@ http {
 EOF
 
     mkdir -p /etc/nginx/conf.d
-    if [[ "$REMOTE_ADDR" = "127.0.0.1" ]]; then
+    if [[ "$PROXY_URL" = "" ]]; then
         cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
@@ -439,7 +431,8 @@ server {
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
-        return 301 https://\$server_name:${PORT}\$request_uri;
+        proxy_ssl_server_name on;
+        proxy_pass $PROXY_URL;
     }
     
     location = /robots.txt {
@@ -487,8 +480,8 @@ configTrojan() {
     "run_type": "server",
     "local_addr": "0.0.0.0",
     "local_port": ${PORT},
-    "remote_addr": "$REMOTE_ADDR",
-    "remote_port": $REMOTE_PORT,
+    "remote_addr": "127.0.0.1",
+    "remote_port": 80,
     "password": [
         "$PASSWORD"
     ],
@@ -501,8 +494,8 @@ configTrojan() {
         ],
         "session_ticket": true,
         "reuse_session": true,
-        "fallback_addr": "$REMOTE_ADDR",
-        "fallback_port": $REMOTE_PORT
+        "fallback_addr": "127.0.0.1",
+        "fallback_port": 80
     },
     "tcp": {
         "no_delay": true,
