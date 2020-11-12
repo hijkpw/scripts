@@ -156,8 +156,18 @@ getData() {
         2)
             len=${#SITES[@]}
             ((len--))
-            index=`shuf -i0-${len} -n1`
-            PROXY_URL=${SITES[$index]}
+            while true
+            do
+                index=`shuf -i0-${len} -n1`
+                PROXY_URL=${SITES[$index]}
+                host=`echo ${PROXY_URL} | cut -d/ -f3`
+                ip=`curl -s https://hijk.art/hostip.php?d=${host}`
+                res=`echo -n ${ip} | grep ${host}`
+                if [[ "${res}" = "" ]]; then
+                    echo "$ip $host" >> /etc/hosts
+                    break
+                fi
+            done
             ;;
         3)
             PROXY_URL="https://imeizi.me"

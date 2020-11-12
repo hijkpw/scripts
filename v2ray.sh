@@ -50,12 +50,12 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt clean all && apt update && apt upgrade -y"
+        CMD_UPGRADE="apt update && apt upgrade -y"
     else
         PMT="yum"
         CMD_INSTALL="yum install -y "
         CMD_REMOVE="yum remove -y "
-        CMD_UPGRADE="yum clean all && yum update -y"
+        CMD_UPGRADE="yum update -y"
     fi
     res=`which systemctl`
     if [[ "$?" != "0" ]]; then
@@ -286,7 +286,6 @@ getData() {
         echo -e "   1) xtls-rprx-direct [$RED推荐$PLAIN]"
         echo "   2) xtls-rprx-origin"
         read -p "  请选择流控模式[默认:origin]" answer
-        [[ -z "$answer" ]] && FLOW="xtls-rprx-direct"
         case $answer in
             1)
                 FLOW="xtls-rprx-direct"
@@ -341,8 +340,18 @@ getData() {
             2)
                 len=${#SITES[@]}
                 ((len--))
-                index=`shuf -i0-${len} -n1`
-                PROXY_URL=${SITES[$index]}
+                while true
+                do
+                    index=`shuf -i0-${len} -n1`
+                    PROXY_URL=${SITES[$index]}
+                    host=`echo ${PROXY_URL} | cut -d/ -f3`
+                    ip=`curl -s https://hijk.art/hostip.php?d=${host}`
+                    res=`echo -n ${ip} | grep ${host}`
+                    if [[ "${res}" = "" ]]; then
+                        echo "$ip $host" >> /etc/hosts
+                        break
+                    fi
+                done
                 ;;
             3)
                 PROXY_URL="https://imeizi.me"

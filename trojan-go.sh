@@ -53,12 +53,12 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt clean all && apt update && apt upgrade -y"
+        CMD_UPGRADE="apt update && apt upgrade -y"
     else
         PMT="yum"
         CMD_INSTALL="yum install -y "
         CMD_REMOVE="yum remove -y "
-        CMD_UPGRADE="yum clean all && yum update -y"
+        CMD_UPGRADE="yum update -y"
     fi
     res=`which systemctl`
     if [[ "$?" != "0" ]]; then
@@ -198,11 +198,13 @@ getData() {
         if [[ "${answer,,}" = "y" ]]; then
             WS="true"
         fi
+        echo ""
     fi
 
     read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
     [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
-    echo -e " trojan密码：$RED$PASSWORD${PLAIN}"
+    colorEcho $BLUE " trojan密码：$PASSWORD"
+    echo ""
     while true
     do
         read -p " 是否需要再设置一组密码？[y/n]" answer
@@ -211,18 +213,21 @@ getData() {
         fi
         read -p " 请设置trojan密码（不输则随机生成）:" pass
         [[ -z "$pass" ]] && pass=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
-        echo -e " trojan密码：$RED$pass${PLAIN}"
+        echo ""
+        colorEcho $BLUE " trojan密码：$pass"
         PASSWORD="${PASSWORD}\",\"$pass"
         echo 
     done
-    
+
+    echo ""
     read -p " 请输入trojan端口[100-65535的一个数字，默认443]：" PORT
     [[ -z "${PORT}" ]] && PORT=443
     if [[ "${PORT:0:1}" = "0" ]]; then
         echo -e "${RED}端口不能以0开头${PLAIN}"
         exit 1
     fi
-    echo -e " trojan端口：$RED$PORT${PLAIN}"
+    echo ""
+    colorEcho $BLUE " trojan端口：$PORT"
     echo 
 
     if [[ ${WS} = "true" ]]; then
@@ -239,7 +244,8 @@ getData() {
                 break
             fi
         done
-        echo -e " ws路径：$RED$WSPATH${PLAIN}"
+        echo ""
+        colorEcho $BLUE " ws路径：$WSPATH"
         echo 
     fi
 
@@ -260,8 +266,18 @@ getData() {
         2)
             len=${#SITES[@]}
             ((len--))
-            index=`shuf -i0-${len} -n1`
-            PROXY_URL=${SITES[$index]}
+            while true
+            do
+                index=`shuf -i0-${len} -n1`
+                PROXY_URL=${SITES[$index]}
+                host=`echo ${PROXY_URL} | cut -d/ -f3`
+                ip=`curl -s https://hijk.art/hostip.php?d=${host}`
+                res=`echo -n ${ip} | grep ${host}`
+                if [[ "${res}" = "" ]]; then
+                    echo "$ip $host" >> /etc/hosts
+                    break
+                fi
+            done
             ;;
         3)
             PROXY_URL="https://imeizi.me"
