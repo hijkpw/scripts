@@ -289,7 +289,7 @@ getData() {
     else
         REMOTE_ADDR=`echo ${PROXY_URL} | cut -d/ -f3`
         protocol=`echo ${PROXY_URL} | cut -d/ -f1`
-        [[ "$protocol" != "http:" ]] && REMOTE_PORT=80 || REMOTE_PORT=443
+        [[ "$protocol" != "http:" ]] && REMOTE_PORT=443 || REMOTE_PORT=80
     fi
 
     echo ""
@@ -483,7 +483,7 @@ configTrojan() {
     "run_type": "server",
     "local_addr": "0.0.0.0",
     "local_port": ${PORT},
-    "remote_addr": "$REMOTE_HOST",
+    "remote_addr": "$REMOTE_ADDR",
     "remote_port": $REMOTE_PORT,
     "password": [
         "$PASSWORD"
@@ -497,7 +497,7 @@ configTrojan() {
         ],
         "session_ticket": true,
         "reuse_session": true,
-        "fallback_addr": "$REMOTE_HOST",
+        "fallback_addr": "$REMOTE_ADDR",
         "fallback_port": $REMOTE_PORT
     },
     "tcp": {

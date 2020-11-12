@@ -184,7 +184,7 @@ function getData()
     else
         REMOTE_ADDR=`echo ${PROXY_URL} | cut -d/ -f3`
         protocol=`echo ${PROXY_URL} | cut -d/ -f1`
-        [[ "$protocol" != "http:" ]] && REMOTE_PORT=80 || REMOTE_PORT=443
+        [[ "$protocol" != "http:" ]] && REMOTE_PORT=443 || REMOTE_PORT=80
     fi
 
     echo ""
