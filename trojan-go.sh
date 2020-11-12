@@ -32,6 +32,10 @@ CONFIG_FILE="/etc/trojan-go/config.json"
 
 WS="false"
 
+colorEcho() {
+    echo -e "${1}${@:2}${PLAIN}"
+}
+
 checkSystem() {
     result=$(id | awk '{print $1}')
     if [[ $result != "uid=0(root)" ]]; then
