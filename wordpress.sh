@@ -64,10 +64,16 @@ checkV2() {
         colorEcho $RED " 未检测到配置了ws协议的v2ray"
         exit 1
     fi
-    if [ ! -f /etc/nginx/conf.d/${DOMAIN}.conf ]; then
+    NGINX_CONFIG_FILE="/etc/nginx/conf.d/${DOMAIN}.conf"
+    if [ ! -f $NGINX_CONFIG_FILE ]; then
         colorEcho $RED " 未找到域名的nginx配置文件"
         exit 1
     fi
+    V2PORT=`grep port $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    WSPATH=`grep path $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    PORT=`grep -i ssl $NGINX_CONFIG_FILE | grep listen | head -n1 | awk '{print $2}'`
+    CERT_FILE=`grep ssl_certificate $NGINX_CONFIG_FILE | grep -v _key | cut -f2 | tr -d \;`
+    KEY_FILE=`grep ssl_certificate_key $NGINX_CONFIG_FILE | cut -f2 | tr -d \;`
 }
 
 installPHP() {
@@ -157,32 +163,69 @@ EOF
     chown -R apache:apache /var/www/${DOMAIN}
 
     # config nginx
-    sed -i '/proxy_ssl_server_name/d' /etc/nginx/conf.d/${DOMAIN}.conf
-    sed -i '26,29d' /etc/nginx/conf.d/${DOMAIN}.conf
-    sed -i '$d' /etc/nginx/conf.d/${DOMAIN}.conf
     if [ $MAIN -eq 7 ]; then
         upstream="127.0.0.1:9000"
     else
         upstream="php-fpm"
     fi
-    echo "  set \$host_path "/var/www/${DOMAIN}";
+
+    cat > $NGINX_CONFIG_FILE<<-EOF
+server {
+    listen 80;
+    server_name ${DOMAIN};
+    return 301 https://\$server_name:${PORT}\$request_uri;
+}
+
+server {
+    listen       ${PORT} ssl http2;
+    server_name ${DOMAIN};
+    charset utf-8;
+
+    # ssl配置
+    ssl_protocols TLSv1.1 TLSv1.2;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    ssl_ecdh_curve secp384r1;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_session_tickets off;
+    ssl_certificate $CERT_FILE;
+    ssl_certificate_key $KEY_FILE;
+
+    set \$host_path "/var/www/${DOMAIN}";
+    access_log  /var/log/nginx/${DOMAIN}.access.log  main buffer=32k flush=30s;
+    error_log /var/log/nginx/${DOMAIN}.error.log;
     root   \$host_path;
     location / {
-        index  index.php index.html;
+        index  index.php;
         try_files \$uri \$uri/ /index.php?\$args;
     }
-    location ~ ^/\.user\.ini {
-            deny all;
-    }
-
-    location ~ \.php$ {
+    location ~ \.php\$ {
         try_files \$uri =404;
         fastcgi_index index.php;
-        fastcgi_pass   $upstream;
+        fastcgi_pass $upstream;
         include fastcgi_params;
         fastcgi_param  SCRIPT_FILENAME  \$document_root\$fastcgi_script_name;
     }
-}" >> /etc/nginx/conf.d/${DOMAIN}.conf
+
+    location ${WSPATH} {
+      proxy_redirect off;
+      proxy_pass http://127.0.0.1:${V2PORT};
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade \$http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_set_header Host \$host;
+      proxy_set_header X-Real-IP \$remote_addr;
+      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+
+    location ~ \.(js|css|png|jpg|jpeg|gif|ico|swf|webp|pdf|txt|doc|docx|xls|xlsx|ppt|pptx|mov|fla|zip|rar)\$ {
+        expires max;
+        access_log off;
+        try_files \$uri =404;
+    }
+}
+EOF
 
     # restart service
     systemctl restart php-fpm mariadb nginx
