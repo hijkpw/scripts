@@ -72,8 +72,8 @@ checkV2() {
     V2PORT=`grep port $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     WSPATH=`grep path $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     PORT=`grep -i ssl $NGINX_CONFIG_FILE | grep listen | head -n1 | awk '{print $2}'`
-    CERT_FILE=`grep ssl_certificate $NGINX_CONFIG_FILE | grep -v _key | cut -f2 | tr -d \;`
-    KEY_FILE=`grep ssl_certificate_key $NGINX_CONFIG_FILE | cut -f2 | tr -d \;`
+    CERT_FILE=`grep ssl_certificate $NGINX_CONFIG_FILE | grep -v _key`
+    KEY_FILE=`grep ssl_certificate_key $NGINX_CONFIG_FILE`
 }
 
 installPHP() {
@@ -189,8 +189,8 @@ server {
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
     ssl_session_tickets off;
-    ssl_certificate $CERT_FILE;
-    ssl_certificate_key $KEY_FILE;
+    $CERT_FILE
+    $KEY_FILE
 
     set \$host_path "/var/www/${DOMAIN}";
     access_log  /var/log/nginx/${DOMAIN}.access.log  main buffer=32k flush=30s;
