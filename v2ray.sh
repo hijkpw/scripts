@@ -1214,11 +1214,9 @@ update() {
 uninstall() {
     read -p " 确定卸载V2ray？[y/n]：" answer
     if [[ "${answer,,}" = "y" ]]; then
-        if [[ "$(configNeedNginx)" = "yes" ]]; then
-            domain=`grep Host $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
-            if [[ "$domain" = "" ]]; then
-                domain=`grep serverName $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
-            fi
+        domain=`grep Host $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+        if [[ "$domain" = "" ]]; then
+            domain=`grep serverName $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
         fi
         
         stop
