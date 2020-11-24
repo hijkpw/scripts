@@ -29,6 +29,7 @@ CONFIG_FILE="/etc/v2ray/config.json"
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 VLESS="false"
+TROJAN="false"
 TLS="false"
 WS="false"
 XTLS="false"
@@ -284,6 +285,13 @@ getData() {
         V2PORT=`shuf -i10000-65000 -n1`
     fi
 
+    if [[ "$TROJAN" = "true" ]]; then
+        read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
+        [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+        colorEcho $BLUE " trojan密码：$PASSWORD"
+        echo ""
+    fi
+
     if [[ "$XTLS" = "true" ]]; then
         colorEcho $BLUE " 请选择流控模式:" 
         echo -e "   1) xtls-rprx-direct [$RED推荐$PLAIN]"
@@ -514,12 +522,8 @@ EOF
     if [[ "$PROXY_URL" = "" ]]; then
         action=""
     else
-        if [[ "${PROXY_URL:0:5}" == "https" ]]; then
-            action="proxy_ssl_server_name on;
+        action="proxy_ssl_server_name on;
         proxy_pass $PROXY_URL;"
-        else
-            action="proxy_pass $PROXY_URL;"
-        fi
     fi
 
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
@@ -573,6 +577,7 @@ EOF
         else
             # VLESS+TCP+TLS
             # VLESS+TCP+XTLS
+            # trojan
             cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
@@ -759,9 +764,110 @@ configV2ray() {
   }
 }
 EOF
-        # VMESS+TCP+TLS
         elif [[ "$WS" = "false" ]]; then
-            cat > $CONFIG_FILE<<-EOF
+            # trojan
+            if [[ "$TROJAN" = "true" ]]; then
+                if [[ "$XTLS" = "false" ]]; then
+                    cat > $CONFIG_FILE<<-EOF
+{
+  "inbounds": [{
+    "port": $PORT,
+    "protocol": "trojan",
+    "settings": {
+      "clients": [
+        {
+          "password": "$PASSWORD"
+        }
+      ]
+    },
+    "streamSettings": {
+        "network": "tcp",
+        "security": "tls",
+        "tlsSettings": {
+            "serverName": "$DOMAIN",
+            "certificates": [
+                {
+                    "certificateFile": "$CERT_FILE",
+                    "keyFile": "$KEY_FILE"
+                }
+            ]
+        }
+    }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",
+    "settings": {}
+  },{
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "blocked"
+  }],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "blocked"
+      }
+    ]
+  }
+}
+EOF
+                # trojan+XTLS
+                else
+                    cat > $CONFIG_FILE<<-EOF
+{
+  "inbounds": [{
+    "port": $PORT,
+    "protocol": "trojan",
+    "settings": {
+      "clients": [
+        {
+          "password": "$PASSWORD",
+          "flow": "$FLOW"
+        }
+      ]
+    },
+    "streamSettings": {
+        "network": "tcp",
+        "security": "xtls",
+        "xtlsSettings": {
+            "serverName": "$DOMAIN",
+            "alpn": [
+                "http/1.1"
+            ],
+            "certificates": [
+                {
+                    "certificateFile": "$CERT_FILE",
+                    "keyFile": "$KEY_FILE"
+                }
+            ]
+        }
+    }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",
+    "settings": {}
+  },{
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "blocked"
+  }],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "blocked"
+      }
+    ]
+  }
+}
+EOF
+                fi
+            # VMESS+TCP+TLS
+            else
+                cat > $CONFIG_FILE<<-EOF
 {
   "inbounds": [{
     "port": $PORT,
@@ -809,6 +915,7 @@ EOF
   }
 }
 EOF
+            fi
         # VMESS+WS+TLS
         else
             cat > $CONFIG_FILE<<-EOF
@@ -1185,6 +1292,8 @@ showInfo() {
     tls="false"
     ws="false"
     xtls="false"
+    trojan="false"
+    protocol="VMess"
 
     ip=`curl -s -4 ip.sb`
     uid=`grep id $CONFIG_FILE | head -n1| cut -d: -f2 | tr -d \",' '`
@@ -1210,7 +1319,15 @@ showInfo() {
 
     vmess=`grep vmess $CONFIG_FILE`
     if [[ "$vmess" = "" ]]; then
-        vless="true"
+        trojan=`grep trojan $CONFIG_FILE`
+        if [[ "$trojan" = "" ]]; then
+            vless="true"
+            protocol="VLESS"
+        else
+            trojan="true"
+            password=`grep password $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+            protocol="trojan"
+        fi
         tls="true"
         encryption="none"
         xtls=`grep xtlsSettings $CONFIG_FILE`
@@ -1228,9 +1345,8 @@ showInfo() {
     statusText
     echo
 
-
+    echo -e " ${BLUE}协议: ${PLAIN} ${RED}${protocol}${PLAIN}"
     if [[ "$vless" = "false" ]]; then
-        echo -e " ${BLUE}协议: ${PLAIN} ${RED}VMess${PLAIN}"
         if [[ "$tls" = "false" ]]; then
             raw="{
   \"v\":\"2\",
@@ -1257,7 +1373,22 @@ showInfo() {
             echo  
             echo -e " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
         elif [[ "$ws" = "false" ]]; then
-            raw="{
+            if [[ "$trojan" = "true" ]]; then
+                if [[ "$xtls" = "true" ]]; then
+                    echo -e " ${BLUE}IP/域名(address): ${PLAIN} ${RED}${domain}${PLAIN}"
+                    echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+                    echo -e " ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
+                    echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
+                    echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+                    echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+                    echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
+                else
+                    echo -e " ${BLUE}IP/域名(address): ${PLAIN} ${RED}${domain}${PLAIN}"
+                    echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+                    echo -e " ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
+                fi
+            else
+                raw="{
   \"v\":\"2\",
   \"ps\":\"\",
   \"add\":\"$ip\",
@@ -1270,18 +1401,19 @@ showInfo() {
   \"path\":\"\",
   \"tls\":\"tls\"
 }"
-            link=`echo -n ${raw} | base64 -w 0`
-            link="vmess://${link}"
-            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
-            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
-            echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
-            echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
-            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-            echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
-            echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
-            echo  
-            echo -e " ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
+                link=`echo -n ${raw} | base64 -w 0`
+                link="vmess://${link}"
+                echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+                echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+                echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+                echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+                echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
+                echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+                echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+                echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
+                echo  
+                echo -e " ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
+            fi
         else
             raw="{
   \"v\":\"2\",
@@ -1313,7 +1445,6 @@ showInfo() {
             echo -e " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
         fi
     else
-        echo -e " ${BLUE}协议: ${PLAIN} ${RED}VLESS${PLAIN}"
         if [[ "$xtls" = "true" ]]; then
             echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
@@ -1381,7 +1512,7 @@ menu() {
     echo -e "  ${GREEN}4.${PLAIN}   安装V2ray-VLESS+TCP+TLS"
     echo -e "  ${GREEN}5.${PLAIN}   安装V2ray-VLESS+WS+TLS${RED}(可过cdn)${PLAIN}"
     echo -e "  ${GREEN}6.${PLAIN}   安装V2ray-VLESS+TCP+XTLS${RED}(推荐)${PLAIN}"
-    echo -e "  ${GREEN}7.${PLAIN}   安装trojan"
+    echo -e "  ${GREEN}7.${PLAIN}   安装trojan${RED}(推荐)${PLAIN}"
     echo -e "  ${GREEN}8.${PLAIN}   安装trojan+XTLS${RED}(推荐)${PLAIN}"
     echo " -------------"
     echo -e "  ${GREEN}10.${PLAIN}  更新V2ray"
@@ -1435,10 +1566,15 @@ menu() {
             install
             ;;
         7)
-            colorEcho $RED " 尚未支持trojan，请过一段时间重试"
+            TROJAN="true"
+            TLS="true"
+            install
             ;;
         8)
-            colorEcho $RED " 尚未支持trojan+XTLS，请过一段时间重试"
+            TROJAN="true"
+            TLS="true"
+            XTLS="true"
+            install
             ;;
         10)
             update
