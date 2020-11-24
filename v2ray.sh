@@ -229,6 +229,7 @@ getData() {
             exit 0
         fi
 
+        echo ""
         while true
         do
             read -p " 请输入伪装域名：" DOMAIN
@@ -385,6 +386,7 @@ getData() {
                 exit 1
             esac
         fi
+        REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
         echo ""
         colorEcho $BLUE " 伪装域名：$PROXY_URL"
         echo ""
@@ -523,7 +525,10 @@ EOF
         action=""
     else
         action="proxy_ssl_server_name on;
-        proxy_pass $PROXY_URL;"
+        proxy_pass $PROXY_URL;
+        proxy_set_header Accept-Encoding '';
+        sub_filter \"$REMOTE_HOST\" \"$DOMAIN\";
+        sub_filter_once off;"
     fi
 
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then

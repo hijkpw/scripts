@@ -448,6 +448,9 @@ server {
     location / {
         proxy_ssl_server_name on;
         proxy_pass $PROXY_URL;
+        proxy_set_header Accept-Encoding '';
+        sub_filter "$REMOTE_HOST" "$DOMAIN";
+        sub_filter_once off;
     }
     
     location = /robots.txt {

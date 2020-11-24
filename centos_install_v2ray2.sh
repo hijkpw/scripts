@@ -192,6 +192,7 @@ getData() {
             exit 1
         esac
     fi
+    REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
     echo ""
     colorEcho $BLUE " 伪装域名：$PROXY_URL"
     echo ""
@@ -401,12 +402,11 @@ EOF
     if [[ "$PROXY_URL" = "" ]]; then
         action=""
     else
-        if [[ "${PROXY_URL:0:5}" == "https" ]]; then
         action="proxy_ssl_server_name on;
-        proxy_pass $PROXY_URL;"
-        else
-            action="proxy_pass $PROXY_URL;"
-        fi
+        proxy_pass $PROXY_URL;
+        proxy_set_header Accept-Encoding '';
+        sub_filter \"$REMOTE_HOST\" \"$DOMAIN\";
+        sub_filter_once off;"
     fi
     cat > ${confpath}${DOMAIN}.conf<<-EOF
 server {
