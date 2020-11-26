@@ -180,7 +180,7 @@ info() {
         echo -e " ${RED}未安装v2ray!${PLAIN}"
         exit 1
     fi
-    ip=`curl -s -4 icanhazip.com`
+    ip=`curl -sL -4 ip.sb`
     port=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep v2ray`
     [ -z "$res" ] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"

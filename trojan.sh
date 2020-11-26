@@ -79,7 +79,7 @@ slogon() {
 
 function getData()
 {
-    IP=`curl -s -4 ip.sb`
+    IP=`curl -sL -4 ip.sb`
     echo " "
     echo " 本脚本为trojan一键脚本，运行之前请确认如下条件已经具备："
     echo -e "  ${RED}1. 一个伪装域名${PLAIN}"
@@ -111,7 +111,7 @@ function getData()
         CERT_FILE="/usr/local/etc/trojan/${DOMAIN}.pem"
         KEY_FILE="/usr/local/etc/trojan/${DOMAIN}.key"
     else
-        resolve=`curl -s https://hijk.art/hostip.php?d=${DOMAIN}`
+        resolve=`curl -sL https://hijk.art/hostip.php?d=${DOMAIN}`
         res=`echo -n ${resolve} | grep ${IP}`
         if [[ -z "${res}" ]]; then
             echo " ${DOMAIN} 解析结果：${resolve}"

@@ -75,7 +75,7 @@ slogon() {
 }
 
 getData() {
-    IP=`curl -s -4 ip.sb`
+    IP=`curl -sL -4 ip.sb`
     echo " "
     echo " 本脚本为带伪装的一键脚本，运行之前请确认如下条件已经具备："
     colorEcho ${YELLOW} "  1. 一个伪装域名"
@@ -105,7 +105,7 @@ getData() {
         CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
         KEY_FILE="/etc/v2ray/${DOMAIN}.key"
     else
-        resolve=`curl -s https://hijk.art/hostip.php?d=${DOMAIN}`
+        resolve=`curl -sL https://hijk.art/hostip.php?d=${DOMAIN}`
         res=`echo -n ${resolve} | grep ${IP}`
         if [[ -z "${res}" ]]; then
             colorEcho ${BLUE}  "${DOMAIN} 解析结果：${resolve}"
@@ -161,7 +161,7 @@ getData() {
                 index=`shuf -i0-${len} -n1`
                 PROXY_URL=${SITES[$index]}
                 host=`echo ${PROXY_URL} | cut -d/ -f3`
-                ip=`curl -s https://hijk.art/hostip.php?d=${host}`
+                ip=`curl -sL https://hijk.art/hostip.php?d=${host}`
                 res=`echo -n ${ip} | grep ${host}`
                 if [[ "${res}" = "" ]]; then
                     echo "$ip $host" >> /etc/hosts
@@ -495,7 +495,7 @@ info() {
         exit 1
     fi
     
-    ip=`curl -s -4 ip.sb`
+    ip=`curl -sL -4 ip.sb`
     res=`netstat -nltp | grep v2ray`
     [ -z "$res" ] && v2status="${RED}已停止${PLAIN}" || v2status="${GREEN}正在运行${PLAIN}"
     

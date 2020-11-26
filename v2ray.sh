@@ -216,7 +216,7 @@ archAffix(){
 }
 
 getData() {
-    IP=`curl -s -4 ip.sb`
+    IP=`curl -sL -4 ip.sb`
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
         echo " "
         echo " V2ray一键脚本，运行之前请确认如下条件已经具备："
@@ -249,7 +249,7 @@ getData() {
             CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
             KEY_FILE="/etc/v2ray/${DOMAIN}.key"
         else
-            resolve=`curl -s https://hijk.art/hostip.php?d=${DOMAIN}`
+            resolve=`curl -sL https://hijk.art/hostip.php?d=${DOMAIN}`
             res=`echo -n ${resolve} | grep ${IP}`
             if [[ -z "${res}" ]]; then
                 colorEcho ${BLUE}  "${DOMAIN} 解析结果：${resolve}"
@@ -357,7 +357,7 @@ getData() {
                     index=`shuf -i0-${len} -n1`
                     PROXY_URL=${SITES[$index]}
                     host=`echo ${PROXY_URL} | cut -d/ -f3`
-                    ip=`curl -s https://hijk.art/hostip.php?d=${host}`
+                    ip=`curl -sL https://hijk.art/hostip.php?d=${host}`
                     res=`echo -n ${ip} | grep ${host}`
                     if [[ "${res}" = "" ]]; then
                         echo "$ip $host" >> /etc/hosts
@@ -1298,7 +1298,7 @@ showInfo() {
     trojan="false"
     protocol="VMess"
 
-    ip=`curl -s -4 ip.sb`
+    ip=`curl -sL -4 ip.sb`
     uid=`grep id $CONFIG_FILE | head -n1| cut -d: -f2 | tr -d \",' '`
     alterid=`grep alterId $CONFIG_FILE  | cut -d: -f2 | tr -d \",' '`
     network=`grep network $CONFIG_FILE  | tail -n1| cut -d: -f2 | tr -d \",' '`

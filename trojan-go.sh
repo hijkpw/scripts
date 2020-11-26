@@ -182,7 +182,7 @@ getData() {
             CERT_FILE="/etc/trojan-go/${DOMAIN}.pem"
             KEY_FILE="/etc/trojan-go/${DOMAIN}.key"
         else
-            resolve=`curl -s https://hijk.art/hostip.php?d=${DOMAIN}`
+            resolve=`curl -sL https://hijk.art/hostip.php?d=${DOMAIN}`
             res=`echo -n ${resolve} | grep ${IP}`
             if [[ -z "${res}" ]]; then
                 echo " ${DOMAIN} 解析结果：${resolve}"
@@ -271,7 +271,7 @@ getData() {
                 index=`shuf -i0-${len} -n1`
                 PROXY_URL=${SITES[$index]}
                 host=`echo ${PROXY_URL} | cut -d/ -f3`
-                ip=`curl -s https://hijk.art/hostip.php?d=${host}`
+                ip=`curl -sL https://hijk.art/hostip.php?d=${host}`
                 res=`echo -n ${ip} | grep ${host}`
                 if [[ "${res}" = "" ]]; then
                     echo "$ip $host" >> /etc/hosts
@@ -791,7 +791,7 @@ showInfo() {
         return
     fi
 
-    ip=`curl -s -4 ip.sb`
+    ip=`curl -sL -4 ip.sb`
     domain=`grep sni $CONFIG_FILE | cut -d\" -f4`
     port=`grep local_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     line1=`grep -n 'password' $CONFIG_FILE  | head -n1 | cut -d: -f1`

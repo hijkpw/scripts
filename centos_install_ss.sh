@@ -266,7 +266,7 @@ setFirewall() {
 
 info() {
     yum install -y qrencode
-    ip=`curl -s -4 icanhazip.com`
+    ip=`curl -sL -4 ip.sb`
     port=`cat /etc/shadowsocks-libev/config.json | grep server_port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep 'ss-server'`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
