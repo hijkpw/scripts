@@ -71,7 +71,7 @@ getData() {
         expr $PORT + 0 &>/dev/null
         if [[ $? -eq 0 ]]; then
             if [[ $PORT -ge 1025 ]] && [[ $PORT -le 65535 ]]; then
-                echo ""1234
+                echo ""
                 colorEcho $BLUE " 端口号： $PORT"
                 echo ""
                 break
@@ -177,29 +177,55 @@ preinstall() {
     fi
 }
 
+normalizeVersion() {
+    if [ -n "$1" ]; then
+        case "$1" in
+            v*)
+                echo "${1:1}"
+            ;;
+            *)
+                echo "$1"
+            ;;
+        esac
+    else
+        echo ""
+    fi
+}
+
+installNewVer() {
+    new_ver=$1
+    if ! wget "https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${new_ver}/shadowsocks-libev-${new_ver}.tar.gz" -O shadowsocks-libev.tar.gz; then
+        colorEcho $RED " 下载安装文件失败！"
+        exit 1
+    fi
+    tar zxf shadowsocks-libev.tar.gz
+    cd shadowsocks-libev-${new_ver}
+    ./configure
+    make && make install
+    if [[ $? -ne 0 ]]; then
+        echo
+        echo -e " [${RED}错误${PLAIN}]: $OS Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
+        cd ${BASE} && rm -rf shadowsocks-libev-${new_ver}
+        exit 1
+    fi
+    cd ${BASE} && rm -rf shadowsocks-libev-${new_ver}
+}
+
 installSS() {
     colorEcho $BLUE " 安装SS..."
 
+    tag_url="https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest"
+    new_ver="$(normalizeVersion "$(curl -s "${tag_url}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
     ssPath=`which ss-server`
     if [[ "$?" != "0" ]]; then
-        if ! wget 'https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.3.4/shadowsocks-libev-3.3.4.tar.gz' -O shadowsocks-libev-3.3.4.tar.gz; then
-            colorEcho $RED " 下载安装文件失败！"
-            exit 1
-        fi
-        tar zxf shadowsocks-libev-3.3.4.tar.gz
-        cd shadowsocks-libev-3.3.4
-        ./configure
-        make && make install
-        if [[ $? -ne 0 ]]; then
-            echo
-            echo -e " [${RED}错误${PLAIN}]: $OS Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
-            cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
-            exit 1
-        fi
-        cd ${BASE} && rm -rf shadowsocks-libev-3.3.4*
-        ssPath=/usr/local/bin/ss-server
+        installNewVer $new_ver
     else
-        colorEcho $YELLOW " SS已安装"
+        ver=`ss-server -h | grep shadowsocks-libev | grep -oE '[0-9+\.]+'`
+        if [[ $ver != $new_ver ]]; then
+            installNewVer $new_ver
+        else
+            colorEcho $YELLOW " 已安装最新版SS"
+        fi
     fi
 
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
@@ -207,6 +233,7 @@ installSS() {
     if [[ ! -d /etc/shadowsocks-libev ]];then
         mkdir /etc/shadowsocks-libev
     fi
+    ssPath=`which ss-server`
     cat > /etc/shadowsocks-libev/config.json<<-EOF
 {
     "server":"0.0.0.0",
