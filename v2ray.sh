@@ -1141,6 +1141,7 @@ EOF
 }
 
 install() {
+    $PMT clean all
     $CMD_UPGRADE
     $CMD_INSTALL wget net-tools unzip vim
     res=`which unzip`

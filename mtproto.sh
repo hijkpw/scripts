@@ -120,6 +120,7 @@ installDocker() {
     fi
 
     #$CMD_REMOVE docker docker-engine docker.io containerd runc
+    $PMT clean all
     $CMD_INSTALL wget curl
     if [[ $PMT = "apt" ]]; then
         apt clean all

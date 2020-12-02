@@ -209,6 +209,7 @@ function getData()
 
 function preinstall()
 {
+    $PMT clean all
     colorEcho $BLUE " 更新系统..."
     $CMD_UPGRADE
 
