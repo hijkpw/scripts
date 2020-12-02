@@ -298,7 +298,7 @@ getCert() {
         fi
         pip3 install --upgrade pip
         pip3 install wheel
-        res=`pip3 list | grep crypto | awk '{print $2}'`
+        res=`pip3 list --format=columns | grep cryptography| awk '{print $2}'`
         if [[ "$res" < "2.8" ]]; then
             pip3 uninstall -y cryptography
             pip3 install cryptography

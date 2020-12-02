@@ -353,13 +353,10 @@ getCert() {
         fi
         pip3 install --upgrade pip
         pip3 install wheel
-        res=`pip3 list | grep crypto | awk '{print $2}'`
+        res=`pip3 list --format=columns | grep cryptography | awk '{print $2}'`
         if [[ "$res" < "2.8" ]]; then
             pip3 uninstall -y cryptography
-            cd /usr/lib/python3/dist-packages
-            rm -r cryptoggraphy cryptography-2.1.4.egg-info
             pip3 install cryptography
-            cd -
         fi
         pip3 install certbot
         res=`which certbot`
