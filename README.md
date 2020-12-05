@@ -1,12 +1,10 @@
 # 网络跳越一键脚本
 
-官网：<https://hijk.art>
+官网：<https://v2raytech.com>
 
 论坛：<https://hijk.club>
 
 TG讨论组： [@hijkclub](https://t.me/hijkclub)
-
-镜像站点：<https://v2raytech.com>
 
 Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 
@@ -42,6 +40,8 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 [trojan-go一键脚本](https://v2raytech.com/trojan-go-one-click-script/)
 
 [V2ray多合一脚本，支持VMESS+websocket+TLS+Nginx、VLESS+TCP+XTLS、VLESS+TCP+TLS等组合](https://v2raytech.com/v2ray-all-in-one-script-vless-tcp-xtls-support/)
+
+[Xray一键脚本](https://v2raytech.com/xray-one-click-script/)
 
 # 客户端配置教程
 
@@ -112,6 +112,8 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 [trojan-go建站教程](https://v2raytech.com/trojan-go-with-website/)
 
 # VPS教程
+
+[VPS可以用来做什么？](https://v2raytech.com/what-can-vps-do/)
 
 [CN2 GIA商家推荐](https://v2raytech.com/cn2-gia-merchants/)
 
@@ -190,6 +192,12 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 [免费vpn有风险，请慎用](https://v2raytech.com/be-careful-when-use-free-vpn/)
 
 [对机场/vpn的看法](https://v2raytech.com/opinion-on-vpn-service/)
+
+[Telegram新手指南和使用教程](https://v2raytech.com/telegram-tutorial/)
+
+[别太把自己当回事](https://v2raytech.com/do-not-treat-yourself-important/)
+
+[那些年跑路的机场](https://v2raytech.com/proxy-service-suspended-unexpected/)
 
 [科学上网常见问题](https://v2raytech.com/vpn-faq/)
 
