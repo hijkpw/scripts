@@ -363,6 +363,15 @@ getCert() {
         if [[ "$?" != "0" ]]; then
             export PATH=$PATH:/usr/local/bin
         fi
+        res=`which certbot`
+        if [[ "$?" != "0" ]]; then
+            pip3 install certbot
+            res=`which certbot`
+            if [[ "$?" != "0" ]]; then
+                colorEcho $RED " certbot安装失败，请到 https://hijk.art 反馈"
+                exit 1
+            fi
+        fi
         certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
         if [[ "$?" != "0" ]]; then
             echo -e " $OS 获取证书失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
@@ -758,7 +767,12 @@ restart() {
     fi
 
     stop
+    colorEcho $BLUE " trojan-go停止成功"
+    sleep 3
     start
+    colorEcho $BLUE " trojan-go启动成功"
+    sleep 3
+    statusText
 }
 
 reconfig() {
