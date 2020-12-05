@@ -22,31 +22,39 @@ colorEcho() {
 
 checkSystem() {
     result=$(id | awk '{print $1}')
-    if [ $result != "uid=0(root)" ]; then
+    if [[ $result != "uid=0(root)" ]]; then
         colorEcho $RED " 请以root身份执行该脚本"
         exit 1
     fi
 
-    if [ ! -f /etc/centos-release ];then
-        res=`which yum`
-        if [ "$?" != "0" ]; then
-            colorEcho $RED " 系统不是CentOS"
+    res=`which yum`
+    if [[ "$?" != "0" ]]; then
+        res=`which apt`
+        if [[ "$?" != "0" ]]; then
+            colorEcho $RED " 不受支持的Linux系统"
             exit 1
-         fi
+        fi
+        PMT="apt"
+        CMD_INSTALL="apt install -y "
+        CMD_REMOVE="apt remove -y "
+        CMD_UPGRADE="apt update && apt upgrade -y"
     else
-        result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
-        main=${result%%.*}
-        if [ $main -lt 7 ]; then
-            colorEcho $RED " 不受支持的CentOS版本"
-            exit 1
-         fi
+        PMT="yum"
+        CMD_INSTALL="yum install -y "
+        CMD_REMOVE="yum remove -y "
+        CMD_UPGRADE="yum update -y"
+    fi
+    res=`which systemctl`
+    if [[ "$?" != "0" ]]; then
+        colorEcho $RED " 系统版本过低，请升级到最新版本"
+        exit 1
     fi
 }
 
 slogon() {
     clear
     echo "#############################################################"
-    echo -e "#         ${RED}CentOS 7/8 ShadowsocksR/SSR 一键安装脚本${PLAIN}           #"
+    echo -e "#             ${RED}ShadowsocksR/SSR 一键安装脚本${PLAIN}               #"
     echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
     echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
     echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
@@ -58,7 +66,7 @@ slogon() {
 
 getData() {
     read -p " 请设置SSR的密码（不输入则随机生成）:" PASSWORD
-    [ -z "$PASSWORD" ] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+    [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
     colorEcho $BLUE " 密码： $PASSWORD"
     echo ""
@@ -66,13 +74,13 @@ getData() {
     while true
     do
         read -p " 请设置SSR的端口号[1-65535]:" PORT
-        [ -z "$PORT" ] && PORT="12345"
-        if [ "${PORT:0:1}" = "0" ]; then
+        [[ -z "$PORT" ]] && PORT=`shuf -i1025-65000 -n1`
+        if [[ "${PORT:0:1}" = "0" ]]; then
             echo -e " ${RED}端口不能以0开头${PLAIN}"
             exit 1
         fi
         expr $PORT + 0 &>/dev/null
-        if [ $? -eq 0 ]; then
+        if [[ $? -eq 0 ]]; then
             if [ $PORT -ge 1 ] && [ $PORT -le 65535 ]; then
                 echo ""
                 colorEcho $BLUE " 端口号： $PORT"
@@ -102,7 +110,7 @@ getData() {
     echo "  12)camellia-256-cfb"
     echo "  13)chacha20-ietf"
     read -p " 请选择加密方式（默认aes-256-cfb）" answer
-    if [ -z "$answer" ]; then
+    if [[ -z "$answer" ]]; then
         METHOD="aes-256-cfb"
     else
         case $answer in
@@ -167,7 +175,7 @@ getData() {
     echo "   10)auth_chain_e"
     echo "   11)auth_chain_f"
     read -p " 请选择SSR协议（默认origin）" answer
-    if [ -z "$answer" ]; then
+    if [[ -z "$answer" ]]; then
         PROTOCOL="origin"
     else
         case $answer in
@@ -221,7 +229,7 @@ getData() {
     echo "   4)tls1.2_ticket_auth"
     echo "   5)tls1.2_ticket_fastauth"
     read -p " 请选择混淆模式（默认plain）" answer
-    if [ -z "$answer" ]; then
+    if [[ -z "$answer" ]]; then
         OBFS="plain"
     else
         case $answer in
@@ -252,27 +260,31 @@ getData() {
 
 preinstall() {
     colorEcho $BLUE " 更新系统..."
-    yum clean all
-    yum update -y
+    $PMT clean all
+    $CMD_UPGRADE
     colorEcho $BLUE " 安装必要软件"
-    yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip tar qrencode
+    if [[ "$PMT" = "yum" ]]; then
+        $CMD_INSTALL epel-release
+    fi
+    $CMD_INSTALL telnet curl wget vim net-tools libsodium* openssl unzip tar qrencode
     res=`which wget`
-    [ "$?" != "0" ] && yum install -y wget
+    [[ "$?" != "0" ]] && $CMD_INSTALL wget
     res=`which netstat`
-    [ "$?" != "0" ] && yum install -y net-tools
-    if [ $main -eq 8 ]; then
+    [[ "$?" != "0" ]] && $CMD_INSTALL net-tools
+    res=`which python`
+    if [[ "$?" != "0" ]]; then
         ln -s /usr/bin/python3 /usr/bin/python
     fi
 
-    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+    if [[ -s /etc/selinux/config ]] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
         setenforce 0
     fi
 }
 
 installSSR() {
-    if [ ! -d /usr/local/shadowsocks ]; then
-        echo 下载安装文件
+    if [[ ! -d /usr/local/shadowsocks ]]; then
+        colorEcho $BLUE " 下载安装文件"
         if ! wget --no-check-certificate -O ${FILENAME}.tar.gz ${URL}; then
             echo -e " [${RED}Error${PLAIN}] 下载文件失败!"
             exit 1
@@ -280,7 +292,7 @@ installSSR() {
 
         tar -zxf ${FILENAME}.tar.gz
         mv shadowsocksr-3.2.2/shadowsocks /usr/local
-        if [ ! -f /usr/local/shadowsocks/server.py ]; then
+        if [[ ! -f /usr/local/shadowsocks/server.py ]]; then
             colorEcho $RED " $OS 安装失败，请到 https://hijk.art 网站反馈"
             cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
             exit 1
@@ -330,32 +342,51 @@ EOF
     systemctl enable shadowsocksR && systemctl restart shadowsocksR
     sleep 3
     res=`netstat -nltp | grep ${PORT} | grep python`
-    if [ "${res}" = "" ]; then
+    if [[ "${res}" = "" ]]; then
         colorEcho $RED " ssr启动失败，请检查端口是否被占用！"
         exit 1
     fi
 }
 
 setFirewall() {
-    systemctl status firewalld > /dev/null 2>&1
-    if [[ $? -eq 0 ]];then
-        firewall-cmd --permanent --add-service=http
-        firewall-cmd --permanent --add-port=${PORT}/tcp
-        firewall-cmd --permanent --add-port=${PORT}/udp
-        firewall-cmd --reload
+    res=`which firewall-cmd`
+    if [[ $? -eq 0 ]]; then
+        systemctl status firewalld > /dev/null 2>&1
+        if [[ $? -eq 0 ]];then
+            firewall-cmd --permanent --add-port=${PORT}/tcp
+            firewall-cmd --permanent --add-port=${PORT}/udp
+            firewall-cmd --reload
+        else
+            nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
+            if [[ "$nl" != "3" ]]; then
+                iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
+                iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
+            fi
+        fi
     else
-        nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
-        if [[ "$nl" != "3" ]]; then
-            iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-            iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
-            iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
+        res=`which iptables`
+        if [[ $? -eq 0 ]]; then
+            nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
+            if [[ "$nl" != "3" ]]; then
+                iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
+                iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
+            fi
+        else
+            res=`which ufw`
+            if [[ $? -eq 0 ]]; then
+                res=`ufw status | grep -i inactive`
+                if [[ "$res" = "" ]]; then
+                    ufw allow ${PORT}/tcp
+                    ufw allow ${PORT}/udp
+                fi
+            fi
         fi
     fi
 }
 
 installBBR() {
     result=$(lsmod | grep bbr)
-    if [ "$result" != "" ]; then
+    if [[ "$result" != "" ]]; then
         colorEcho $GREEN " BBR模块已安装"
         echo "3" > /proc/sys/net/ipv4/tcp_fastopen
         echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
@@ -381,11 +412,16 @@ installBBR() {
     fi
 
     colorEcho $BLUE " 安装BBR模块..."
-    rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-    rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-    yum --enablerepo=elrepo-kernel install kernel-ml -y
-    yum remove kernel-3.* -y
-    grub2-set-default 0
+    if [[ "$PMT" = "yum" ]]; then
+        rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+        rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+        $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
+        $CMD_REMOVE kernel-3.*
+        grub2-set-default 0
+    else
+        $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
+        grub-set-default 0
+    fi
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     INSTALL_BBR=true
@@ -395,7 +431,7 @@ info() {
     ip=`curl -sL -4 ip.sb`
     port=`cat /etc/shadowsocksR.json | grep server_port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep python`
-    [ -z "$res" ] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
+    [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
     password=`cat /etc/shadowsocksR.json | grep password | cut -d: -f2 | tr -d \",' '`
     method=`cat /etc/shadowsocksR.json | grep method | cut -d: -f2 | tr -d \",' '`
     protocol=`cat /etc/shadowsocksR.json | grep protocol | cut -d: -f2 | tr -d \",' '`
@@ -425,7 +461,7 @@ info() {
 }
 
 bbrReboot() {
-    if [ "${INSTALL_BBR}" == "true" ]; then
+    if [[ "${INSTALL_BBR}" == "true" ]]; then
         echo  
         echo  为使BBR模块生效，系统将在30秒后重启
         echo  
@@ -437,8 +473,6 @@ bbrReboot() {
 
 
 install() {
-    echo -n "系统版本:  "
-    cat /etc/centos-release
     checkSystem
     getData
     preinstall
@@ -454,9 +488,9 @@ install() {
 uninstall() {
     echo ""
     read -p " 确定卸载SSR吗？(y/n)" answer
-    [ -z ${answer} ] && answer="n"
+    [[ -z ${answer} ]] && answer="n"
 
-    if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
+    if [[ "${answer}" == "y" ]] || [[ "${answer}" == "Y" ]]; then
         rm -f /etc/shadowsocksR.json
         rm -f /var/log/shadowsocks.log
         rm -rf /usr/local/shadowsocks
@@ -468,7 +502,7 @@ uninstall() {
 slogon
 
 action=$1
-[ -z $1 ] && action=install
+[[ -z $1 ]] && action=install
 case "$action" in
     install|uninstall|info)
         ${action}

@@ -1,5 +1,5 @@
 #!/bin/bash
-# shadowsocks/ss CentOS8一键安装脚本
+# shadowsocks/ss一键安装脚本
 # Author: hijk<https://hijk.art>
 
 
@@ -19,31 +19,39 @@ colorEcho() {
 
 checkSystem() {
     result=$(id | awk '{print $1}')
-    if [[ "$result" != "uid=0(root)" ]]; then
+    if [[ $result != "uid=0(root)" ]]; then
         colorEcho $RED " 请以root身份执行该脚本"
         exit 1
     fi
 
-    if [[ ! -f /etc/centos-release ]]; then
-        res=`which yum`
-        if [ "$?" != "0" ]; then
-            colorEcho $RED " 系统不是CentOS"
+    res=`which yum`
+    if [[ "$?" != "0" ]]; then
+        res=`which apt`
+        if [[ "$?" != "0" ]]; then
+            colorEcho $RED " 不受支持的Linux系统"
             exit 1
-         fi
+        fi
+        PMT="apt"
+        CMD_INSTALL="apt install -y "
+        CMD_REMOVE="apt remove -y "
+        CMD_UPGRADE="apt update && apt upgrade -y"
     else
-        result=`cat /etc/centos-release|grep -oE "[0-9.]+"`
-        main=${result%%.*}
-        if [[ $main -lt 7 ]]; then
-            colorEcho $RED " 不受支持的CentOS版本"
-            exit 1
-         fi
+        PMT="yum"
+        CMD_INSTALL="yum install -y "
+        CMD_REMOVE="yum remove -y "
+        CMD_UPGRADE="yum update -y"
+    fi
+    res=`which systemctl`
+    if [[ "$?" != "0" ]]; then
+        colorEcho $RED " 系统版本过低，请升级到最新版本"
+        exit 1
     fi
 }
 
 slogon() {
     clear
     echo "#############################################################"
-    echo -e "#         ${RED}CentOS 7/8 Shadowsocks/SS 一键安装脚本${PLAIN}             #"
+    echo -e "#              ${RED}Shadowsocks/SS 一键安装脚本${PLAIN}                #"
     echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
     echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
     echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
@@ -63,7 +71,7 @@ getData() {
     while true
     do
         read -p " 请设置SS的端口号[1025-65535]:" PORT
-        [[ -z "$PORT" ]] && PORT="12345"
+        [[ -z "$PORT" ]] && PORT=`shuf -i1025-65000 -n1`
         if [[ "${PORT:0:1}" = "0" ]]; then
             echo -e " ${RED}端口不能以0开头${PLAIN}"
             exit 1
@@ -159,17 +167,25 @@ getData() {
 }
 
 preinstall() {
-    yum clean all
-    yum update -y
+    $PMT clean all
+    $CMD_UPGRADE
     
     colorEcho $BULE " 安装必要软件"
-    yum install -y epel-release telnet wget vim net-tools unzip tar qrencode
-    yum install -y openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
+    if [[ "$PMT" = "yum" ]]; then
+        $CMD_INSTALL epel-release
+    fi
+    $CMD_INSTALL telnet wget vim net-tools unzip tar qrencode
+    $CMD_INSTALL openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto
+    if [[ "$PMT" = "yum" ]]; then
+        $CMD_INSTALL udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
+    else
+        $CMD_INSTALL libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls-dev libc-ares2 libc-ares-dev g++
+        $CMD_INSTALL libsodium*
+    fi
     res=`which wget`
-    [[ "$?" != "0" ]] && yum install -y wget
+    [[ "$?" != "0" ]] && $CMD_INSTALL wget
     res=`which netstat`
-    [[ "$?" != "0" ]] && yum install -y net-tools
-
+    [[ "$?" != "0" ]] && $CMD_INSTALL net-tools
 
     if [[ -s /etc/selinux/config ]] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
@@ -276,17 +292,81 @@ EOF
     fi
 }
 
-setFirewall() {
-    systemctl status firewalld > /dev/null 2>&1
-    if [[ $? -eq 0 ]];then
-        firewall-cmd --permanent --add-port=${PORT}/tcp
-        firewall-cmd --permanent --add-port=${PORT}/udp
-        firewall-cmd --reload
+installBBR() {
+    result=$(lsmod | grep bbr)
+    if [[ "$result" != "" ]]; then
+        colorEcho $GREEN " BBR模块已安装"
+        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+        echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
+        INSTALL_BBR=false
+        return
+    fi
+    res=`hostnamectl | grep -i openvz`
+    if [ "$res" != "" ]; then
+        colorEcho $YELLOW " openvz机器，跳过安装"
+        INSTALL_BBR=false
+        return
+    fi
+    
+    echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
+    sysctl -p
+    result=$(lsmod | grep bbr)
+    if [[ "$result" != "" ]]; then
+        colorEcho $GREEN " BBR模块已启用"
+        INSTALL_BBR=false
+        return
+    fi
+
+    colorEcho $BLUE " 安装BBR模块..."
+    if [[ "$PMT" = "yum" ]]; then
+        rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+        rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+        $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
+        $CMD_REMOVE kernel-3.*
+        grub2-set-default 0
     else
-        nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
-        if [[ "$nl" != "3" ]]; then
-            iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
-            iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
+        $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
+        grub-set-default 0
+    fi
+    echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+    INSTALL_BBR=true
+}
+
+setFirewall() {
+    res=`which firewall-cmd`
+    if [[ $? -eq 0 ]]; then
+        systemctl status firewalld > /dev/null 2>&1
+        if [[ $? -eq 0 ]];then
+            firewall-cmd --permanent --add-port=${PORT}/tcp
+            firewall-cmd --permanent --add-port=${PORT}/udp
+            firewall-cmd --reload
+        else
+            nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
+            if [[ "$nl" != "3" ]]; then
+                iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
+                iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
+            fi
+        fi
+    else
+        res=`which iptables`
+        if [[ $? -eq 0 ]]; then
+            nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
+            if [[ "$nl" != "3" ]]; then
+                iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
+                iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
+            fi
+        else
+            res=`which ufw`
+            if [[ $? -eq 0 ]]; then
+                res=`ufw status | grep -i inactive`
+                if [[ "$res" = "" ]]; then
+                    ufw allow ${PORT}/tcp
+                    ufw allow ${PORT}/udp
+                fi
+            fi
         fi
     fi
 }
@@ -317,12 +397,11 @@ info() {
 }
 
 install() {
-    echo -n -e " ${BLUE}系统版本:$PLAIN "
-    cat /etc/centos-release
     checkSystem
     getData
     preinstall
     installSS
+    installBBR
     setFirewall
 
     info

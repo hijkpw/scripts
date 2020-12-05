@@ -165,15 +165,8 @@ preinstall() {
     
     colorEcho $BLUE " 安装必要软件"
     apt install -y telnet wget vim net-tools unzip tar qrencode
-    apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls-dev libsodium-dev libc-ares2 libc-ares-dev gcc g++
-    apt install -y libsodium18
-    if [ "$?" != "0" ]; then
-        apt install -y libsodium23
-    fi
-    apt install -y libmbedtls10
-    if [ "$?" != "0" ]; then
-        apt install -y libmbedtls12
-    fi
+    apt install -y make openssl libssl-dev gettext gcc autoconf libtool automake make asciidoc xmlto libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls-dev libsodium-dev libc-ares2 libc-ares-dev g++
+    apt install -y libsodium*
     apt autoremove -y
     res=`which wget`
     [ "$?" != "0" ] && apt install -y wget
@@ -209,10 +202,10 @@ installNewVer() {
     if [[ $? -ne 0 ]]; then
         echo
         echo -e " [${RED}错误${PLAIN}]: $OS Shadowsocks-libev 安装失败！ 请打开 https://hijk.art 反馈"
-        cd ${BASE} && rm -rf shadowsocks-libev-${new_ver}
+        cd ${BASE} && rm -rf shadowsocks-libev*
         exit 1
     fi
-    cd ${BASE} && rm -rf shadowsocks-libev-${new_ver}
+    cd ${BASE} && rm -rf shadowsocks-libev*
 }
 
 installSS() {
@@ -326,7 +319,6 @@ installBBR() {
 }
 
 info() {
-    apt install -y qrencode
     ip=`curl -sL -4 ip.sb`
     port=`cat /etc/shadowsocks-libev/config.json | grep server_port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep 'ss-server'`

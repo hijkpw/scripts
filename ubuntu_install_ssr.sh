@@ -282,6 +282,7 @@ installSSR() {
             cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
             exit 1
         fi
+        cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
     fi
 
      cat > /etc/shadowsocksR.json<<-EOF
@@ -377,7 +378,6 @@ installBBR() {
 }
 
 info() {
-    apt install -y qrencode
     ip=`curl -sL -4 ip.sb`
     port=`cat /etc/shadowsocksR.json | grep server_port | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep python`
@@ -433,8 +433,6 @@ install() {
     setFirewall
 
     info
-    
-    cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
     
     bbrReboot
 }
