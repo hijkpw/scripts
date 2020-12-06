@@ -60,7 +60,7 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt update && apt upgrade -y"
+        CMD_UPGRADE="apt update; apt upgrade -y; apt autoremove -y"
     else
         PMT="yum"
         CMD_INSTALL="yum install -y "
@@ -667,7 +667,7 @@ installBBR() {
 
 install() {
     $PMT clean all
-    $CMD_UPGRADE
+    echo $CMD_UPGRADE | bash
     $CMD_INSTALL wget net-tools unzip vim
     res=`which unzip`
     if [[ $? -ne 0 ]]; then
@@ -725,6 +725,7 @@ update() {
 }
 
 uninstall() {
+    echo ""
     read -p " 确定卸载trojan-go？[y/n]：" answer
     if [[ "${answer,,}" = "y" ]]; then
         domain=`grep sni $CONFIG_FILE | cut -d\" -f4`
@@ -737,6 +738,9 @@ uninstall() {
 
         systemctl disable nginx
         $CMD_REMOVE nginx
+        if [[ "$PMT" = "apt" ]]; then
+            $CMD_REMOVE nginx-common
+        fi
         rm -rf /etc/nginx/nginx.conf
         if [[ -f /etc/nginx/nginx.conf.bak ]]; then
             mv /etc/nginx/nginx.conf.bak /etc/nginx/nginx.conf
@@ -766,12 +770,14 @@ run() {
 start() {
     systemctl restart nginx
     systemctl restart trojan-go
-    sleep 3
+    sleep 2
+    statusText
 }
 
 stop() {
     systemctl stop nginx
     systemctl stop trojan-go
+    colorEcho $BLUE " trojan-go停止成功"
 }
 
 
@@ -784,10 +790,10 @@ restart() {
 
     stop
     colorEcho $BLUE " trojan-go停止成功"
-    sleep 3
+    sleep 2
     start
     colorEcho $BLUE " trojan-go启动成功"
-    sleep 3
+    sleep 2
     statusText
 }
 

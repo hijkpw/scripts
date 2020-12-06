@@ -600,6 +600,7 @@ uninstall() {
         rm -rf /etc/systemd/system/multi-user.target.wants/v2ray.service
 
         apt remove -y nginx
+        apt remove -y nginx-common
         apt autoremove -y
         if [ -d /usr/share/nginx/html.bak ]; then
             rm -rf /usr/share/nginx/html

@@ -42,7 +42,7 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt update && apt upgrade -y"
+        CMD_UPGRADE="apt update; apt upgrade -y; apt autoremove -y"
     else
         PMT="yum"
         CMD_INSTALL="yum install -y "
@@ -176,18 +176,18 @@ getData() {
 
 preinstall() {
     $PMT clean all
-    $CMD_UPGRADE
+    echo $CMD_UPGRADE | bash
     
     colorEcho $BULE " 安装必要软件"
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release
     fi
     $CMD_INSTALL telnet wget vim net-tools unzip tar qrencode
-    $CMD_INSTALL openssl openssl-devel gettext gcc autoconf libtool automake make asciidoc xmlto
+    $CMD_INSTALL openssl gettext gcc autoconf libtool automake make asciidoc xmlto
     if [[ "$PMT" = "yum" ]]; then
-        $CMD_INSTALL udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
+        $CMD_INSTALL openssl-devel udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel
     else
-        $CMD_INSTALL libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls-dev libc-ares2 libc-ares-dev g++
+        $CMD_INSTALL libssl-dev libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls-dev libc-ares2 libc-ares-dev g++
         $CMD_INSTALL libsodium*
     fi
     res=`which wget`
@@ -255,11 +255,15 @@ installSS() {
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
 
+    interface="0.0.0.0"
+    if [[ "$V6_PROXY" != "" ]]; then
+        interface="::"
+    fi
     mkdir -p /etc/shadowsocks-libev
     ssPath=`which ss-server`
     cat > $CONFIG_FILE<<-EOF
 {
-    "server":"::",
+    "server":"$interface",
     "server_port":${PORT},
     "local_port":1080,
     "password":"${PASSWORD}",

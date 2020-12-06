@@ -58,7 +58,7 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt update && apt upgrade -y"
+        CMD_UPGRADE="apt update; apt upgrade -y; apt autoremove -y"
     else
         PMT="yum"
         CMD_INSTALL="yum install -y "
@@ -282,7 +282,7 @@ getData() {
         echo ""
         echo
     else
-        read -p "请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
+        read -p " 请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
         [[ -z "${PORT}" ]] && PORT=443
         if [ "${PORT:0:1}" = "0" ]; then
             colorEcho ${BLUE}  " 端口不能以0开头"
@@ -1189,7 +1189,7 @@ EOF
 
 install() {
     $PMT clean all
-    $CMD_UPGRADE
+    echo $CMD_UPGRADE | bash
     $CMD_INSTALL wget net-tools unzip vim
     res=`which unzip`
     if [[ $? -ne 0 ]]; then
@@ -1265,6 +1265,7 @@ update() {
 }
 
 uninstall() {
+    echo ""
     read -p " 确定卸载V2ray？[y/n]：" answer
     if [[ "${answer,,}" = "y" ]]; then
         domain=`grep Host $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
@@ -1281,6 +1282,9 @@ uninstall() {
         
         systemctl disable nginx
         $CMD_REMOVE nginx
+        if [[ "$PMT" = "apt" ]]; then
+            $CMD_REMOVE nginx-common
+        fi
         rm -rf /etc/nginx/nginx.conf
         if [[ -f /etc/nginx/nginx.conf.bak ]]; then
             mv /etc/nginx/nginx.conf.bak /etc/nginx/nginx.conf
@@ -1311,12 +1315,14 @@ run() {
 start() {
     systemctl restart nginx
     systemctl restart v2ray
-    sleep 3
+    sleep 2
+    statusText
 }
 
 stop() {
     systemctl stop nginx
     systemctl stop v2ray
+    colorEcho $BLUE " V2ray停止成功"
 }
 
 
@@ -1329,10 +1335,10 @@ restart() {
 
     stop
     colorEcho $BLUE " V2ray停止成功"
-    sleep 3
+    sleep 2
     start
     colorEcho $BLUE " V2ray启动成功"
-    sleep 3
+    sleep 2
     statusText
 }
 
@@ -1494,7 +1500,7 @@ showInfo() {
             echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
             echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
             echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none{$PLAIN}"
+            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
             echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e " ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
@@ -1520,7 +1526,7 @@ showInfo() {
             echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
             echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
             echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none{$PLAIN}"
+            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
             echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
             echo  
@@ -1531,7 +1537,7 @@ showInfo() {
             echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
             echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
             echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none{$PLAIN}"
+            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
             echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e " ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"

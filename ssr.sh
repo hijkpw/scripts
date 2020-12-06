@@ -46,7 +46,7 @@ checkSystem() {
         PMT="apt"
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt update && apt upgrade -y"
+        CMD_UPGRADE="apt update && apt upgrade -y; apt autoremove -y"
     else
         PMT="yum"
         CMD_INSTALL="yum install -y "
@@ -270,7 +270,7 @@ getData() {
 preinstall() {
     colorEcho $BLUE " 更新系统..."
     $PMT clean all
-    $CMD_UPGRADE
+    echo $CMD_UPGRADE | bash
     colorEcho $BLUE " 安装必要软件"
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release

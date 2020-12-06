@@ -57,7 +57,7 @@ function checkSystem()
         PMT=apt
         CMD_INSTALL="apt install -y "
         CMD_REMOVE="apt remove -y "
-        CMD_UPGRADE="apt update && apt upgrade -y"
+        CMD_UPGRADE="apt update; apt upgrade -y; apt autoremove -y"
     else
         PMT=yum
         CMD_INSTALL="yum install -y "
@@ -71,17 +71,38 @@ function checkSystem()
     fi
 }
 
-slogon() {
-    clear
-    echo "#############################################################"
-    echo -e  "#                      ${RED}trojan一键安装脚本${PLAIN}                    #"
-    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
-    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
-    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
-    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
-    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
-    echo "#############################################################"
-    echo ""
+status() {
+    trojan_cmd="$(command -v trojan)"
+    if [[ "$trojan_cmd" = "" ]]; then
+        echo 0
+        return
+    fi
+    if [[ ! -f $CONFIG_FILE ]]; then
+        echo 1
+        return
+    fi
+    port=`grep local_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
+    res=`ss -ntlp| grep ${port} | grep trojan`
+    if [[ -z "$res" ]]; then
+        echo 2
+    else
+        echo 3
+    fi
+}
+
+statusText() {
+    res=`status`
+    case $res in
+        2)
+            echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN}
+            ;;
+        3)
+            echo -e ${GREEN}已安装${PLAIN} ${GREEN}正在运行${PLAIN}
+            ;;
+        *)
+            echo -e ${RED}未安装${PLAIN}
+            ;;
+    esac
 }
 
 function getData()
@@ -181,14 +202,7 @@ function getData()
             exit 1
         esac
     fi
-    if [[ "$PROXY_URL" = "" ]]; then
-        REMOTE_ADDR="127.0.0.1"
-        REMOTE_PORT=80
-    else
-        REMOTE_ADDR=`echo ${PROXY_URL} | cut -d/ -f3`
-        protocol=`echo ${PROXY_URL} | cut -d/ -f1`
-        [[ "$protocol" != "http:" ]] && REMOTE_PORT=443 || REMOTE_PORT=80
-    fi
+    
     echo ""
     colorEcho $BLUE " 伪装域名：$PROXY_URL"
 
@@ -217,7 +231,7 @@ function preinstall()
 {
     $PMT clean all
     colorEcho $BLUE " 更新系统..."
-    $CMD_UPGRADE
+    echo $CMD_UPGRADE | bash
 
     colorEcho $BLUE " 安装必要软件"
     if [[ "$PMT" = "yum" ]]; then
@@ -239,7 +253,7 @@ function preinstall()
 
 function installTrojan()
 {
-    colorEcho $BLUE " 安装trojan..."
+    colorEcho $BLUE " 安装最新版trojan..."
     rm -rf $CONFIG_FILE
     rm -rf /etc/systemd/system/trojan.service
 
@@ -269,9 +283,7 @@ function installTrojan()
     cp "$NAME" "$BINARYPATH"
     chmod 755 "$BINARYPATH"
 
-    echo Installing $NAME server config to $CONFIGPATH...
     mkdir -p $INSTALLPREFIX/etc/$NAME
-    cp examples/server.json-example "$CONFIGPATH"
 
     echo Installing $NAME systemd service to $SYSTEMDPATH...
     cat > "$SYSTEMDPATH" << EOF
@@ -316,8 +328,8 @@ configTrojan() {
     "run_type": "server",
     "local_addr": "::",
     "local_port": ${PORT},
-    "remote_addr": "$REMOTE_ADDR",
-    "remote_port": $REMOTE_PORT,
+    "remote_addr": "127.0.0.1",
+    "remote_port": 80,
     "password": [
         "$PASSWORD"
     ],
@@ -489,7 +501,7 @@ http {
 EOF
 
     mkdir -p /etc/nginx/conf.d
-    if [[ "$REMOTE_ADDR" = "127.0.0.1" ]]; then
+    if [[ "$PROXY_URL" = "" ]]; then
         cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
@@ -506,7 +518,11 @@ server {
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
-        return 301 https://\$server_name:${PORT}\$request_uri;
+        proxy_ssl_server_name on;
+        proxy_pass $PROXY_URL;
+        proxy_set_header Accept-Encoding '';
+        sub_filter "$REMOTE_HOST" "$DOMAIN";
+        sub_filter_once off;
     }
     
     location = /robots.txt {
@@ -623,7 +639,7 @@ function installBBR()
     fi
 }
 
-function info()
+function showInfo()
 {
     res=`netstat -nltp | grep trojan`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
@@ -652,8 +668,7 @@ function info()
     echo ============================================
 }
 
-function bbrReboot()
-{
+function bbrReboot() {
     if [ "${INSTALL_BBR}" == "true" ]; then
         echo  
         colorEcho $BLUE " 为使BBR模块生效，系统将在30秒后重启"
@@ -665,8 +680,7 @@ function bbrReboot()
 }
 
 
-function install()
-{
+function install() {
     getData
     preinstall
     installBBR
@@ -675,12 +689,82 @@ function install()
     installTrojan
     configTrojan
     
-    info
+    showInfo
     bbrReboot
 }
 
-function uninstall()
-{
+update() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}trojan未安装，请先安装！${PLAIN}"
+        return
+    fi
+
+    installTrojan
+
+    stop
+    start
+    colorEcho $BLUE " 成功更新到最新版trojan"
+}
+
+run() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e "${RED}trojan未安装，请先安装！${PLAIN}"
+        return
+    fi
+
+    res=`ss -ntlp| grep trojan`
+    if [[ "$res" != "" ]]; then
+        return
+    fi
+
+    start
+    showInfo
+}
+
+start() {
+    systemctl restart nginx
+    systemctl restart trojan
+    sleep 2
+    statusText
+}
+
+stop() {
+    systemctl stop nginx
+    systemctl stop trojan
+    colorEcho $BLUE " trojan停止成功"
+}
+
+
+restart() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}trojan未安装，请先安装！${PLAIN}"
+        return
+    fi
+
+    stop
+    colorEcho $BLUE " trojan停止成功"
+    sleep 2
+    start
+    colorEcho $BLUE " trojan启动成功"
+    sleep 2
+    statusText
+}
+
+showLog() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e "${RED}trojan未安装，请先安装！${PLAIN}"
+        return
+    fi
+
+    journalctl -xen -u trojan --no-pager
+}
+
+function uninstall() {
+    echo ""
     read -p " 确定卸载trojan？(y/n)" answer
     [[ -z ${answer} ]] && answer="n"
 
@@ -697,6 +781,9 @@ function uninstall()
         rm -rf /etc/systemd/system/trojan.service
 
         $CMD_REMOVE nginx
+        if [[ "$PMT" = "apt" ]]; then
+            $CMD_REMOVE nginx-common
+        fi
         if [[ -d /usr/share/nginx/html.bak ]]; then
             rm -rf /usr/share/nginx/html
             mv /usr/share/nginx/html.bak /usr/share/nginx/html
@@ -706,19 +793,71 @@ function uninstall()
     fi
 }
 
-slogon
+menu() {
+    clear
+    echo "#############################################################"
+    echo -e "#                    ${RED}trojan一键安装脚本${PLAIN}                    #"
+    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
+    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+    echo "#############################################################"
+    echo ""
+
+    echo -e "  ${GREEN}1.${PLAIN}  安装trojan"
+    echo -e "  ${GREEN}2.${PLAIN}  更新trojan"
+    echo -e "  ${GREEN}3.${PLAIN}  卸载trojan"
+    echo " -------------"
+    echo -e "  ${GREEN}4.${PLAIN}  启动trojan"
+    echo -e "  ${GREEN}5.${PLAIN}  重启trojan"
+    echo -e "  ${GREEN}6.${PLAIN}  停止trojan"
+    echo " -------------"
+    echo -e "  ${GREEN}7.${PLAIN}  查看trojan信息"
+    echo -e "  ${GREEN}8.${PLAIN}  查看trojan日志"
+    echo " -------------"
+    echo -e "  ${GREEN}0.${PLAIN} 退出"
+    echo 
+    echo -n " 当前状态："
+    statusText
+    echo 
+
+    read -p " 请选择操作[0-10]：" answer
+    case $answer in
+        0)
+            exit 0
+            ;;
+        1)
+            install
+            ;;
+        2)
+            update
+            ;;
+        3)
+            uninstall
+            ;;
+        4)
+            run
+            ;;
+        5)
+            restart
+            ;;
+        6)
+            stop
+            ;;
+        7)
+            showInfo
+            ;;
+        8)
+            showLog
+            ;;
+        *)
+            echo -e "$RED 请选择正确的操作！${PLAIN}"
+            exit 1
+            ;;
+    esac
+}
 
 checkSystem
 
-action=$1
-[[ -z $1 ]] && action=install
-case "$action" in
-    install|uninstall|info)
-        ${action}
-        ;;
-    *)
-        echo " 参数错误"
-        echo " 用法: `basename $0` [install|uninstall|info]"
-        ;;
-esac
-
+menu

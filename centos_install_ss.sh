@@ -238,12 +238,16 @@ installSS() {
 
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-    
+
+    interface="0.0.0.0"
+    if [[ "$V6_PROXY" != "" ]]; then
+        interface="::"
+    fi
     mkdir -p /etc/shadowsocks-libev
     ssPath=`which ss-server`
     cat > $CONFIG_FILE<<-EOF
 {
-    "server":"::",
+    "server":"$interface",
     "server_port":${PORT},
     "local_port":1080,
     "password":"${PASSWORD}",
