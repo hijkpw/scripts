@@ -46,7 +46,7 @@ checkSystem() {
 slogon() {
     clear
     echo "#############################################################"
-    echo -e "#         ${RED}Ubuntu TLS ShadowsocksR/SSR 一键安装脚本${PLAIN}            #"
+    echo -e "#          ${RED}Ubuntu LTS ShadowsocksR/SSR 一键安装脚本${PLAIN}          #"
     echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
     echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
     echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
