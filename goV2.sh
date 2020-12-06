@@ -45,7 +45,7 @@ BLUE="36m"     # Info message
 V6_PROXY=""
 res=`curl -sL -4 ip.sb`
 if [[ "$?" != "0" ]]; then
-    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+    V6_PROXY="https://gh.hijk.art/"
 fi
 
 #########################
