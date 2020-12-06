@@ -327,9 +327,32 @@ installV2Ray(){
 
 
 installInitScript(){
-    if [[ -n "${SYSTEMCTL_CMD}" ]] && [[ ! -f "/etc/systemd/system/v2ray.service" && ! -f "/lib/systemd/system/v2ray.service" ]]; then
-        #unzip -oj "$1" "$2systemd/system/v2ray.service" -d '/etc/systemd/system'
-        wget -O /etc/systemd/system/v2ray.service https://raw.githubusercontent.com/hijkpw/scripts/master/v2ray.service
+    if [[ -n "${SYSTEMCTL_CMD}" ]]; then
+        systemctl disable v2ray
+        rm -rf /etc/systemd/system/v2ray.service /lib/systemd/system/v2ray.service /etc/systemd/system/v2ray.service.d
+        cat >/etc/systemd/system/v2ray.service<<-EOF
+[Unit]
+Description=V2Ray Service
+Documentation=https://www.v2ray.com/ https://www.v2fly.org/
+After=network.target nss-lookup.target
+
+[Service]
+# If the version of systemd is 240 or above, then uncommenting Type=exec and commenting out Type=simple
+#Type=exec
+Type=simple
+# This service runs as root. You may consider to run it as another user for security concerns.
+# By uncommenting User=nobody and commenting out User=root, the service will run as user nobody.
+# More discussion at https://github.com/v2ray/v2ray-core/issues/1011
+User=root
+#User=nobody
+NoNewPrivileges=true
+ExecStart=/usr/bin/v2ray/v2ray -config /etc/v2ray/config.json
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+        systemctl daemon-reload
         systemctl enable v2ray.service
     elif [[ -n "${SERVICE_CMD}" ]] && [[ ! -f "/etc/init.d/v2ray" ]]; then
         installSoftware 'daemon' && \

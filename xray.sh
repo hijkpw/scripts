@@ -740,7 +740,25 @@ installXray() {
         exit 1
     }
 
-    cp /tmp/xray/systemd/system/xray.service /etc/systemd/system
+    cat >/etc/systemd/system/xray.service<<-EOF
+[Unit]
+Description=Xray Service
+Documentation=https://github.com/xtls https://hijk.art
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+ExecStart=/usr/local/bin/xray run -config /usr/local/etc/xray/config.json
+Restart=on-failure
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl daemon-reload
     systemctl enable xray.service
 }
 

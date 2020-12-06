@@ -253,24 +253,14 @@ installV2ray() {
     else
         sed -i -e "s/path\":.*/path\": \"\\${WSPATH}\",/" $CONFIG_FILE
     fi
-    #echo "0 3 */3 * * root echo '' > /var/log/v2ray/access.log; echo ''>/var/log/v2ray/error.log" >> /etc/crontab
+    
     systemctl enable v2ray
     systemctl restart v2ray
     sleep 3
     res=`netstat -ntlp| grep ${V2PORT} | grep v2ray`
     if [ "${res}" = "" ]; then
-        sed -i '/Capabili/d' /etc/systemd/system/v2ray.service
-        sed -i '/AmbientCapabilities/d' /etc/systemd/system/v2ray.service
-        sed -i '/Capabili/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
-        sed -i '/AmbientCapabilities/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
-        systemctl daemon-reload
-        systemctl restart v2ray
-        sleep 3
-        res=`netstat -ntlp| grep ${V2PORT} | grep v2ray`
-        if [ "${res}" = "" ]; then
-            echo " $OS 端口号：${PORT}，伪装路径：${WSPATH}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
-            exit 1
-         fi
+        echo " $OS 端口号：${PORT}，伪装路径：${WSPATH}， v2启动失败，请检查端口是否被占用或伪装路径是否有特殊字符！！"
+        exit 1
     fi
     colorEcho $BLUE " v2ray安装成功！"
 }

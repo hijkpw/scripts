@@ -115,23 +115,12 @@ installV2ray() {
     uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
-    if [ -d /etc/systemd/system/v2ray.service.d ]; then
-        rm -rf /etc/systemd/system/v2ray.service.d
-    fi
+    
     systemctl enable v2ray
     systemctl restart v2ray
     sleep 3
     res=`ss -ntlp| grep ${PORT} | grep v2ray`
     if [ "${res}" = "" ]; then
-        sed -i '/Capabili/d' /etc/systemd/system/v2ray.service
-        sed -i '/AmbientCapabilities/d' /etc/systemd/system/v2ray.service
-        sed -i '/Capabili/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
-        sed -i '/AmbientCapabilities/d' /etc/systemd/system/multi-user.target.wants/v2ray.service
-        systemctl daemon-reload
-        systemctl restart v2ray
-        sleep 3
-        res=`ss -ntlp| grep ${PORT} | grep v2ray`
-        if [ "${res}" = "" ]; then
             colorEcho $RED " 端口号：${PORT}， v2启动失败，请检查端口是否被占用！"
             exit 1
          fi
