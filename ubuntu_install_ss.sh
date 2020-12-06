@@ -228,9 +228,8 @@ installSS() {
 
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-    if [ ! -d /etc/shadowsocks-libev ];then
-        mkdir /etc/shadowsocks-libev
-    fi
+
+    mkdir -p /etc/shadowsocks-libev
     ssPath=`which ss-server`
     cat > /etc/shadowsocks-libev/config.json<<-EOF
 {

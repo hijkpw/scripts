@@ -12,6 +12,7 @@ PLAIN='\033[0m'
 BASE=`pwd`
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
+CONFIG_FILE="/etc/shadowsocks-libev/config.json"
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
@@ -246,11 +247,10 @@ installSS() {
 
     echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-    if [[ ! -d /etc/shadowsocks-libev ]];then
-        mkdir /etc/shadowsocks-libev
-    fi
+
+    mkdir -p /etc/shadowsocks-libev
     ssPath=`which ss-server`
-    cat > /etc/shadowsocks-libev/config.json<<-EOF
+    cat > $CONFIG_FILE<<-EOF
 {
     "server":"0.0.0.0",
     "server_port":${PORT},
@@ -274,7 +274,7 @@ Wants=network-online.target
 Type=simple
 PIDFile=/var/run/shadowsocks-libev.pid
 LimitNOFILE=32768
-ExecStart=$ssPath -c /etc/shadowsocks-libev/config.json -f /var/run/shadowsocks-libev.pid
+ExecStart=$ssPath -c $CONFIG_FILE -f /var/run/shadowsocks-libev.pid
 ExecReload=/bin/kill -s HUP \$MAINPID
 ExecStop=/bin/kill -s TERM \$MAINPID
 
@@ -373,18 +373,18 @@ setFirewall() {
 
 info() {
     ip=`curl -sL -4 ip.sb`
-    port=`cat /etc/shadowsocks-libev/config.json | grep server_port | cut -d: -f2 | tr -d \",' '`
+    port=`grep server_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep 'ss-server'`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
-    password=`cat /etc/shadowsocks-libev/config.json | grep password | cut -d: -f2 | tr -d \",' '`
-    method=`cat /etc/shadowsocks-libev/config.json | grep method | cut -d: -f2 | tr -d \",' '`
+    password=`grep password $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    method=`grep method $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     
     res=`echo -n "${method}:${password}@${ip}:${port}" | base64 -w 0`
     link="ss://${res}"
 
     echo ============================================
     echo -e " ${BLUE}ss运行状态${PLAIN}：${status}"
-    echo -e " ${BLUE}ss配置文件：${PLAIN}${RED}/etc/shadowsocks-libev/config.json${PLAIN}"
+    echo -e " ${BLUE}ss配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo ""
     echo -e " ${RED}ss配置信息：${PLAIN}"
     echo -e "  ${BLUE}IP(address):${PLAIN}  ${RED}${ip}${PLAIN}"
