@@ -121,9 +121,8 @@ installV2ray() {
     sleep 3
     res=`ss -ntlp| grep ${PORT} | grep v2ray`
     if [ "${res}" = "" ]; then
-            colorEcho $RED " 端口号：${PORT}， v2启动失败，请检查端口是否被占用！"
-            exit 1
-         fi
+        colorEcho $RED " 端口号：${PORT}， v2启动失败，请检查端口是否被占用！"
+        exit 1
     fi
     colorEcho $GREEN " v2ray安装成功！"
 }
