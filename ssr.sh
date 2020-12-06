@@ -9,8 +9,15 @@ YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
+V6_PROXY=""
+IP=`curl -4 ip.sb`
+if [[ "$?" != "0" ]]; then
+    IP=`curl -6 ip.sb`
+    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+fi
+
 FILENAME="ShadowsocksR-v3.2.2"
-URL="https://github.com/shadowsocksrr/shadowsocksr/archive/3.2.2.tar.gz"
+URL="${V6_PROXY}https://github.com/shadowsocksrr/shadowsocksr/archive/3.2.2.tar.gz"
 BASE=`pwd`
 
 OS=`hostnamectl | grep -i system | cut -d: -f2`
@@ -305,7 +312,7 @@ installSSR() {
      cat > $CONFIG_FILE<<-EOF
 {
     "server":"0.0.0.0",
-    "server_ipv6":"[::]",
+    "server_ipv6":"::",
     "server_port":${PORT},
     "local_port":1080,
     "password":"${PASSWORD}",
@@ -415,22 +422,26 @@ installBBR() {
 
     colorEcho $BLUE " 安装BBR模块..."
     if [[ "$PMT" = "yum" ]]; then
-        rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-        rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-        $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
-        $CMD_REMOVE kernel-3.*
-        grub2-set-default 0
+        if [[ "$V6_PROXY" = "" ]]; then
+            rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+            rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+            $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
+            $CMD_REMOVE kernel-3.*
+            grub2-set-default 0
+            echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+            echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+            INSTALL_BBR=true
+        fi
     else
         $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
+        echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+        INSTALL_BBR=true
     fi
-    echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-    INSTALL_BBR=true
 }
 
 info() {
-    ip=`curl -sL -4 ip.sb`
     port=`grep server_port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep python`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
@@ -441,7 +452,7 @@ info() {
     
     p1=`echo -n ${password} | base64 -w 0`
     p1=`echo -n ${p1} | tr -d =`
-    res=`echo -n "${ip}:${port}:${protocol}:${method}:${obfs}:${p1}/?remarks=&protoparam=&obfsparam=" | base64 -w 0`
+    res=`echo -n "${IP}:${port}:${protocol}:${method}:${obfs}:${p1}/?remarks=&protoparam=&obfsparam=" | base64 -w 0`
     res=`echo -n ${res} | tr -d =`
     link="ssr://${res}"
 
@@ -451,7 +462,7 @@ info() {
     echo -e " ${BLUE}ssr配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo ""
     echo -e " ${RED}ssr配置信息：${PLAIN}"
-    echo -e "   ${BLUE}IP(address):${PLAIN}  ${RED}${ip}${PLAIN}"
+    echo -e "   ${BLUE}IP(address):${PLAIN}  ${RED}${IP}${PLAIN}"
     echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
     echo -e "   ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
     echo -e "   ${BLUE}加密方式(method)：${PLAIN} ${RED}${method}${PLAIN}"
@@ -465,7 +476,7 @@ info() {
 bbrReboot() {
     if [[ "${INSTALL_BBR}" == "true" ]]; then
         echo  
-        echo  为使BBR模块生效，系统将在30秒后重启
+        colorEcho $BLUE  " 为使BBR模块生效，系统将在30秒后重启"
         echo  
         echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${RED}reboot${PLAIN} 重启系统"
         sleep 30
@@ -475,7 +486,6 @@ bbrReboot() {
 
 
 install() {
-    checkSystem
     getData
     preinstall
     installBBR
@@ -502,6 +512,8 @@ uninstall() {
 }
 
 slogon
+
+checkSystem
 
 action=$1
 [[ -z $1 ]] && action=install

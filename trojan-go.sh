@@ -11,6 +11,13 @@ PLAIN='\033[0m'
 
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
+V6_PROXY=""
+IP=`curl -4 ip.sb`
+if [[ "$?" != "0" ]]; then
+    IP=`curl -6 ip.sb`
+    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+fi
+
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
 # 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
 SITES=(
@@ -102,7 +109,7 @@ statusText() {
 }
 
 getVersion() {
-    VERSION=$(curl -fsSL https://api.github.com/repos/p4gefau1t/trojan-go/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/'| head -n1)
+    VERSION=`curl -fsSL ${V6_PROXY}https://api.github.com/repos/p4gefau1t/trojan-go/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/'| head -n1`
     if [[ ${VERSION:0:1} != "v" ]];then
         VERSION="v${VERSION}"
     fi
@@ -151,7 +158,6 @@ archAffix() {
 getData() {
     can_change=$1
     if [[ "$can_change" != "yes" ]]; then
-        IP=`curl -s -4 ip.sb`
         echo " "
         echo " trojan-go一键脚本，运行之前请确认如下条件已经具备："
         echo -e "  ${RED}1. 一个伪装域名${PLAIN}"
@@ -163,6 +169,7 @@ getData() {
             exit 0
         fi
 
+        echo ""
         while true
         do
             read -p " 请输入伪装域名：" DOMAIN
@@ -172,7 +179,7 @@ getData() {
                 break
             fi
         done
-        echo -e " 伪装域名(host)：${RED}$DOMAIN${PLAIN}"
+        colorEcho $BLUE " 伪装域名(host)：$DOMAIN"
         echo ""
         
         DOMAIN=${DOMAIN,,}
@@ -226,7 +233,6 @@ getData() {
         echo -e "${RED}端口不能以0开头${PLAIN}"
         exit 1
     fi
-    echo ""
     colorEcho $BLUE " trojan端口：$PORT"
     echo 
 
@@ -300,6 +306,7 @@ getData() {
             exit 1
         esac
     fi
+    REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
     echo ""
     colorEcho $BLUE " 伪装域名：$PROXY_URL"
 
@@ -441,6 +448,7 @@ EOF
         cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
 }
@@ -449,6 +457,7 @@ EOF
         cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
@@ -472,7 +481,7 @@ EOF
 
 downloadFile() {
     SUFFIX=`archAffix`
-    DOWNLOAD_URL="https://github.com/p4gefau1t/trojan-go/releases/download/${VERSION}/trojan-go-linux-${SUFFIX}.zip"
+    DOWNLOAD_URL="${V6_PROXY}https://github.com/p4gefau1t/trojan-go/releases/download/${VERSION}/trojan-go-linux-${SUFFIX}.zip"
     wget -O /tmp/${ZIP_FILE}.zip $DOWNLOAD_URL
     if [[ ! -f /tmp/${ZIP_FILE}.zip ]]; then
         echo -e "{$RED} trojan-go安装文件下载失败，请检查网络或重试${PLAIN}"
@@ -502,7 +511,7 @@ configTrojan() {
     cat > $CONFIG_FILE <<-EOF
 {
     "run_type": "server",
-    "local_addr": "0.0.0.0",
+    "local_addr": "::",
     "local_port": ${PORT},
     "remote_addr": "127.0.0.1",
     "remote_port": 80,
@@ -635,18 +644,25 @@ installBBR() {
         return
     fi
 
-    echo " 安装BBR模块..."
+    colorEcho $BLUE " 安装BBR模块..."
     if [[ "$PMT" = "yum" ]]; then
-        rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-        rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-        yum --enablerepo=elrepo-kernel install kernel-ml -y
-        grub2-set-default 0
+        if [[ "$V6_PROXY" = "" ]]; then
+            rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+            rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+            $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
+            $CMD_REMOVE kernel-3.*
+            grub2-set-default 0
+            echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+            echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+            INSTALL_BBR=true
+        fi
     else
         $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
+        echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+        INSTALL_BBR=true
     fi
-    echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-    INSTALL_BBR=true
 }
 
 install() {
@@ -803,7 +819,6 @@ showInfo() {
         return
     fi
 
-    ip=`curl -sL -4 ip.sb`
     domain=`grep sni $CONFIG_FILE | cut -d\" -f4`
     port=`grep local_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     line1=`grep -n 'password' $CONFIG_FILE  | head -n1 | cut -d: -f1`
@@ -817,7 +832,7 @@ showInfo() {
     echo 
     echo -n "  当前状态："
     statusText
-    echo -e "  IP：${RED}$ip${PLAIN}"
+    echo -e "  IP：${RED}$IP${PLAIN}"
     echo -e "  伪装域名/主机名(host)：${RED}$domain${PLAIN}"
     echo -e "  端口(port)：${RED}$port${PLAIN}"
     echo -e "  密码(password)：${RED}$password${PLAIN}"

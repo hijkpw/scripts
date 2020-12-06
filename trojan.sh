@@ -10,6 +10,13 @@ PLAIN='\033[0m'
 
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
+V6_PROXY=""
+IP=`curl -4 ip.sb`
+if [[ "$?" != "0" ]]; then
+    IP=`curl -6 ip.sb`
+    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+fi
+
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
 # 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
 SITES=(
@@ -79,7 +86,6 @@ slogon() {
 
 function getData()
 {
-    IP=`curl -sL -4 ip.sb`
     echo " "
     echo " 本脚本为trojan一键脚本，运行之前请确认如下条件已经具备："
     echo -e "  ${RED}1. 一个伪装域名${PLAIN}"
@@ -236,27 +242,128 @@ function installTrojan()
     colorEcho $BLUE " 安装trojan..."
     rm -rf $CONFIG_FILE
     rm -rf /etc/systemd/system/trojan.service
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/trojan-gfw/trojan-quickstart/master/trojan-quickstart.sh)"
+
+    NAME=trojan
+    VERSION=`curl -fsSL ${V6_PROXY}https://api.github.com/repos/trojan-gfw/trojan/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/'`
+    TARBALL="$NAME-$VERSION-linux-amd64.tar.xz"
+    DOWNLOADURL="${V6_PROXY}https://github.com/trojan-gfw/$NAME/releases/download/v$VERSION/$TARBALL"
+    TMPDIR="$(mktemp -d)"
+    INSTALLPREFIX=/usr/local
+    SYSTEMDPREFIX=/etc/systemd/system
+
+    BINARYPATH="$INSTALLPREFIX/bin/$NAME"
+    CONFIGPATH="$INSTALLPREFIX/etc/$NAME/config.json"
+    SYSTEMDPATH="$SYSTEMDPREFIX/$NAME.service"
+
+    echo Entering temp directory $TMPDIR...
+    cd "$TMPDIR"
+
+    echo Downloading $NAME $VERSION...
+    curl -LO --progress-bar "$DOWNLOADURL" || wget -q --show-progress "$DOWNLOADURL"
+
+    echo Unpacking $NAME $VERSION...
+    tar xf "$TARBALL"
+    cd "$NAME"
+
+    echo Installing $NAME $VERSION to $BINARYPATH...
+    cp "$NAME" "$BINARYPATH"
+    chmod 755 "$BINARYPATH"
+
+    echo Installing $NAME server config to $CONFIGPATH...
+    mkdir -p $INSTALLPREFIX/etc/$NAME
+    cp examples/server.json-example "$CONFIGPATH"
+
+    echo Installing $NAME systemd service to $SYSTEMDPATH...
+    cat > "$SYSTEMDPATH" << EOF
+[Unit]
+Description=$NAME
+Documentation=https://trojan-gfw.github.io/$NAME/config https://trojan-gfw.github.io/$NAME/
+After=network.target network-online.target nss-lookup.target mysql.service mariadb.service mysqld.service
+
+[Service]
+Type=simple
+StandardError=journal
+ExecStart="$BINARYPATH" "$CONFIGPATH"
+ExecReload=/bin/kill -HUP \$MAINPID
+LimitNOFILE=51200
+Restart=on-failure
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    echo Reloading systemd daemon...
+    systemctl daemon-reload
+
+    echo Deleting temp directory $TMPDIR...
+    rm -rf "$TMPDIR"
+
+    echo Done!
 
     if [[ ! -f $CONFIG_FILE ]]; then
         colorEcho $RED " $OS 安装trojan失败，请到 https://hijk.art 反馈"
         exit 1
     fi
+}
 
+configTrojan() {
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
 
-    sed -i -e "s/local_port\":\s*[0-9]*/local_port\": ${PORT}/" $CONFIG_FILE
-    sed -i -e "s/remote_addr\":\s*\".*\",/remote_addr\": \"$REMOTE_ADDR\",/" $CONFIG_FILE
-    sed -i -e "s/remote_port\":\s*[0-9]*/remote_port\": $REMOTE_PORT/" $CONFIG_FILE
-    sed -i -e "s/cert\":\s*\".*\",/cert\": \"\/etc\/letsencrypt\/live\/${DOMAIN}\/fullchain.pem\",/" $CONFIG_FILE
-    sed -i -e "s/key\":\s*\".*\",/key\": \"\/etc\/letsencrypt\/live\/${DOMAIN}\/privkey.pem\",/" $CONFIG_FILE
-    line1=`grep -n 'password' $CONFIG_FILE  | head -n1 | cut -d: -f1`
-    line11=`expr $line1 + 1`
-    line2=`grep -n '],' $CONFIG_FILE  | head -n1 | cut -d: -f1`
-    line22=`expr $line2 - 1`
-    sed -i "${line11},${line22}d" $CONFIG_FILE
-    sed -i "${line1}a\        \"$PASSWORD\"" $CONFIG_FILE
+    cat >$CONFIG_FILE<<-EOF
+{
+    "run_type": "server",
+    "local_addr": "::",
+    "local_port": ${PORT},
+    "remote_addr": "$REMOTE_ADDR",
+    "remote_port": $REMOTE_PORT,
+    "password": [
+        "$PASSWORD"
+    ],
+    "log_level": 1,
+    "ssl": {
+        "cert": "$CERT_FILE",
+        "key": "$KEY_FILE",
+        "key_password": "",
+	    "sni": "$DOMAIN",
+        "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384",
+        "cipher_tls13": "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384",
+        "prefer_server_cipher": true,
+        "alpn": [
+            "http/1.1"
+        ],
+        "alpn_port_override": {
+            "h2": 81
+        },
+        "reuse_session": true,
+        "session_ticket": false,
+        "session_timeout": 600,
+        "plain_http_response": "",
+        "curves": "",
+        "dhparam": ""
+    },
+    "tcp": {
+        "prefer_ipv4": false,
+        "no_delay": true,
+        "keep_alive": true,
+        "reuse_port": false,
+        "fast_open": false,
+        "fast_open_qlen": 20
+    },
+    "mysql": {
+        "enabled": false,
+        "server_addr": "127.0.0.1",
+        "server_port": 3306,
+        "database": "trojan",
+        "username": "trojan",
+        "password": "",
+        "key": "",
+        "cert": "",
+        "ca": ""
+    }
+}
+EOF
 
     systemctl enable trojan && systemctl restart trojan
     sleep 3
@@ -386,6 +493,7 @@ EOF
         cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
 }
@@ -394,6 +502,7 @@ EOF
         cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
@@ -495,17 +604,23 @@ function installBBR()
 
     colorEcho $BLUE " 安装BBR模块..."
     if [[ "$PMT" = "yum" ]]; then
-        rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-        rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-        yum --enablerepo=elrepo-kernel install kernel-ml -y
-        grub2-set-default 0
+        if [[ "$V6_PROXY" = "" ]]; then
+            rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+            rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+            $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
+            $CMD_REMOVE kernel-3.*
+            grub2-set-default 0
+            echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+            echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+            INSTALL_BBR=true
+        fi
     else
         $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
+        echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+        INSTALL_BBR=true
     fi
-    echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-    INSTALL_BBR=true
 }
 
 function info()
@@ -513,8 +628,11 @@ function info()
     res=`netstat -nltp | grep trojan`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
     
-    ip=`cat $CONFIG_FILE | grep -m1 cert | cut -d/ -f5`
-    port=`cat $CONFIG_FILE | grep local_port | cut -d: -f2 | tr -d \",' '`
+    domain=`grep sni $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    if [[ "$domain" = "" ]]; then
+        domain=`grep -m1 cert $CONFIG_FILE | cut -d/ -f5`
+    fi
+    port=`grep local_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     line1=`grep -n 'password' $CONFIG_FILE  | head -n1 | cut -d: -f1`
     line11=`expr $line1 + 1`
     password=`sed -n "${line11}p" $CONFIG_FILE | tr -d \",' '`
@@ -527,7 +645,7 @@ function info()
     echo -e " ${BLUE}trojan配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo ""
     echo -e " ${RED}trojan配置信息：${PLAIN}               "
-    echo -e "   ${BLUE}IP/域名(address):${PLAIN}  ${RED}${ip}${PLAIN}"
+    echo -e "   ${BLUE}IP/域名(address):${PLAIN}  ${RED}${domain}${PLAIN}"
     echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
     echo -e "   ${BLUE}密码(password)：${PLAIN}${RED}$password${PLAIN}"
     echo  
@@ -549,16 +667,13 @@ function bbrReboot()
 
 function install()
 {
-    echo -n " 系统版本:  "
-    cat /etc/centos-release
-
-    checkSystem
     getData
     preinstall
     installBBR
     setFirewall
     installNginx
     installTrojan
+    configTrojan
     
     info
     bbrReboot
@@ -570,7 +685,10 @@ function uninstall()
     [[ -z ${answer} ]] && answer="n"
 
     if [[ "${answer}" == "y" ]] || [[ "${answer}" == "Y" ]]; then
-        domain=`cat $CONFIG_FILE | grep cert | cut -d/ -f5`
+        domain=`grep sni $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+        if [[ "$domain" = "" ]]; then
+            domain=`grep -m1 cert $CONFIG_FILE | cut -d/ -f5`
+        fi
 
         systemctl stop trojan
         systemctl disable trojan
@@ -589,6 +707,8 @@ function uninstall()
 }
 
 slogon
+
+checkSystem
 
 action=$1
 [[ -z $1 ]] && action=install

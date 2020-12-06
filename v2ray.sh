@@ -28,6 +28,13 @@ https://www.23xsw.cc/
 CONFIG_FILE="/etc/v2ray/config.json"
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
+V6_PROXY=""
+IP=`curl -4 ip.sb`
+if [[ "$?" != "0" ]]; then
+    IP=`curl -6 ip.sb`
+    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+fi
+
 VLESS="false"
 TROJAN="false"
 TLS="false"
@@ -155,7 +162,7 @@ getVersion() {
     VER="$(/usr/bin/v2ray/v2ray -version 2>/dev/null)"
     RETVAL=$?
     CUR_VER="$(normalizeVersion "$(echo "$VER" | head -n 1 | cut -d " " -f2)")"
-    TAG_URL="https://api.github.com/repos/v2fly/v2ray-core/releases/latest"
+    TAG_URL="${V6_PROXY}https://api.github.com/repos/v2fly/v2ray-core/releases/latest"
     NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
     if [[ "$XTLS" = "true" ]]; then
         NEW_VER=v4.32.1
@@ -217,7 +224,6 @@ archAffix(){
 }
 
 getData() {
-    IP=`curl -sL -4 ip.sb`
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
         echo " "
         echo " V2ray一键脚本，运行之前请确认如下条件已经具备："
@@ -549,12 +555,14 @@ EOF
             cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     return 301 https://\$server_name:${PORT}\$request_uri;
 }
 
 server {
     listen       ${PORT} ssl http2;
+    listen       [::]:${PORT} ssl http2;
     server_name ${DOMAIN};
     charset utf-8;
 
@@ -596,6 +604,7 @@ EOF
             cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
@@ -702,21 +711,29 @@ installBBR() {
 
     colorEcho $BLUE " 安装BBR模块..."
     if [[ "$PMT" = "yum" ]]; then
-        rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-        rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-        yum --enablerepo=elrepo-kernel install kernel-ml -y
-        grub2-set-default 0
+        if [[ "$V6_PROXY" = "" ]]; then
+            rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+            rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+            $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
+            $CMD_REMOVE kernel-3.*
+            grub2-set-default 0
+            echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+            echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+            INSTALL_BBR=true
+        fi
     else
         $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
+        echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+        INSTALL_BBR=true
     fi
-    INSTALL_BBR=true
 }
 
 installV2ray() {
     rm -rf /tmp/v2ray
     mkdir -p /tmp/v2ray
-    DOWNLOAD_LINK="https://github.com/v2fly/v2ray-core/releases/download/${NEW_VER}/v2ray-linux-$(archAffix).zip"
+    DOWNLOAD_LINK="${V6_PROXY}https://github.com/v2fly/v2ray-core/releases/download/${NEW_VER}/v2ray-linux-$(archAffix).zip"
     colorEcho $BLUE " 下载V2Ray: ${DOWNLOAD_LINK}"
     curl -L -H "Cache-Control: no-cache" -o /tmp/v2ray/v2ray.zip ${DOWNLOAD_LINK}
     if [ $? != 0 ];then
@@ -1334,7 +1351,6 @@ showInfo() {
     trojan="false"
     protocol="VMess"
 
-    ip=`curl -sL -4 ip.sb`
     uid=`grep id $CONFIG_FILE | head -n1| cut -d: -f2 | tr -d \",' '`
     alterid=`grep alterId $CONFIG_FILE  | cut -d: -f2 | tr -d \",' '`
     network=`grep network $CONFIG_FILE  | tail -n1| cut -d: -f2 | tr -d \",' '`
@@ -1390,7 +1406,7 @@ showInfo() {
             raw="{
   \"v\":\"2\",
   \"ps\":\"\",
-  \"add\":\"$ip\",
+  \"add\":\"$IP\",
   \"port\":\"${port}\",
   \"id\":\"${uid}\",
   \"aid\":\"$alterid\",
@@ -1403,7 +1419,7 @@ showInfo() {
             link=`echo -n ${raw} | base64 -w 0`
             link="vmess://${link}"
 
-            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
             echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
             echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
@@ -1432,7 +1448,7 @@ showInfo() {
                 raw="{
   \"v\":\"2\",
   \"ps\":\"\",
-  \"add\":\"$ip\",
+  \"add\":\"$IP\",
   \"port\":\"${port}\",
   \"id\":\"${uid}\",
   \"aid\":\"$alterid\",
@@ -1444,7 +1460,7 @@ showInfo() {
 }"
                 link=`echo -n ${raw} | base64 -w 0`
                 link="vmess://${link}"
-                echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+                echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
                 echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
                 echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
                 echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
@@ -1459,7 +1475,7 @@ showInfo() {
             raw="{
   \"v\":\"2\",
   \"ps\":\"\",
-  \"add\":\"$ip\",
+  \"add\":\"$IP\",
   \"port\":\"${port}\",
   \"id\":\"${uid}\",
   \"aid\":\"$alterid\",
@@ -1472,7 +1488,7 @@ showInfo() {
             link=`echo -n ${raw} | base64 -w 0`
             link="vmess://${link}"
 
-            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
             echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
             echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
@@ -1487,7 +1503,7 @@ showInfo() {
         fi
     else
         if [[ "$xtls" = "true" ]]; then
-            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
             echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
             echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
@@ -1498,7 +1514,7 @@ showInfo() {
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
             echo  
         elif [[ "$ws" = "false" ]]; then
-            echo -e " ${BLUE}IP(address):  ${PLAIN}${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}IP(address):  ${PLAIN}${RED}${IP}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
             echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
             echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
@@ -1509,7 +1525,7 @@ showInfo() {
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
             echo  
         else
-            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
             echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
             echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"

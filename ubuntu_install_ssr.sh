@@ -9,11 +9,19 @@ YELLOW="\033[33m"   # Warning message
 BLUE="\033[36m"     # Info message
 PLAIN='\033[0m'
 
+V6_PROXY=""
+IP=`curl -4 ip.sb`
+if [[ "$?" != "0" ]]; then
+    IP=`curl -6 ip.sb`
+    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+fi
+
 FILENAME="ShadowsocksR-v3.2.2"
-URL="https://github.com/shadowsocksrr/shadowsocksr/archive/3.2.2.tar.gz"
+URL="${V6_PROXY}https://github.com/shadowsocksrr/shadowsocksr/archive/3.2.2.tar.gz"
 BASE=`pwd`
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
+CONFIG_FILE="/etc/shadowsocksR.json"
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
@@ -285,10 +293,10 @@ installSSR() {
         cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
     fi
 
-     cat > /etc/shadowsocksR.json<<-EOF
+     cat > $CONFIG_FILE<<-EOF
 {
     "server":"0.0.0.0",
-    "server_ipv6":"[::]",
+    "server_ipv6":"::",
     "server_port":${PORT},
     "local_port":1080,
     "password":"${PASSWORD}",
@@ -315,7 +323,7 @@ Wants=network-online.target
 [Service]
 Type=forking
 LimitNOFILE=32768
-ExecStart=/usr/local/shadowsocks/server.py -c /etc/shadowsocksR.json -d start
+ExecStart=/usr/local/shadowsocks/server.py -c $CONFIG_FILE -d start
 ExecReload=/bin/kill -s HUP \$MAINPID
 ExecStop=/bin/kill -s TERM \$MAINPID
 
@@ -378,27 +386,26 @@ installBBR() {
 }
 
 info() {
-    ip=`curl -sL -4 ip.sb`
-    port=`cat /etc/shadowsocksR.json | grep server_port | cut -d: -f2 | tr -d \",' '`
+    port=`grep server_port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep python`
     [ -z "$res" ] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
-    password=`cat /etc/shadowsocksR.json | grep password | cut -d: -f2 | tr -d \",' '`
-    method=`cat /etc/shadowsocksR.json | grep method | cut -d: -f2 | tr -d \",' '`
-    protocol=`cat /etc/shadowsocksR.json | grep protocol | cut -d: -f2 | tr -d \",' '`
-    obfs=`cat /etc/shadowsocksR.json | grep obfs | cut -d: -f2 | tr -d \",' '`
+    password=`grep password $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    method=`grep method $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    protocol=`grep protocol $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    obfs=`grep obfs $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     
     p1=`echo -n ${password} | base64 -w 0`
     p1=`echo -n ${p1} | tr -d =`
-    res=`echo -n "${ip}:${port}:${protocol}:${method}:${obfs}:${p1}/?remarks=&protoparam=&obfsparam=" | base64 -w 0`
+    res=`echo -n "${IP}:${port}:${protocol}:${method}:${obfs}:${p1}/?remarks=&protoparam=&obfsparam=" | base64 -w 0`
     res=`echo -n ${res} | tr -d =`
     link="ssr://${res}"
 
     echo ============================================
     echo -e " ${BLUE}ssr运行状态：${PLAIN}${status}"
-    echo -e " ${BLUE}ssr配置文件：${PLAIN}${RED}/etc/shadowsocksR.json${PLAIN}"
+    echo -e " ${BLUE}ssr配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo ""
     echo -e " ${RED}ssr配置信息：${PLAIN}"
-    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
     echo -e "   ${BLUE}端口(port)${PLAIN}：${RED}${port}${PLAIN}"
     echo -e "   ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
     echo -e "   ${BLUE}加密方式(method)：${PLAIN} ${RED}${method}${PLAIN}"
@@ -442,7 +449,7 @@ uninstall() {
     [ -z ${answer} ] && answer="n"
 
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
-        rm -f /etc/shadowsocksR.json
+        rm -f $CONFIG_FILE
         rm -f /var/log/shadowsocks.log
         rm -rf /usr/local/shadowsocks
         systemctl disable shadowsocksR && systemctl stop shadowsocksR && rm -rf /lib/systemd/system/shadowsocksR.service

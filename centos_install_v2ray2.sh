@@ -29,6 +29,13 @@ CONFIG_FILE="/etc/v2ray/config.json"
 
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
+V6_PROXY=""
+IP=`curl -4 ip.sb`
+if [[ "$?" != "0" ]]; then
+    IP=`curl -6 ip.sb`
+    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+fi
+
 checkSystem() {
     result=$(id | awk '{print $1}')
     if [[ $result != "uid=0(root)" ]]; then
@@ -75,7 +82,6 @@ slogon() {
 }
 
 getData() {
-    IP=`curl -sL -4 ip.sb`
     echo " "
     echo " 本脚本为带伪装的一键脚本，运行之前请确认如下条件已经具备："
     colorEcho ${YELLOW} "  1. 一个伪装域名"
@@ -92,7 +98,7 @@ getData() {
     do
         read -p " 请输入伪装域名：" DOMAIN
         if [[ -z "${DOMAIN}" ]]; then
-            echo " 域名输入错误，请重新输入！"
+            colorEcho $RED " 域名输入错误，请重新输入！"
         else
             break
         fi
@@ -120,11 +126,11 @@ getData() {
     do
         read -p " 请输入伪装路径，以/开头：" WSPATH
         if [[ -z "${WSPATH}" ]]; then
-            echo " 请输入伪装路径，以/开头！"
+            colorEcho $RED " 请输入伪装路径，以/开头！"
         elif [[ "${WSPATH:0:1}" != "/" ]]; then
-            echo " 伪装路径必须以/开头！"
+            colorEcho $RED " 伪装路径必须以/开头！"
         elif [[ "${WSPATH}" = "/" ]]; then
-            echo  " 不能使用根路径！"
+            colorEcho $RED " 不能使用根路径！"
         else
             break
         fi
@@ -293,7 +299,7 @@ getCert() {
 
 installV2ray() {
     colorEcho $BLUE " 安装v2ray..."
-    bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
+    bash <(curl -sL ${V6_PROXY}https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
 
     if [[ ! -f $CONFIG_FILE ]]; then
         colorEcho $RED " $OS 安装V2ray失败，请到 https://hijk.art 网站反馈"
@@ -306,6 +312,7 @@ installV2ray() {
     V2PORT=`grep port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
+
     res=`grep streamSettings $CONFIG_FILE`
     if [[ "$res" = "" ]]; then
         line=`grep -n '}]' $CONFIG_FILE  | head -n1 | cut -d: -f1`
@@ -407,12 +414,14 @@ EOF
     cat > ${confpath}${DOMAIN}.conf<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     return 301 https://\$server_name:${PORT}\$request_uri;
 }
 
 server {
     listen       ${PORT} ssl http2;
+    listen       [::]:${PORT} ssl http2;
     server_name ${DOMAIN};
     charset utf-8;
 
@@ -526,14 +535,16 @@ installBBR() {
         return
     fi
 
-    colorEcho $BLUE 安装BBR模块...
-    rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-    rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-    yum --enablerepo=elrepo-kernel install kernel-ml -y
-    grub2-set-default 0
-    echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-    INSTALL_BBR=true
+    colorEcho $BLUE " 安装BBR模块..."
+    if [[ "$V6_PROXY" = "" ]]; then
+        rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+        rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+        yum --enablerepo=elrepo-kernel install kernel-ml -y
+        grub2-set-default 0
+        echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+        INSTALL_BBR=true
+    fi
 }
 
 info() {
@@ -541,8 +552,7 @@ info() {
         echo -e " ${RED}未安装v2ray!${PLAIN}"
         exit 1
     fi
-    
-    ip=`curl -sL -4 ip.sb`
+
     res=`netstat -nltp | grep v2ray`
     [[ -z "$res" ]] && v2status="${RED}已停止${PLAIN}" || v2status="${GREEN}正在运行${PLAIN}"
     
@@ -568,7 +578,7 @@ info() {
     raw="{
   \"v\":\"2\",
   \"ps\":\"\",
-  \"add\":\"$ip\",
+  \"add\":\"$IP\",
   \"port\":\"${port}\",
   \"id\":\"${uid}\",
   \"aid\":\"$alterid\",
@@ -589,7 +599,7 @@ info() {
     echo -e " ${BLUE}nginx配置文件：${PLAIN}${RED}${confpath}${domain}.conf${PLAIN}"
     echo ""
     echo -e " ${RED}v2ray配置信息：${PLAIN}               "
-    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${ip}${PLAIN}"
+    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
     echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
     echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
     echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"

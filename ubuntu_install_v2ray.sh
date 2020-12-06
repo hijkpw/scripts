@@ -10,6 +10,15 @@ PLAIN='\033[0m'
 
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
+V6_PROXY=""
+IP=`curl -4 ip.sb`
+if [[ "$?" != "0" ]]; then
+    IP=`curl -6 ip.sb`
+    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+fi
+
+CONFIG_FILE="/etc/v2ray/config.json"
+
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
@@ -97,17 +106,17 @@ preinstall() {
 
 installV2ray() {
     colorEcho $BLUE " 安装v2ray..."
-    bash <(curl -sL https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
+    bash <(curl -sL ${V6_PROXY}https://raw.githubusercontent.com/hijkpw/scripts/master/goV2.sh)
 
-    if [ ! -f /etc/v2ray/config.json ]; then
+    if [ ! -f $CONFIG_FILE ]; then
         colorEcho $RED " $OS 安装V2ray失败，请到 https://hijk.art 网站反馈"
         exit 1
     fi
 
-    sed -i -e "s/port\":.*[0-9]*,/port\": ${PORT},/" /etc/v2ray/config.json
+    sed -i -e "s/port\":.*[0-9]*,/port\": ${PORT},/" $CONFIG_FILE
     alterid=`shuf -i50-80 -n1`
-    sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" /etc/v2ray/config.json
-    uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
+    sed -i -e "s/alterId\":.*[0-9]*/alterId\": ${alterid}/" $CONFIG_FILE
+    uid=`grep id $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     ntpdate -u time.nist.gov
     
@@ -167,24 +176,24 @@ installBBR() {
 }
 
 info() {
-    if [ ! -f /etc/v2ray/config.json ]; then
+    if [ ! -f $CONFIG_FILE ]; then
         echo -e " ${RED}未安装v2ray!${PLAIN}"
         exit 1
     fi
-    ip=`curl -sL -4 ip.sb`
-    port=`cat /etc/v2ray/config.json | grep port | cut -d: -f2 | tr -d \",' '`
+
+    port=`grep port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep v2ray`
     [ -z "$res" ] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
-    uid=`cat /etc/v2ray/config.json | grep id | cut -d: -f2 | tr -d \",' '`
-    alterid=`cat /etc/v2ray/config.json | grep alterId | cut -d: -f2 | tr -d \",' '`
-    res=`cat /etc/v2ray/config.json | grep network`
-    [ -z "$res" ] && network="tcp" || network=`cat /etc/v2ray/config.json | grep network | cut -d: -f2 | tr -d \",' '`
+    uid=`grep id $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    alterid=`grep alterId $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    res=`grep network $CONFIG_FILE`
+    [ -z "$res" ] && network="tcp" || network=`grep network $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     security="auto"
         
     raw="{
   \"v\":\"2\",
   \"ps\":\"\",
-  \"add\":\"$ip\",
+  \"add\":\"$IP\",
   \"port\":\"${port}\",
   \"id\":\"${uid}\",
   \"aid\":\"$alterid\",
@@ -199,10 +208,10 @@ info() {
 
     echo ============================================
     echo -e " ${BLUE}v2ray运行状态：${PLAIN}${status}"
-    echo -e " ${BLUE}v2ray配置文件：${PLAIN}${RED}/etc/v2ray/config.json${PLAIN}"
+    echo -e " ${BLUE}v2ray配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo ""
     echo -e " ${RED}v2ray配置信息：${PLAIN}               "
-    echo -e "   ${BLUE}IP(address):${PLAIN}  ${RED}${ip}${PLAIN}"
+    echo -e "   ${BLUE}IP(address):${PLAIN}  ${RED}${IP}${PLAIN}"
     echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
     echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
     echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"

@@ -14,6 +14,13 @@ OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 CONFIG_FILE="/etc/shadowsocks-libev/config.json"
 
+V6_PROXY=""
+IP=`curl -4 ip.sb`
+if [[ "$?" != "0" ]]; then
+    IP=`curl -6 ip.sb`
+    V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
+fi
+
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
@@ -211,7 +218,7 @@ normalizeVersion() {
 
 installNewVer() {
     new_ver=$1
-    if ! wget "https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${new_ver}/shadowsocks-libev-${new_ver}.tar.gz" -O shadowsocks-libev.tar.gz; then
+    if ! wget "${V6_PROXY}https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${new_ver}/shadowsocks-libev-${new_ver}.tar.gz" -O shadowsocks-libev.tar.gz; then
         colorEcho $RED " 下载安装文件失败！"
         exit 1
     fi
@@ -231,7 +238,7 @@ installNewVer() {
 installSS() {
     colorEcho $BLUE " 安装SS..."
 
-    tag_url="https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest"
+    tag_url="${V6_PROXY}https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest"
     new_ver="$(normalizeVersion "$(curl -s "${tag_url}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
     ssPath=`which ss-server`
     if [[ "$?" != "0" ]]; then
@@ -252,7 +259,7 @@ installSS() {
     ssPath=`which ss-server`
     cat > $CONFIG_FILE<<-EOF
 {
-    "server":"0.0.0.0",
+    "server":"::",
     "server_port":${PORT},
     "local_port":1080,
     "password":"${PASSWORD}",
@@ -321,18 +328,23 @@ installBBR() {
 
     colorEcho $BLUE " 安装BBR模块..."
     if [[ "$PMT" = "yum" ]]; then
-        rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-        rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-        $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
-        $CMD_REMOVE kernel-3.*
-        grub2-set-default 0
+        if [[ "${V6_PROXY}" = "" ]]; then
+            rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+            rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+            $CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
+            $CMD_REMOVE kernel-3.*
+            grub2-set-default 0
+            echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+            echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+            INSTALL_BBR=true
+        fi
     else
         $CMD_INSTALL --install-recommends linux-generic-hwe-16.04
         grub-set-default 0
+        echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
+        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+        INSTALL_BBR=true
     fi
-    echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-    INSTALL_BBR=true
 }
 
 setFirewall() {
@@ -372,14 +384,13 @@ setFirewall() {
 }
 
 info() {
-    ip=`curl -sL -4 ip.sb`
     port=`grep server_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep 'ss-server'`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
     password=`grep password $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     method=`grep method $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     
-    res=`echo -n "${method}:${password}@${ip}:${port}" | base64 -w 0`
+    res=`echo -n "${method}:${password}@${IP}:${port}" | base64 -w 0`
     link="ss://${res}"
 
     echo ============================================
@@ -387,7 +398,7 @@ info() {
     echo -e " ${BLUE}ss配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo ""
     echo -e " ${RED}ss配置信息：${PLAIN}"
-    echo -e "  ${BLUE}IP(address):${PLAIN}  ${RED}${ip}${PLAIN}"
+    echo -e "  ${BLUE}IP(address):${PLAIN}  ${RED}${IP}${PLAIN}"
     echo -e "  ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
     echo -e "  ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
     echo -e "  ${BLUE}加密方式(method)：${PLAIN} ${RED}${method}${PLAIN}"
@@ -397,7 +408,6 @@ info() {
 }
 
 install() {
-    checkSystem
     getData
     preinstall
     installSS
@@ -424,9 +434,9 @@ uninstall() {
     fi
 }
 
-checkSystem
-
 slogon
+
+checkSystem
 
 action=$1
 [[ -z $1 ]] && action=install
