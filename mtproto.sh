@@ -17,6 +17,8 @@ export MTG_IMAGENAME="${MTG_IMAGENAME:-nineseconds/mtg:stable}"
 DOCKER_CMD="$(command -v docker)"
 OSNAME=`hostnamectl | grep -i system | cut -d: -f2`
 
+IP=`curl -sL -4 ip.sb`
+
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
@@ -94,7 +96,6 @@ statusText() {
 }
 
 getData() {
-    IP=`curl -sL -4 ip.sb`
     read -p " 请输入MTProto端口[100-65535的一个数字]：" PORT
     [[ -z "${PORT}" ]] && {
         echo -e " ${RED}请输入MTProto端口！${PLAIN}"
@@ -244,7 +245,6 @@ showInfo() {
         return
     fi
 
-    IP=`curl -sL -4 ip.sb`
     SECRET=$(cat "$MTG_SECRET")
     set -a
     source "$MTG_ENV"

@@ -12,9 +12,9 @@ PLAIN='\033[0m'
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 V6_PROXY=""
-IP=`curl -4 ip.sb`
+IP=`curl -sL -4 ip.sb`
 if [[ "$?" != "0" ]]; then
-    IP=`curl -6 ip.sb`
+    IP=`curl -sL -6 ip.sb`
     V6_PROXY="https://cool-firefly-b19e.hijk.workers.dev/"
 fi
 
