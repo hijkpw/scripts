@@ -313,7 +313,7 @@ EOF
 
     echo Done!
 
-    if [[ ! -f BINARYPATH ]]; then
+    if [[ ! -f "$BINARYPATH" ]]; then
         colorEcho $RED " $OS 安装trojan失败，请到 https://hijk.art 反馈"
         exit 1
     fi
