@@ -332,6 +332,7 @@ getData() {
 }
 
 installNginx() {
+    colorEcho $BLUE " 安装nginx..."
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release 
     fi
@@ -499,6 +500,8 @@ installTrojan() {
 
     systemctl enable trojan-go
     rm -rf /tmp/${ZIP_FILE}
+
+    colorEcho $BLUE " trojan-go安装成功！"
 }
 
 configTrojan() {
@@ -666,6 +669,8 @@ installBBR() {
 }
 
 install() {
+    getData
+
     $PMT clean all
     echo $CMD_UPGRADE | bash
     $CMD_INSTALL wget net-tools unzip vim
@@ -675,9 +680,6 @@ install() {
         exit 1
     fi
 
-    getData
-
-    echo " 安装nginx..."
     installNginx
     setFirewall
     getCert
@@ -694,6 +696,8 @@ install() {
 
     start
     showInfo
+
+    bbrReboot
 }
 
 bbrReboot() {
@@ -721,7 +725,6 @@ update() {
 
     stop
     start
-    showInfo
 }
 
 uninstall() {
@@ -751,27 +754,23 @@ uninstall() {
     fi
 }
 
-run() {
+start() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         echo -e "${RED}trojan-go未安装，请先安装！${PLAIN}"
         return
     fi
 
-    res=`ss -ntlp| grep trojan-go`
-    if [[ "$res" != "" ]]; then
-        return
-    fi
-
-    start
-    showInfo
-}
-
-start() {
     systemctl restart nginx
     systemctl restart trojan-go
     sleep 2
-    statusText
+    port=`grep local_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
+    res=`ss -ntlp| grep ${port} | grep trojan-go`
+    if [[ "$res" = "" ]]; then
+        colorEcho $RED " trojan-go启动失败，请检查端口是否被占用！"
+    else
+        colorEcho $BLUE " trojan-go启动成功"
+    fi
 }
 
 stop() {
@@ -789,12 +788,7 @@ restart() {
     fi
 
     stop
-    colorEcho $BLUE " trojan-go停止成功"
-    sleep 2
     start
-    colorEcho $BLUE " trojan-go启动成功"
-    sleep 2
-    statusText
 }
 
 reconfig() {
@@ -810,6 +804,8 @@ reconfig() {
     getData true
     configTrojan
     setFirewall
+    getCert
+    configNginx
     stop
     start
     showInfo
@@ -881,7 +877,7 @@ menu() {
     echo -e "  ${GREEN}6.${PLAIN}  重启trojan-go"
     echo -e "  ${GREEN}7.${PLAIN}  停止trojan-go"
     echo " -------------"
-    echo -e "  ${GREEN}8.${PLAIN}  查看trojan-go信息"
+    echo -e "  ${GREEN}8.${PLAIN}  查看trojan-go配置"
     echo -e "  ${GREEN}9.${PLAIN}  修改trojan-go配置"
     echo -e "  ${GREEN}10.${PLAIN} 查看trojan-go日志"
     echo " -------------"
@@ -910,7 +906,7 @@ menu() {
             uninstall
             ;;
         5)
-            run
+            start
             ;;
         6)
             restart

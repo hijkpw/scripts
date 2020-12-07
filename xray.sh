@@ -429,6 +429,7 @@ getData() {
 }
 
 installNginx() {
+    colorEcho $BLUE " 安装nginx..."
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release 
     fi
@@ -1191,6 +1192,8 @@ EOF
 }
 
 install() {
+    getData
+
     $PMT clean all
     echo $CMD_UPGRADE | bash
     $CMD_INSTALL wget net-tools unzip vim
@@ -1200,9 +1203,6 @@ install() {
         exit 1
     fi
 
-    getData
-
-    colorEcho $BLUE " 安装nginx..."
     installNginx
     setFirewall
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
@@ -1299,28 +1299,23 @@ uninstall() {
     fi
 }
 
-run() {
+start() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         colorEcho $RED " Xray未安装，请先安装！"
         return
     fi
-
-    res=`ss -ntlp| grep xray`
-    if [[ "$res" != "" ]]; then
-        return
-    fi
-
-    start
-    showInfo
-}
-
-start() {
     systemctl restart nginx
     systemctl restart xray
     sleep 2
-    colorEcho $BLUE " Xray启动成功"
-    statusText
+    
+    port=`grep port $CONFIG_FILE| head -n 1| cut -d: -f2| tr -d \",' '`
+    res=`ss -ntlp| grep ${port} | grep -i xray`
+    if [[ "$res" = "" ]]; then
+        colorEcho $RED " Xray启动失败，请检查日志或查看端口是否被占用！"
+    else
+        colorEcho $BLUE " Xray启动成功"
+    fi
 }
 
 stop() {
@@ -1338,12 +1333,7 @@ restart() {
     fi
 
     stop
-    colorEcho $BLUE " Xray停止成功"
-    sleep 2
     start
-    colorEcho $BLUE " Xray启动成功"
-    sleep 2
-    statusText
 }
 
 
@@ -1589,7 +1579,7 @@ menu() {
     echo -e "  ${GREEN}14.${PLAIN}  重启Xray"
     echo -e "  ${GREEN}15.${PLAIN}  停止Xray"
     echo " -------------"
-    echo -e "  ${GREEN}16.${PLAIN}  查看Xray信息"
+    echo -e "  ${GREEN}16.${PLAIN}  查看Xray配置"
     echo -e "  ${GREEN}17.${PLAIN}  查看Xray日志"
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"

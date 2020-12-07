@@ -626,9 +626,6 @@ bbrReboot() {
 
 
 install() {
-    echo -n " 系统版本:  "
-    cat /etc/centos-release
-
     checkSystem
     getData
     preinstall

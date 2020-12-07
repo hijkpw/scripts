@@ -570,9 +570,6 @@ bbrReboot() {
 
 
 install() {
-    echo -n "系统版本:  "
-    lsb_release -a
-
     checkSystem
     getData
     preinstall

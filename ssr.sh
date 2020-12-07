@@ -23,6 +23,7 @@ BASE=`pwd`
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 CONFIG_FILE="/etc/shadowsocksR.json"
+NAME="shadowsocksR"
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
@@ -60,20 +61,8 @@ checkSystem() {
     fi
 }
 
-slogon() {
-    clear
-    echo "#############################################################"
-    echo -e "#             ${RED}ShadowsocksR/SSR 一键安装脚本${PLAIN}               #"
-    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
-    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
-    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
-    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
-    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
-    echo "#############################################################"
-    echo ""
-}
-
 getData() {
+    echo ""
     read -p " 请设置SSR的密码（不输入则随机生成）:" PASSWORD
     [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
@@ -267,6 +256,40 @@ getData() {
     echo ""
 }
 
+status() {
+    res=`which python`
+    if [[ "$?" != "0" ]]; then
+        echo 0
+        return
+    fi
+    if [[ ! -f $CONFIG_FILE ]]; then
+        echo 1
+        return
+    fi
+    port=`grep server_port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    res=`netstat -nltp | grep ${port} | grep python`
+    if [[ -z "$res" ]]; then
+        echo 2
+    else
+        echo 3
+    fi
+}
+
+statusText() {
+    res=`status`
+    case $res in
+        2)
+            echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN}
+            ;;
+        3)
+            echo -e ${GREEN}已安装${PLAIN} ${GREEN}正在运行${PLAIN}
+            ;;
+        *)
+            echo -e ${RED}未安装${PLAIN}
+            ;;
+    esac
+}
+
 preinstall() {
     colorEcho $BLUE " 更新系统..."
     $PMT clean all
@@ -309,26 +332,6 @@ installSSR() {
         cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
     fi
 
-     cat > $CONFIG_FILE<<-EOF
-{
-    "server":"0.0.0.0",
-    "server_ipv6":"::",
-    "server_port":${PORT},
-    "local_port":1080,
-    "password":"${PASSWORD}",
-    "timeout":600,
-    "method":"${METHOD}",
-    "protocol":"${PROTOCOL}",
-    "protocol_param":"",
-    "obfs":"${OBFS}",
-    "obfs_param":"",
-    "redirect":"",
-    "dns_ipv6":false,
-    "fast_open":false,
-    "workers":1
-}
-EOF
-
 cat > /usr/lib/systemd/system/shadowsocksR.service <<-EOF
 [Unit]
 Description=shadowsocksR
@@ -348,13 +351,29 @@ WantedBy=multi-user.target
 EOF
 
     systemctl daemon-reload
-    systemctl enable shadowsocksR && systemctl restart shadowsocksR
-    sleep 3
-    res=`netstat -nltp | grep ${PORT} | grep python`
-    if [[ "${res}" = "" ]]; then
-        colorEcho $RED " ssr启动失败，请检查端口是否被占用！"
-        exit 1
-    fi
+    systemctl enable shadowsocksR
+}
+
+configSSR() {
+    cat > $CONFIG_FILE<<-EOF
+{
+    "server":"0.0.0.0",
+    "server_ipv6":"::",
+    "server_port":${PORT},
+    "local_port":1080,
+    "password":"${PASSWORD}",
+    "timeout":600,
+    "method":"${METHOD}",
+    "protocol":"${PROTOCOL}",
+    "protocol_param":"",
+    "obfs":"${OBFS}",
+    "obfs_param":"",
+    "redirect":"",
+    "dns_ipv6":false,
+    "fast_open":false,
+    "workers":1
+}
+EOF
 }
 
 setFirewall() {
@@ -441,7 +460,7 @@ installBBR() {
     fi
 }
 
-info() {
+showInfo() {
     port=`grep server_port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep python`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
@@ -490,11 +509,27 @@ install() {
     preinstall
     installBBR
     installSSR
+    configSSR
     setFirewall
 
-    info
+    start
+    showInfo
     
     bbrReboot
+}
+
+reconfig() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SSR未安装，请先安装！${PLAIN}"
+        return
+    fi
+    getData
+    configSSR
+    setFirewall
+    restart
+
+    showInfo
 }
 
 uninstall() {
@@ -504,25 +539,120 @@ uninstall() {
 
     if [[ "${answer}" == "y" ]] || [[ "${answer}" == "Y" ]]; then
         rm -f $CONFIG_FILE
-        rm -f /var/log/shadowsocks.log
+        rm -f /var/log/shadowsocksr.log
         rm -rf /usr/local/shadowsocks
         systemctl disable shadowsocksR && systemctl stop shadowsocksR && rm -rf /usr/lib/systemd/system/shadowsocksR.service
     fi
     echo -e " ${RED}卸载成功${PLAIN}"
 }
 
-slogon
+start() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SS未安装，请先安装！${PLAIN}"
+        return
+    fi
+    systemctl restart ${NAME}
+    sleep 2
+    port=`grep server_port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    res=`netstat -nltp | grep ${port} | grep python`
+    if [[ "$res" = "" ]]; then
+        colorEcho $RED " SSR启动失败，请检查端口是否被占用！"
+    else
+        colorEcho $BLUE " SSR启动成功！"
+    fi
+}
+
+restart() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SSR未安装，请先安装！${PLAIN}"
+        return
+    fi
+
+    stop
+    start
+}
+
+stop() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SSR未安装，请先安装！${PLAIN}"
+        return
+    fi
+    systemctl stop ${NAME}
+    colorEcho $BLUE " SSR停止成功"
+}
+
+showLog() {
+    tail /var/log/shadowsocksr.log
+}
+
+menu() {
+    clear
+    echo "#############################################################"
+    echo -e "#             ${RED}ShadowsocksR/SSR 一键安装脚本${PLAIN}               #"
+    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
+    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+    echo "#############################################################"
+    echo ""
+
+    echo -e "  ${GREEN}1.${PLAIN}  安装SSR"
+    echo -e "  ${GREEN}2.${PLAIN}  卸载SSR"
+    echo " -------------"
+    echo -e "  ${GREEN}4.${PLAIN}  启动SSR"
+    echo -e "  ${GREEN}5.${PLAIN}  重启SSR"
+    echo -e "  ${GREEN}6.${PLAIN}  停止SSR"
+    echo " -------------"
+    echo -e "  ${GREEN}7.${PLAIN}  查看SSR配置"
+    echo -e "  ${GREEN}8.${PLAIN}  修改SSR配置"
+    echo -e "  ${GREEN}9.${PLAIN}  查看SSR日志"
+    echo " -------------"
+    echo -e "  ${GREEN}0.${PLAIN} 退出"
+    echo 
+    echo -n " 当前状态："
+    statusText
+    echo 
+
+    read -p " 请选择操作[0-10]：" answer
+    case $answer in
+        0)
+            exit 0
+            ;;
+        1)
+            install
+            ;;
+        2)
+            uninstall
+            ;;
+        4)
+            start
+            ;;
+        5)
+            restart
+            ;;
+        6)
+            stop
+            ;;
+        7)
+            showInfo
+            ;;
+        8)
+            reconfig
+            ;;
+        9)
+            showLog
+            ;;
+        *)
+            echo -e "$RED 请选择正确的操作！${PLAIN}"
+            exit 1
+            ;;
+    esac
+}
 
 checkSystem
 
-action=$1
-[[ -z $1 ]] && action=install
-case "$action" in
-    install|uninstall|info)
-        ${action}
-        ;;
-    *)
-        echo " 参数错误"
-        echo " 用法: `basename $0` [install|uninstall]"
-        ;;
-esac
+menu

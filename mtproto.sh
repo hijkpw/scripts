@@ -194,6 +194,12 @@ firewall() {
 }
 
 start() {
+    res=`status`
+    if [[ $res -lt 3 ]]; then
+        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
+        return
+    fi
+
     set -a
     source "$MTG_ENV"
     set +a
@@ -221,6 +227,8 @@ start() {
         docker logs $MTG_CONTAINER | tail
         echo -e " ${RED}$OSNAME 启动docker镜像失败，请到 https://hijk.art 反馈${PLAIN}"
         exit 1
+    else
+        colorEcho $BLUE " MTProto启动成功！"
     fi
 }
 
@@ -236,6 +244,7 @@ stop() {
     set +a
 
     $DOCKER_CMD stop $MTG_CONTAINER >> /dev/null
+    colorEcho $BLUE " MTProto停止成功！"
 }
 
 showInfo() {
@@ -286,6 +295,7 @@ update() {
 }
 
 uninstall() {
+    echo ""
     read -p " 确定卸载MTProto？[y/n]：" answer
     if [[ "$answer" = "y" ]] || [[ "$answer" = "Y" ]]; then
         stop
@@ -296,25 +306,6 @@ uninstall() {
         $CMD_REMOVE docker-ce docker-ce-cli containerd.io
         colorEcho $GREEN " 卸载成功"
     fi
-}
-
-run() {
-    res=`status`
-    if [[ $res -lt 3 ]]; then
-        echo -e " ${RED}MTProto未安装，请先安装！${PLAIN}"
-        return
-    fi
-
-    set -a
-    source "$MTG_ENV"
-    set +a
-    res=`ss -ntlp| grep ${MTG_PORT} | grep docker`
-    if [[ "$res" != "" ]]; then
-        return
-    fi
-
-    start
-    showInfo
 }
 
 restart() {
@@ -354,7 +345,7 @@ showLog() {
     source "$MTG_ENV"
     set +a
 
-    $DOCKER_CMD logs $MTG_CONTAINER | tail -f
+    $DOCKER_CMD logs $MTG_CONTAINER | tail
 }
 
 menu() {
@@ -402,7 +393,7 @@ menu() {
             uninstall
             ;;
         4)
-            run
+            start
             ;;
         5)
             restart

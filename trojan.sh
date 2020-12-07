@@ -317,6 +317,9 @@ EOF
         colorEcho $RED " $OS 安装trojan失败，请到 https://hijk.art 反馈"
         exit 1
     fi
+
+    systemctl enable trojan
+    colorEcho $GREEN " trojan安装成功！"
 }
 
 configTrojan() {
@@ -376,15 +379,6 @@ configTrojan() {
     }
 }
 EOF
-
-    systemctl enable trojan && systemctl restart trojan
-    sleep 3
-    res=`netstat -nltp | grep ${PORT} | grep trojan`
-    if [ "${res}" = "" ]; then
-        colorEcho $RED " trojan启动失败，请检查端口是否被占用！"
-        exit 1
-    fi
-    colorEcho $GREEN " trojan安装成功！"
 }
 
 getCert()
@@ -688,9 +682,25 @@ function install() {
     installNginx
     installTrojan
     configTrojan
-    
+
+    start
     showInfo
     bbrReboot
+}
+
+reconfig() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}trojan未安装，请先安装！${PLAIN}"
+        return
+    fi
+
+    getData
+    setFirewall
+    installNginx
+    configTrojan
+    restart
+    showInfo
 }
 
 update() {
@@ -707,27 +717,22 @@ update() {
     colorEcho $BLUE " 成功更新到最新版trojan"
 }
 
-run() {
+start() {
     res=`status`
     if [[ $res -lt 2 ]]; then
         echo -e "${RED}trojan未安装，请先安装！${PLAIN}"
         return
     fi
-
-    res=`ss -ntlp| grep trojan`
-    if [[ "$res" != "" ]]; then
-        return
-    fi
-
-    start
-    showInfo
-}
-
-start() {
     systemctl restart nginx
     systemctl restart trojan
     sleep 2
-    statusText
+    port=`grep local_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
+    res=`ss -ntlp| grep ${port} | grep trojan`
+    if [[ "$res" = "" ]]; then
+         colorEcho $RED " trojan启动失败，请检查端口是否被占用！"
+    else
+        colorEcho $BLUE " trojan启动成功"
+    fi
 }
 
 stop() {
@@ -745,12 +750,7 @@ restart() {
     fi
 
     stop
-    colorEcho $BLUE " trojan停止成功"
-    sleep 2
     start
-    colorEcho $BLUE " trojan启动成功"
-    sleep 2
-    statusText
 }
 
 showLog() {
@@ -813,8 +813,9 @@ menu() {
     echo -e "  ${GREEN}5.${PLAIN}  重启trojan"
     echo -e "  ${GREEN}6.${PLAIN}  停止trojan"
     echo " -------------"
-    echo -e "  ${GREEN}7.${PLAIN}  查看trojan信息"
-    echo -e "  ${GREEN}8.${PLAIN}  查看trojan日志"
+    echo -e "  ${GREEN}7.${PLAIN}  查看trojan配置"
+    echo -e "  ${GREEN}8.${PLAIN}  修改trojan配置"
+    echo -e "  ${GREEN}9.${PLAIN}  查看trojan日志"
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"
     echo 
@@ -837,7 +838,7 @@ menu() {
             uninstall
             ;;
         4)
-            run
+            start
             ;;
         5)
             restart
@@ -849,6 +850,9 @@ menu() {
             showInfo
             ;;
         8)
+            reconfig
+            ;;
+        9)
             showLog
             ;;
         *)

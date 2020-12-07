@@ -12,7 +12,9 @@ PLAIN='\033[0m'
 BASE=`pwd`
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
-CONFIG_FILE="/etc/shadowsocks-libev/config.json"
+NAME="shadowsocks-libev"
+CONFIG_FILE="/etc/${NAME}/config.json"
+SERVICE_FILE="/usr/lib/systemd/system/${NAME}.service"
 
 V6_PROXY=""
 IP=`curl -sL -4 ip.sb`
@@ -56,20 +58,42 @@ checkSystem() {
     fi
 }
 
-slogon() {
-    clear
-    echo "#############################################################"
-    echo -e "#              ${RED}Shadowsocks/SS 一键安装脚本${PLAIN}                #"
-    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
-    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
-    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
-    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
-    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
-    echo "#############################################################"
-    echo ""
+status() {
+    cmd="$(command -v ss-server)"
+    if [[ "$cmd" = "" ]]; then
+        echo 0
+        return
+    fi
+    if [[ ! -f $CONFIG_FILE ]]; then
+        echo 1
+        return
+    fi
+    port=`grep server_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
+    res=`ss -ntlp| grep ${port} | grep ss-server`
+    if [[ -z "$res" ]]; then
+        echo 2
+    else
+        echo 3
+    fi
+}
+
+statusText() {
+    res=`status`
+    case $res in
+        2)
+            echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN}
+            ;;
+        3)
+            echo -e ${GREEN}已安装${PLAIN} ${GREEN}正在运行${PLAIN}
+            ;;
+        *)
+            echo -e ${RED}未安装${PLAIN}
+            ;;
+    esac
 }
 
 getData() {
+    echo ""
     read -p " 请设置SS的密码（不输入则随机生成）:" PASSWORD
     [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
@@ -218,11 +242,11 @@ normalizeVersion() {
 
 installNewVer() {
     new_ver=$1
-    if ! wget "${V6_PROXY}https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${new_ver}/shadowsocks-libev-${new_ver}.tar.gz" -O shadowsocks-libev.tar.gz; then
+    if ! wget "${V6_PROXY}https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${new_ver}/shadowsocks-libev-${new_ver}.tar.gz" -O ${NAME}.tar.gz; then
         colorEcho $RED " 下载安装文件失败！"
         exit 1
     fi
-    tar zxf shadowsocks-libev.tar.gz
+    tar zxf ${NAME}.tar.gz
     cd shadowsocks-libev-${new_ver}
     ./configure
     make && make install
@@ -232,11 +256,34 @@ installNewVer() {
         cd ${BASE} && rm -rf shadowsocks-libev*
         exit 1
     fi
+    ssPath=`which ss-server`
+    cat > $SERVICE_FILE <<-EOF
+[Unit]
+Description=shadowsocks
+Documentation=https://hijk.art/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+PIDFile=/var/run/${NAME}.pid
+LimitNOFILE=32768
+ExecStart=$ssPath -c $CONFIG_FILE -f /var/run/${NAME}.pid
+ExecReload=/bin/kill -s HUP \$MAINPID
+ExecStop=/bin/kill -s TERM \$MAINPID
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl daemon-reload
+    systemctl enable ${NAME}
     cd ${BASE} && rm -rf shadowsocks-libev*
+
+    colorEcho $BLUE " 安装成功!"
 }
 
 installSS() {
-    colorEcho $BLUE " 安装SS..."
+    colorEcho $BLUE " 安装最新版SS..."
 
     tag_url="${V6_PROXY}https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest"
     new_ver="$(normalizeVersion "$(curl -s "${tag_url}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
@@ -244,23 +291,22 @@ installSS() {
     if [[ "$?" != "0" ]]; then
         installNewVer $new_ver
     else
-        ver=`ss-server -h | grep shadowsocks-libev | grep -oE '[0-9+\.]+'`
+        ver=`ss-server -h | grep ${NAME} | grep -oE '[0-9+\.]+'`
         if [[ $ver != $new_ver ]]; then
             installNewVer $new_ver
         else
             colorEcho $YELLOW " 已安装最新版SS"
         fi
     fi
+}
 
-    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-
+configSS(){
     interface="0.0.0.0"
     if [[ "$V6_PROXY" != "" ]]; then
         interface="::"
     fi
-    mkdir -p /etc/shadowsocks-libev
-    ssPath=`which ss-server`
+
+    mkdir -p /etc/${NAME}
     cat > $CONFIG_FILE<<-EOF
 {
     "server":"$interface",
@@ -274,33 +320,6 @@ installSS() {
     "fast_open":false
 }
 EOF
- cat > /usr/lib/systemd/system/shadowsocks-libev.service <<-EOF
-[Unit]
-Description=shadowsocks
-Documentation=https://hijk.art/
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-PIDFile=/var/run/shadowsocks-libev.pid
-LimitNOFILE=32768
-ExecStart=$ssPath -c $CONFIG_FILE -f /var/run/shadowsocks-libev.pid
-ExecReload=/bin/kill -s HUP \$MAINPID
-ExecStop=/bin/kill -s TERM \$MAINPID
-
-[Install]
-WantedBy=multi-user.target
-EOF
-    systemctl daemon-reload
-    systemctl enable shadowsocks-libev
-    systemctl restart shadowsocks-libev
-    sleep 3
-    res=`netstat -nltp | grep ${PORT} | grep 'ss-server'`
-    if [[ "${res}" = "" ]]; then
-        colorEcho $RED " ss启动失败，请检查端口是否被占用！"
-        exit 1
-    fi
 }
 
 installBBR() {
@@ -387,7 +406,7 @@ setFirewall() {
     fi
 }
 
-info() {
+showInfo() {
     port=`grep server_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep 'ss-server'`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
@@ -411,14 +430,92 @@ info() {
     qrencode -o - -t utf8 ${link}
 }
 
+function bbrReboot() {
+    if [ "${INSTALL_BBR}" == "true" ]; then
+        echo  
+        colorEcho $BLUE " 为使BBR模块生效，系统将在30秒后重启"
+        echo  
+        echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${RED}reboot${PLAIN} 重启系统"
+        sleep 30
+        reboot
+    fi
+}
+
 install() {
     getData
+
     preinstall
     installSS
+    configSS
     installBBR
     setFirewall
 
-    info
+    start
+    showInfo
+
+    bbrReboot
+}
+
+reconfig() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SS未安装，请先安装！${PLAIN}"
+        return
+    fi
+    getData
+    configSS
+    restart
+    setFirewall
+
+    showInfo
+}
+
+update() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SS未安装，请先安装！${PLAIN}"
+        return
+    fi
+    installSS
+    restart
+}
+
+start() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SS未安装，请先安装！${PLAIN}"
+        return
+    fi
+    systemctl restart ${NAME}
+    sleep 2
+    port=`grep server_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    res=`ss -nltp | grep ${port} | grep ss-server`
+    if [[ "$res" = "" ]]; then
+        colorEcho $RED " SS启动失败，请检查端口是否被占用！"
+    else
+        colorEcho $BLUE " SS启动成功！"
+    fi
+}
+
+restart() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SS未安装，请先安装！${PLAIN}"
+        return
+    fi
+
+    stop
+    start
+}
+
+stop() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SS未安装，请先安装！${PLAIN}"
+        return
+    fi
+    systemctl stop ${NAME}
+    colorEcho $BLUE " SS停止成功"
 }
 
 uninstall() {
@@ -427,29 +524,90 @@ uninstall() {
     [[ -z ${answer} ]] && answer="n"
 
     if [[ "${answer}" == "y" ]] || [[ "${answer}" == "Y" ]]; then
-        systemctl stop shadowsocks-libev && systemctl disable shadowsocks-libev
-        rm -rf /usr/lib/systemd/system/shadowsocks-libev.service
+        systemctl stop ${NAME} && systemctl disable ${NAME}
+        rm -rf $SERVICE_FILE
         cd /usr/local/bin && rm -rf ss-local ss-manager ss-nat ss-redir ss-server ss-tunnel
         rm -rf /usr/lib64/libshadowsocks-libev*
-        rm -rf /usr/share/doc/shadowsocks-libev
-        rm -rf /usr/share/man/man1/ss-*.1.gz
-        rm -rf /usr/share/man/man8/shadowsocks-libev.8.gz
+        rm -rf /usr/share/doc/shadowsocks-libev*
+        rm -rf /usr/share/man/man1/ss-*.gz
+        rm -rf /usr/share/man/man8/shadowsocks-libev*
         colorEcho $GREEN " SS卸载成功"
     fi
 }
 
-slogon
+showLog() {
+    journalctl -xen --no-pager -u ${NAME}
+}
+
+menu() {
+    clear
+    echo "#############################################################"
+    echo -e "#              ${RED}Shadowsocks/SS 一键安装脚本${PLAIN}                #"
+    echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
+    echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+    echo "#############################################################"
+    echo ""
+
+    echo -e "  ${GREEN}1.${PLAIN}  安装SS"
+    echo -e "  ${GREEN}2.${PLAIN}  更新SS"
+    echo -e "  ${GREEN}3.${PLAIN}  卸载SS"
+    echo " -------------"
+    echo -e "  ${GREEN}4.${PLAIN}  启动SS"
+    echo -e "  ${GREEN}5.${PLAIN}  重启SS"
+    echo -e "  ${GREEN}6.${PLAIN}  停止SS"
+    echo " -------------"
+    echo -e "  ${GREEN}7.${PLAIN}  查看SS配置"
+    echo -e "  ${GREEN}8.${PLAIN}  修改SS配置"
+    echo -e "  ${GREEN}9.${PLAIN}  查看SS日志"
+    echo " -------------"
+    echo -e "  ${GREEN}0.${PLAIN} 退出"
+    echo 
+    echo -n " 当前状态："
+    statusText
+    echo 
+
+    read -p " 请选择操作[0-10]：" answer
+    case $answer in
+        0)
+            exit 0
+            ;;
+        1)
+            install
+            ;;
+        2)
+            update
+            ;;
+        3)
+            uninstall
+            ;;
+        4)
+            start
+            ;;
+        5)
+            restart
+            ;;
+        6)
+            stop
+            ;;
+        7)
+            showInfo
+            ;;
+        8)
+            reconfig
+            ;;
+        9)
+            showLog
+            ;;
+        *)
+            echo -e "$RED 请选择正确的操作！${PLAIN}"
+            exit 1
+            ;;
+    esac
+}
 
 checkSystem
 
-action=$1
-[[ -z $1 ]] && action=install
-case "$action" in
-    install|uninstall|info)
-        ${action}
-        ;;
-    *)
-        echo " 参数错误"
-        echo "  用法: `basename $0` [install|uninstall|info]"
-        ;;
-esac
+menu
