@@ -206,7 +206,7 @@ preinstall() {
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release
     fi
-    $CMD_INSTALL telnet wget vim net-tools unzip tar qrencode
+    $CMD_INSTALL wget vim net-tools unzip tar qrencode
     $CMD_INSTALL openssl gettext gcc autoconf libtool automake make asciidoc xmlto
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL openssl-devel udns-devel libev-devel pcre pcre-devel mbedtls mbedtls-devel libsodium libsodium-devel c-ares c-ares-devel

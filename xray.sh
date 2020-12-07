@@ -35,6 +35,16 @@ if [[ "$?" != "0" ]]; then
     V6_PROXY="https://gh.hijk.art/"
 fi
 
+BT="false"
+NGINX_CONF_PATH="/etc/nginx/conf.d/"
+START_NGINX="systemctl start nginx"
+res=`which bt`
+if [[ "$res" != "" ]]; then
+    BT="true"
+    NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
+    START_NGINX="nginx -c /www/server/nginx/conf/nginx.conf"
+fi
+
 VLESS="false"
 TROJAN="false"
 TLS="false"
@@ -430,16 +440,24 @@ getData() {
 
 installNginx() {
     colorEcho $BLUE " 安装nginx..."
-    if [[ "$PMT" = "yum" ]]; then
-        $CMD_INSTALL epel-release 
+    if [[ "$BT" = "false" ]]; then
+        if [[ "$PMT" = "yum" ]]; then
+            $CMD_INSTALL epel-release 
+        fi
+        $CMD_INSTALL nginx
+        systemctl enable nginx
+    else
+        res=`which nginx`
+        if [[ "$?" != "0" ]]; then
+            colorEcho $RED " 您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
+            exit 1
+        fi
     fi
-    $CMD_INSTALL nginx
-    systemctl enable nginx
 }
 
 getCert() {
     if [[ -z ${CERT_FILE+x} ]]; then
-        systemctl stop nginx
+        nginx -s stop
         systemctl stop xray
         res=`netstat -ntlp| grep -E ':80|:443'`
         if [[ "${res}" != "" ]]; then
@@ -487,6 +505,10 @@ getCert() {
 
         CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
         KEY_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+
+        sed -i '/certbot/d' /etc/crontab
+        certbotpath=`which certbot`
+        echo "0 3 1 */2 0 root nginx -s stop; ${certbotpath} renew ; $START_NGINX" >> /etc/crontab
     else
         mkdir -p /usr/local/etc/xray
         cp ~/xray.pem /usr/local/etc/xray/${DOMAIN}.pem
@@ -495,21 +517,23 @@ getCert() {
 }
 
 configNginx() {
-    if [[ ! -f /etc/nginx/nginx.conf.bak ]]; then
-        mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-    fi
-    res=`id nginx`
-    if [[ "$?" != "0" ]]; then
-        user="www-data"
-    else
-        user="nginx"
-    fi
     mkdir -p /usr/share/nginx/html;
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
     fi
-    cat > /etc/nginx/nginx.conf<<-EOF
+
+    if [[ "$BT" = "false" ]]; then
+        if [[ ! -f /etc/nginx/nginx.conf.bak ]]; then
+            mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+        fi
+        res=`id nginx`
+        if [[ "$?" != "0" ]]; then
+            user="www-data"
+        else
+            user="nginx"
+        fi
+        cat > /etc/nginx/nginx.conf<<-EOF
 user $user;
 worker_processes auto;
 error_log /var/log/nginx/error.log;
@@ -546,6 +570,7 @@ http {
     include /etc/nginx/conf.d/*.conf;
 }
 EOF
+    fi
 
     if [[ "$PROXY_URL" = "" ]]; then
         action=""
@@ -558,11 +583,11 @@ EOF
     fi
 
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
-        mkdir -p /etc/nginx/conf.d;
+        mkdir -p ${NGINX_CONF_PATH}
         # VMESS+WS+TLS
         # VLESS+WS+TLS
         if [[ "$WS" = "true" ]]; then
-            cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
+            cat > ${NGINX_CONF_PATH}${DOMAIN}.conf<<-EOF
 server {
     listen 80;
     listen [::]:80;
@@ -610,7 +635,7 @@ EOF
             # VLESS+TCP+TLS
             # VLESS+TCP+XTLS
             # trojan
-            cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
+            cat > ${NGINX_CONF_PATH}${DOMAIN}.conf<<-EOF
 server {
     listen 80;
     listen [::]:80;
@@ -624,11 +649,6 @@ server {
 }
 EOF
         fi
-    fi
-
-    certbotpath=`which certbot`
-    if [[ "$certbotpath" != "" ]]; then
-        echo "0 3 1 */2 0 root systemctl stop nginx ; ${certbotpath} renew; systemctl restart nginx" >> /etc/crontab
     fi
 }
 
@@ -1196,7 +1216,11 @@ install() {
 
     $PMT clean all
     echo $CMD_UPGRADE | bash
-    $CMD_INSTALL wget net-tools unzip vim
+    $CMD_INSTALL wget vim unzip tar gcc openssl
+    $CMD_INSTALL net-tools
+    if [[ "$PMT" = "apt" ]]; then
+        $CMD_INSTALL libssl-dev g++
+    fi
     res=`which unzip`
     if [[ $? -ne 0 ]]; then
         colorEcho $RED " unzip安装失败，请检查网络"
@@ -1279,21 +1303,22 @@ uninstall() {
         stop
         systemctl disable xray
         rm -rf /etc/systemd/system/xray.service
-        rm -rf /etc/systemd/system/multi-user.target.wants/xray.service
         rm -rf /usr/local/bin/xray
         rm -rf /usr/local/etc/xray
-        
-        systemctl disable nginx
-        $CMD_REMOVE nginx
-        if [[ "$PMT" = "apt" ]]; then
-            $CMD_REMOVE nginx-common
-        fi
-        rm -rf /etc/nginx/nginx.conf
-        if [[ -f /etc/nginx/nginx.conf.bak ]]; then
-            mv /etc/nginx/nginx.conf.bak /etc/nginx/nginx.conf
+
+        if [[ "$BT" = "false" ]]; then
+            systemctl disable nginx
+            $CMD_REMOVE nginx
+            if [[ "$PMT" = "apt" ]]; then
+                $CMD_REMOVE nginx-common
+            fi
+            rm -rf /etc/nginx/nginx.conf
+            if [[ -f /etc/nginx/nginx.conf.bak ]]; then
+                mv /etc/nginx/nginx.conf.bak /etc/nginx/nginx.conf
+            fi
         fi
         if [[ "$domain" != "" ]]; then
-            rm -rf /etc/nginx/conf.d/${domain}.conf
+            rm -rf ${NGINX_CONF_PATH}${domain}.conf
         fi
         colorEcho $GREEN " Xray卸载成功"
     fi
@@ -1305,7 +1330,8 @@ start() {
         colorEcho $RED " Xray未安装，请先安装！"
         return
     fi
-    systemctl restart nginx
+    nginx -s stop
+    $START_NGINX
     systemctl restart xray
     sleep 2
     
@@ -1319,7 +1345,7 @@ start() {
 }
 
 stop() {
-    systemctl stop nginx
+    nginx -s stop
     systemctl stop xray
     colorEcho $BLUE " Xray停止成功"
 }
@@ -1367,7 +1393,7 @@ showInfo() {
         tls="true"
     fi
     if [[ "$ws" = "true" ]]; then
-        port=`cat /etc/nginx/conf.d/${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
+        port=`grep -i ssl ${NGINX_CONF_PATH}${domain}.conf| head -n1 | awk '{print $2}'`
     else
         port=`grep port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     fi

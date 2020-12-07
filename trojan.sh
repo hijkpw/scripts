@@ -17,6 +17,16 @@ if [[ "$?" != "0" ]]; then
     V6_PROXY="https://gh.hijk.art/"
 fi
 
+BT="false"
+NGINX_CONF_PATH="/etc/nginx/conf.d/"
+START_NGINX="systemctl start nginx"
+res=`which bt`
+if [[ "$res" != "" ]]; then
+    BT="true"
+    NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
+    START_NGINX="nginx -c /www/server/nginx/conf/nginx.conf"
+fi
+
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
 # 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
 SITES=(
@@ -237,12 +247,10 @@ function preinstall()
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release
     fi
-    $CMD_INSTALL telnet wget vim unzip tar
+    $CMD_INSTALL wget vim unzip tar gcc openssl
     $CMD_INSTALL net-tools
-    $CMD_INSTALL ntpdate
     if [[ "$PMT" = "apt" ]]; then
-        $CMD_INSTALL gcc g++
-        apt autoremove -y
+        $CMD_INSTALL libssl-dev g++
     fi
 
     if [[ -s /etc/selinux/config ]] && grep 'SELINUX=enforcing' /etc/selinux/config; then
@@ -324,7 +332,6 @@ EOF
 
 configTrojan() {
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-    ntpdate -u time.nist.gov
 
     cat >$CONFIG_FILE<<-EOF
 {
@@ -428,8 +435,12 @@ getCert()
             exit 1
         fi
 
-        CERT_FILE="/etc/letsencrypt/archive/${DOMAIN}/fullchain1.pem"
-        KEY_FILE="/etc/letsencrypt/archive/${DOMAIN}/privkey1.pem"
+        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
+        KEY_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+
+        sed -i '/certbot/d' /etc/crontab
+        certbotpath=`which certbot`
+        echo "0 3 1 */2 0 root nginx -s stop; ${certbotpath} renew ; $START_NGINX" >> /etc/crontab
     else
         mkdir -p /usr/local/etc/trojan
         cp ~/trojan.pem /usr/local/etc/trojan/${DOMAIN}.pem
@@ -439,25 +450,40 @@ getCert()
 
 function installNginx()
 {
-    $CMD_INSTALL nginx
-    
-    getCert
-
-    if [ ! -f /etc/nginx/nginx.conf.bak ]; then
-        mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-    fi
-    res=`id nginx`
-    if [[ "$?" != "0" ]]; then
-        user="www-data"
+    colorEcho $BLUE " 安装nginx..."
+    if [[ "$BT" = "false" ]]; then
+        if [[ "$PMT" = "yum" ]]; then
+            $CMD_INSTALL epel-release 
+        fi
+        $CMD_INSTALL nginx
+        systemctl enable nginx
     else
-        user="nginx"
+        res=`which nginx`
+        if [[ "$?" != "0" ]]; then
+            colorEcho $RED " 您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
+            exit 1
+        fi
     fi
+}
+
+configNginx() {
     mkdir -p /usr/share/nginx/html
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
     fi
-    cat > /etc/nginx/nginx.conf<<-EOF
+
+    if [[ "$BT" = "false" ]]; then
+        if [ ! -f /etc/nginx/nginx.conf.bak ]; then
+            mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+        fi
+        res=`id nginx`
+        if [[ "$?" != "0" ]]; then
+            user="www-data"
+        else
+            user="nginx"
+        fi
+        cat > /etc/nginx/nginx.conf<<-EOF
 user $user;
 worker_processes auto;
 error_log /var/log/nginx/error.log;
@@ -493,10 +519,11 @@ http {
     include /etc/nginx/conf.d/*.conf;
 }
 EOF
+    fi
 
-    mkdir -p /etc/nginx/conf.d
+    mkdir -p $NGINX_CONF_PATH
     if [[ "$PROXY_URL" = "" ]]; then
-        cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
+        cat > $NGINX_CONF_PATH${DOMAIN}.conf<<-EOF
 server {
     listen 80;
     listen [::]:80;
@@ -505,7 +532,7 @@ server {
 }
 EOF
     else
-        cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
+        cat > $NGINX_CONF_PATH${DOMAIN}.conf<<-EOF
 server {
     listen 80;
     listen [::]:80;
@@ -524,10 +551,6 @@ server {
 }
 EOF
     fi
-    sed -i '/certbot/d' /etc/crontab
-    certbotpath=`which certbot`
-    echo "0 3 1 */2 0 root systemctl stop nginx ; ${certbotpath} renew ; systemctl restart nginx" >> /etc/crontab
-    systemctl enable nginx && systemctl restart nginx
 }
 
 function setFirewall()
@@ -680,6 +703,8 @@ function install() {
     installBBR
     setFirewall
     installNginx
+    getCert
+    configNginx
     installTrojan
     configTrojan
 
@@ -697,7 +722,8 @@ reconfig() {
 
     getData
     setFirewall
-    installNginx
+    getCert
+    configNginx
     configTrojan
     restart
     showInfo
@@ -723,7 +749,8 @@ start() {
         echo -e "${RED}trojan未安装，请先安装！${PLAIN}"
         return
     fi
-    systemctl restart nginx
+    nginx -s stop
+    $START_NGINX
     systemctl restart trojan
     sleep 2
     port=`grep local_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
@@ -736,7 +763,7 @@ start() {
 }
 
 stop() {
-    systemctl stop nginx
+    nginx -s stop
     systemctl stop trojan
     colorEcho $BLUE " trojan停止成功"
 }
@@ -780,16 +807,18 @@ function uninstall() {
         rm -rf /usr/local/etc/trojan
         rm -rf /etc/systemd/system/trojan.service
 
-        $CMD_REMOVE nginx
-        if [[ "$PMT" = "apt" ]]; then
-            $CMD_REMOVE nginx-common
+        if [[ "$BT" = "false" ]]; then
+            $CMD_REMOVE nginx
+            if [[ "$PMT" = "apt" ]]; then
+                $CMD_REMOVE nginx-common
+            fi
+            if [[ -d /usr/share/nginx/html.bak ]]; then
+                rm -rf /usr/share/nginx/html
+                mv /usr/share/nginx/html.bak /usr/share/nginx/html
+            fi
         fi
-        if [[ -d /usr/share/nginx/html.bak ]]; then
-            rm -rf /usr/share/nginx/html
-            mv /usr/share/nginx/html.bak /usr/share/nginx/html
-        fi
-        rm -rf /etc/nginx/conf.d/${domain}.conf
-        echo -e " ${RED}卸载成功${PLAIN}"
+        rm -rf $NGINX_CONF_PATH${domain}.conf
+        echo -e " ${RED}trojan卸载成功${PLAIN}"
     fi
 }
 

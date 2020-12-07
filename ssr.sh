@@ -298,7 +298,7 @@ preinstall() {
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release
     fi
-    $CMD_INSTALL telnet curl wget vim net-tools libsodium* openssl unzip tar qrencode
+    $CMD_INSTALL curl wget vim net-tools libsodium* openssl unzip tar qrencode
     res=`which wget`
     [[ "$?" != "0" ]] && $CMD_INSTALL wget
     res=`which netstat`

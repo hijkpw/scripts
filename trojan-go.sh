@@ -18,6 +18,16 @@ if [[ "$?" != "0" ]]; then
     V6_PROXY="https://gh.hijk.art/"
 fi
 
+BT="false"
+NGINX_CONF_PATH="/etc/nginx/conf.d/"
+START_NGINX="systemctl start nginx"
+res=`which bt`
+if [[ "$res" != "" ]]; then
+    BT="true"
+    NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
+    START_NGINX="nginx -c /www/server/nginx/conf/nginx.conf"
+fi
+
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
 # 搭建好后无法打开伪装域名，可能是反代小说网站挂了，请在网站留言，或者Github发issue，以便替换新的网站
 SITES=(
@@ -333,23 +343,34 @@ getData() {
 
 installNginx() {
     colorEcho $BLUE " 安装nginx..."
-    if [[ "$PMT" = "yum" ]]; then
-        $CMD_INSTALL epel-release 
-    fi
-    $CMD_INSTALL nginx
-    systemctl enable nginx
-    systemctl stop nginx
-    res=`netstat -ntlp| grep -E ':80|:443'`
-    if [[ "${res}" != "" ]]; then
-        echo -e "${RED} 其他进程占用了80或443端口，请先关闭再运行一键脚本${PLAIN}"
-        echo " 端口占用信息如下："
-        echo ${res}
-        exit 1
+    if [[ "$BT" = "false" ]]; then
+        if [[ "$PMT" = "yum" ]]; then
+            $CMD_INSTALL epel-release 
+        fi
+        $CMD_INSTALL nginx
+        systemctl enable nginx
+    else
+        res=`which nginx`
+        if [[ "$?" != "0" ]]; then
+            colorEcho $RED " 您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
+            exit 1
+        fi
     fi
 }
 
 getCert() {
     if [[ -z ${CERT_FILE+x} ]]; then
+        nginx -s stop
+        systemctl stop trojan-go
+        sleep 2
+        res=`ss -ntlp| grep -E ':80|:443'`
+        if [[ "${res}" != "" ]]; then
+            echo -e "${RED} 其他进程占用了80或443端口，请先关闭再运行一键脚本${PLAIN}"
+            echo " 端口占用信息如下："
+            echo ${res}
+            exit 1
+        fi
+
         res=`which pip3`
         if [[ "$?" != "0" ]]; then
             $CMD_INSTALL python3 python3-setuptools python3-pip
@@ -386,27 +407,36 @@ getCert() {
             exit 1
         fi
 
-        CERT_FILE="/etc/letsencrypt/archive/${DOMAIN}/fullchain1.pem"
-        KEY_FILE="/etc/letsencrypt/archive/${DOMAIN}/privkey1.pem"
+        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
+        KEY_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+
+        sed -i '/certbot/d' /etc/crontab
+        certbotpath=`which certbot`
+        echo "0 3 1 */2 0 root nginx -s stop; ${certbotpath} renew; ${START_NGINX}" >> /etc/crontab
+    else
+        mkdir -p /etc/trojan-go
+        cp ~/trojan-go.pem /etc/trojan-go/${DOMAIN}.pem
+        cp ~/trojan-go.key /etc/trojan-go/${DOMAIN}.key
     fi
 }
 
 configNginx() {
-    if [[ ! -f /etc/nginx/nginx.conf.bak ]]; then
-        mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-    fi
-    res=`id nginx`
-    if [[ "$?" != "0" ]]; then
-        user="www-data"
-    else
-        user="nginx"
-    fi
     mkdir -p /usr/share/nginx/html
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
     fi
-    cat > /etc/nginx/nginx.conf<<-EOF
+    if [[ "$BT" = "false" ]]; then
+        if [[ ! -f /etc/nginx/nginx.conf.bak ]]; then
+            mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+        fi
+        res=`id nginx`
+        if [[ "$?" != "0" ]]; then
+            user="www-data"
+        else
+            user="nginx"
+        fi
+        cat > /etc/nginx/nginx.conf<<-EOF
 user $user;
 worker_processes auto;
 error_log /var/log/nginx/error.log;
@@ -443,10 +473,11 @@ http {
     include /etc/nginx/conf.d/*.conf;
 }
 EOF
+    fi
 
-    mkdir -p /etc/nginx/conf.d
+    mkdir -p $NGINX_CONF_PATH
     if [[ "$PROXY_URL" = "" ]]; then
-        cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
+        cat > $NGINX_CONF_PATH${DOMAIN}.conf<<-EOF
 server {
     listen 80;
     listen [::]:80;
@@ -455,7 +486,7 @@ server {
 }
 EOF
     else
-        cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
+        cat > $NGINX_CONF_PATH${DOMAIN}.conf<<-EOF
 server {
     listen 80;
     listen [::]:80;
@@ -474,10 +505,6 @@ server {
 }
 EOF
     fi
-
-    certbotpath=`which certbot`
-    echo "0 3 1 */2 0 root systemctl stop nginx ; ${certbotpath} renew; systemctl restart nginx" >> /etc/crontab
-    systemctl enable nginx
 }
 
 downloadFile() {
@@ -507,10 +534,6 @@ installTrojan() {
 configTrojan() {
     rm -rf /etc/trojan-go
     mkdir -p /etc/trojan-go
-    if [[ -f ~/trojan-go.pem ]]; then
-        cp ~/trojan-go.pem /etc/trojan-go/${DOMAIN}.pem
-        cp ~/trojan-go.key /etc/trojan-go/${DOMAIN}.key
-    fi
     cat > $CONFIG_FILE <<-EOF
 {
     "run_type": "server",
@@ -673,7 +696,11 @@ install() {
 
     $PMT clean all
     echo $CMD_UPGRADE | bash
-    $CMD_INSTALL wget net-tools unzip vim
+    $CMD_INSTALL wget vim unzip tar gcc openssl
+    $CMD_INSTALL net-tools
+    if [[ "$PMT" = "apt" ]]; then
+        $CMD_INSTALL libssl-dev g++
+    fi
     res=`which unzip`
     if [[ $? -ne 0 ]]; then
         echo -e " ${RED}unzip安装失败，请检查网络${PLAIN}"
@@ -739,17 +766,19 @@ uninstall() {
         systemctl disable trojan-go
         rm -rf /etc/systemd/system/trojan-go.service
 
-        systemctl disable nginx
-        $CMD_REMOVE nginx
-        if [[ "$PMT" = "apt" ]]; then
-            $CMD_REMOVE nginx-common
-        fi
-        rm -rf /etc/nginx/nginx.conf
-        if [[ -f /etc/nginx/nginx.conf.bak ]]; then
-            mv /etc/nginx/nginx.conf.bak /etc/nginx/nginx.conf
+        if [[ "$BT" = "false" ]]; then
+            systemctl disable nginx
+            $CMD_REMOVE nginx
+            if [[ "$PMT" = "apt" ]]; then
+                $CMD_REMOVE nginx-common
+            fi
+            rm -rf /etc/nginx/nginx.conf
+            if [[ -f /etc/nginx/nginx.conf.bak ]]; then
+                mv /etc/nginx/nginx.conf.bak /etc/nginx/nginx.conf
+            fi
         fi
 
-        rm -rf /etc/nginx/conf.d/${domain}.conf
+        rm -rf $NGINX_CONF_PATH${domain}.conf
         echo -e " ${GREEN}trojan-go卸载成功${PLAIN}"
     fi
 }
@@ -761,7 +790,8 @@ start() {
         return
     fi
 
-    systemctl restart nginx
+    nginx -s stop
+    $START_NGINX
     systemctl restart trojan-go
     sleep 2
     port=`grep local_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
@@ -774,7 +804,7 @@ start() {
 }
 
 stop() {
-    systemctl stop nginx
+    nginx -s stop
     systemctl stop trojan-go
     colorEcho $BLUE " trojan-go停止成功"
 }
