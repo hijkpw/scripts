@@ -202,7 +202,7 @@ function getData()
             exit 1
         esac
     fi
-    
+    REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
     echo ""
     colorEcho $BLUE " 伪装域名：$PROXY_URL"
 
