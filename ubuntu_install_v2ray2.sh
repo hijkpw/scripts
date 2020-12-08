@@ -90,8 +90,8 @@ getData() {
     echo " "
     read -p " 确认满足按y，按其他退出脚本：" answer
     [ "${answer}" != "y" ] && exit 0
-    echo ""
 
+    echo ""
     while true
     do
         read -p " 请输入伪装域名：" DOMAIN
@@ -103,8 +103,8 @@ getData() {
     done
     DOMAIN=${DOMAIN,,}
     colorEcho ${BLUE}  " 伪装域名(host)：$DOMAIN"
-    echo ""
 
+    echo ""
     if [[ -f ~/v2ray.pem && -f ~/v2ray.key ]]; then
         colorEcho ${BLUE}  " 检测到自有证书，将使用其部署"
         echo 
@@ -120,22 +120,26 @@ getData() {
         fi
     fi
 
+    echo ""
     while true
     do
         read -p " 请输入伪装路径，以/开头：" WSPATH
-        if [ -z "${WSPATH}" ]; then
-            colorEcho $RED " 请输入伪装路径，以/开头！"
-        elif [ "${WSPATH:0:1}" != "/" ]; then
-            colorEcho $RED " 伪装路径必须以/开头！"
-        elif [ "${WSPATH}" = "/" ]; then
-            colorEcho $RED  " 不能使用根路径！"
+        if [[ -z "${WSPATH}" ]]; then
+            len=`shuf -i5-12 -n1`
+            ws=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $len | head -n 1`
+            WSPATH="/$ws"
+            break
+        elif [[ "${WSPATH:0:1}" != "/" ]]; then
+            colorEcho ${RED}  " 伪装路径必须以/开头！"
+        elif [[ "${WSPATH}" = "/" ]]; then
+            colorEcho ${RED}   " 不能使用根路径！"
         else
             break
         fi
     done
     colorEcho ${BLUE}  " 伪装路径：$WSPATH"
+
     echo 
-    
     read -p " 请输入Nginx端口[100-65535的一个数字，默认443]：" PORT
     [ -z "${PORT}" ] && PORT=443
     if [ "${PORT:0:1}" = "0" ]; then
@@ -143,8 +147,8 @@ getData() {
         exit 1
     fi
     colorEcho ${BLUE}  " Nginx端口：$PORT"
-    echo ""
 
+    echo ""
     colorEcho $BLUE " 请选择伪装站类型:" 
     echo "   1) 静态网站(位于/usr/share/nginx/html)"
     echo "   2) 小说站(随机选择)"
@@ -198,7 +202,7 @@ getData() {
     fi
     REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
     echo ""
-    colorEcho $BLUE " 伪装域名：$PROXY_URL"
+    colorEcho $BLUE " 伪装网站：$PROXY_URL"
 
     echo ""
     colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
@@ -214,11 +218,12 @@ getData() {
     fi
     echo ""
     colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
-    echo ""
 
+    echo ""
     read -p " 是否安装BBR（安装请按y，不安装请输n，不输则默认安装）:" NEED_BBR
     [ -z "$NEED_BBR" ] && NEED_BBR=y
     [ "$NEED_BBR" = "Y" ] && NEED_BBR=y
+    colorEcho $BLUE " 安装BBR：$NEED_BBR"
 }
 
 preinstall() {
