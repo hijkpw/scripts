@@ -23,6 +23,7 @@ BASE=`pwd`
 OS=`hostnamectl | grep -i system | cut -d: -f2`
 
 CONFIG_FILE="/etc/shadowsocksR.json"
+SERVICE_FILE="/etc/systemd/system/shadowsocksR.service"
 NAME="shadowsocksR"
 
 colorEcho() {
@@ -332,7 +333,7 @@ installSSR() {
         cd ${BASE} && rm -rf shadowsocksr-3.2.2 ${FILENAME}.tar.gz
     fi
 
-cat > /usr/lib/systemd/system/shadowsocksR.service <<-EOF
+cat > $SERVICE_FILE <<-EOF
 [Unit]
 Description=shadowsocksR
 Documentation=https://hijk.art/
@@ -541,7 +542,7 @@ uninstall() {
         rm -f $CONFIG_FILE
         rm -f /var/log/shadowsocksr.log
         rm -rf /usr/local/shadowsocks
-        systemctl disable shadowsocksR && systemctl stop shadowsocksR && rm -rf /usr/lib/systemd/system/shadowsocksR.service
+        systemctl disable shadowsocksR && systemctl stop shadowsocksR && rm -rf $SERVICE_FILE
     fi
     echo -e " ${RED}卸载成功${PLAIN}"
 }
