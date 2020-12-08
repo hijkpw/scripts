@@ -460,22 +460,12 @@ getCert() {
             exit 1
         fi
 
-        nginx -s stop
-        systemctl stop xray
-        res=`netstat -ntlp| grep -E ':80|:443'`
-        if [[ "${res}" != "" ]]; then
-            colorEcho ${RED}  " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
-            echo " 端口占用信息如下："
-            echo ${res}
-            exit 1
-        fi
-
         $CMD_INSTALL socat openssl
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
         ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
         CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
-        KEY_FILE="/etc/v2ray/${DOMAIN}.pem"
+        KEY_FILE="/etc/v2ray/${DOMAIN}.key"
         ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN \
             --key-file       $KEY_FILE  \
             --fullchain-file $CERT_FILE \
