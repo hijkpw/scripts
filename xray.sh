@@ -244,7 +244,7 @@ archAffix(){
 
 getData() {
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
-        echo " "
+        echo ""
         echo " Xray一键脚本，运行之前请确认如下条件已经具备："
         colorEcho ${YELLOW} "  1. 一个伪装域名"
         colorEcho ${YELLOW} "  2. 伪装域名DNS解析指向当前服务器ip（${IP}）"
@@ -267,8 +267,8 @@ getData() {
         done
         DOMAIN=${DOMAIN,,}
         colorEcho ${BLUE}  " 伪装域名(host)：$DOMAIN"
-        echo ""
 
+        echo ""
         if [[ -f ~/xray.pem && -f ~/xray.key ]]; then
             colorEcho ${BLUE}  " 检测到自有证书，将使用其部署"
             echo 
@@ -284,7 +284,8 @@ getData() {
             fi
         fi
     fi
-    
+
+    echo ""
     if [[ "$(needNginx)" = "no" ]]; then
         if [[ "$TLS" = "true" ]]; then
             read -p " 请输入xray监听端口[强烈建议443，默认443]：" PORT
@@ -298,8 +299,6 @@ getData() {
             fi
         fi
         colorEcho ${BLUE}  " xray端口：$PORT"
-        echo ""
-        echo
     else
         read -p "请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
         [[ -z "${PORT}" ]] && PORT=443
@@ -308,18 +307,18 @@ getData() {
             exit 1
         fi
         colorEcho ${BLUE}  " Nginx端口：$PORT"
-        echo ""
         XPORT=`shuf -i10000-65000 -n1`
     fi
 
     if [[ "$TROJAN" = "true" ]]; then
+        echo ""
         read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
         [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
         colorEcho $BLUE " trojan密码：$PASSWORD"
-        echo ""
     fi
 
     if [[ "$XTLS" = "true" ]]; then
+        echo ""
         colorEcho $BLUE " 请选择流控模式:" 
         echo -e "   1) xtls-rprx-direct [$RED推荐$PLAIN]"
         echo "   2) xtls-rprx-origin"
@@ -338,10 +337,10 @@ getData() {
         esac
         echo ""
         colorEcho $BLUE " 流控模式：$FLOW"
-        echo ""
     fi
 
     if [[ "${WS}" = "true" ]]; then
+        echo ""
         while true
         do
             read -p " 请输入伪装路径，以/开头：" WSPATH
@@ -356,11 +355,10 @@ getData() {
             fi
         done
         colorEcho ${BLUE}  " ws路径：$WSPATH"
-        echo ""
-        echo 
     fi
-    
+
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
+        echo ""
         colorEcho $BLUE " 请选择伪装站类型:"
         echo "   1) 静态网站(位于/usr/share/nginx/html)"
         echo "   2) 小说站(随机选择)"
@@ -415,8 +413,8 @@ getData() {
         REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
         echo ""
         colorEcho $BLUE " 伪装域名：$PROXY_URL"
-        echo ""
 
+        echo ""
         colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
         echo "    y)允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
         echo "    n)不允许，爬虫不会访问网站，访问ip比较单一，但能节省vps流量"
@@ -430,15 +428,17 @@ getData() {
         fi
         echo ""
         colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
-        echo ""
     fi
 
+    echo ""
     read -p " 是否安装BBR(默认安装)?[y/n]:" NEED_BBR
     [[ -z "$NEED_BBR" ]] && NEED_BBR=y
     [[ "$NEED_BBR" = "Y" ]] && NEED_BBR=y
+    colorEcho $BLUE " 安装BBR：$NEED_BBR"
 }
 
 installNginx() {
+    echo ""
     colorEcho $BLUE " 安装nginx..."
     if [[ "$BT" = "false" ]]; then
         if [[ "$PMT" = "yum" ]]; then
@@ -456,6 +456,7 @@ installNginx() {
 }
 
 getCert() {
+    mkdir -p /usr/local/etc/xray
     if [[ -z ${CERT_FILE+x} ]]; then
         nginx -s stop
         systemctl stop xray
@@ -467,50 +468,17 @@ getCert() {
             exit 1
         fi
 
-        res=`which pip3`
-        if [[ "$?" != "0" ]]; then
-            $CMD_INSTALL python3 python3-setuptools python3-pip
-        fi
-        res=`which pip3`
-        if [[ "$?" != "0" ]]; then
-            colorEcho ${RED}  " $OS pip3安装失败，请到 https://hijk.art 反馈"
-            exit 1
-        fi
-        pip3 install --upgrade pip
-        pip3 install wheel
-        res=`pip3 list --format=columns | grep cryptography | awk '{print $2}'`
-        if [[ "$res" < "2.8" ]]; then
-            pip3 uninstall -y cryptography
-            pip3 install cryptography
-        fi
-        pip3 install certbot
-        res=`which certbot`
-        if [[ "$?" != "0" ]]; then
-            export PATH=$PATH:/usr/local/bin
-        fi
-        res=`which certbot`
-        if [[ "$?" != "0" ]]; then
-            pip3 install certbot
-            res=`which certbot`
-            if [[ "$?" != "0" ]]; then
-                colorEcho $RED " certbot安装失败，请到 https://hijk.art 反馈"
-                exit 1
-            fi
-        fi
-        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
-        if [[ "$?" != "0" ]]; then
-            colorEcho ${RED}  " $OS 获取证书失败，请到 https://hijk.art 反馈"
-            exit 1
-        fi
-
-        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
-        KEY_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
-
-        sed -i '/certbot/d' /etc/crontab
-        certbotpath=`which certbot`
-        echo "0 3 1 */2 0 root nginx -s stop; ${certbotpath} renew ; $START_NGINX" >> /etc/crontab
+        $CMD_INSTALL socat openssl
+        curl -sL https://get.acme.sh | sh
+        source ~/.bashrc
+        ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
+        CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
+        KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
+        ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN \
+            --key-file       $KEY_FILE  \
+            --fullchain-file $CERT_FILE \
+            --reloadcmd     "service nginx force-reload"
     else
-        mkdir -p /usr/local/etc/xray
         cp ~/xray.pem /usr/local/etc/xray/${DOMAIN}.pem
         cp ~/xray.key /usr/local/etc/xray/${DOMAIN}.key
     fi
@@ -1320,6 +1288,7 @@ uninstall() {
         if [[ "$domain" != "" ]]; then
             rm -rf ${NGINX_CONF_PATH}${domain}.conf
         fi
+        ~/.acme.sh/acme.sh --uninstall
         colorEcho $GREEN " Xray卸载成功"
     fi
 }

@@ -98,8 +98,8 @@ getData() {
     [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
     colorEcho $BLUE " 密码： $PASSWORD"
+
     echo ""
-    
     while true
     do
         read -p " 请设置SS的端口号[1025-65535]:" PORT
@@ -195,13 +195,13 @@ getData() {
     fi
     echo ""
     colorEcho $BLUE "加密方式： $METHOD"
-    echo ""
 }
 
 preinstall() {
     $PMT clean all
     #echo $CMD_UPGRADE | bash
-    
+
+    echo ""
     colorEcho $BULE " 安装必要软件"
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release
@@ -283,6 +283,7 @@ EOF
 }
 
 installSS() {
+    echo ""
     colorEcho $BLUE " 安装最新版SS..."
 
     tag_url="${V6_PROXY}https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest"
@@ -349,6 +350,7 @@ installBBR() {
         return
     fi
 
+    echo ""
     colorEcho $BLUE " 安装BBR模块..."
     if [[ "$PMT" = "yum" ]]; then
         if [[ "${V6_PROXY}" = "" ]]; then

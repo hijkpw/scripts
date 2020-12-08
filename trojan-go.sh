@@ -166,9 +166,9 @@ archAffix() {
 }
 
 getData() {
+    echo ""
     can_change=$1
     if [[ "$can_change" != "yes" ]]; then
-        echo " "
         echo " trojan-go一键脚本，运行之前请确认如下条件已经具备："
         echo -e "  ${RED}1. 一个伪装域名${PLAIN}"
         echo -e "  ${RED}2. 伪装域名DNS解析指向当前服务器ip（${IP}）${PLAIN}"
@@ -190,12 +190,11 @@ getData() {
             fi
         done
         colorEcho $BLUE " 伪装域名(host)：$DOMAIN"
+
         echo ""
-        
         DOMAIN=${DOMAIN,,}
         if [[ -f ~/trojan-go.pem && -f ~/trojan-go.key ]]; then
             echo -e "${GREEN} 检测到自有证书，将使用其部署${PLAIN}"
-            echo 
             CERT_FILE="/etc/trojan-go/${DOMAIN}.pem"
             KEY_FILE="/etc/trojan-go/${DOMAIN}.key"
         else
@@ -215,9 +214,9 @@ getData() {
         if [[ "${answer,,}" = "y" ]]; then
             WS="true"
         fi
-        echo ""
     fi
 
+    echo ""
     read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
     [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     colorEcho $BLUE " trojan密码：$PASSWORD"
@@ -233,7 +232,6 @@ getData() {
         echo ""
         colorEcho $BLUE " trojan密码：$pass"
         PASSWORD="${PASSWORD}\",\"$pass"
-        echo 
     done
 
     echo ""
@@ -244,9 +242,9 @@ getData() {
         exit 1
     fi
     colorEcho $BLUE " trojan端口：$PORT"
-    echo 
 
     if [[ ${WS} = "true" ]]; then
+        echo ""
         while true
         do
             read -p " 请输入伪装路径，以/开头：" WSPATH
@@ -262,9 +260,9 @@ getData() {
         done
         echo ""
         colorEcho $BLUE " ws路径：$WSPATH"
-        echo 
     fi
 
+    echo ""
     colorEcho $BLUE " 请选择伪装站类型:"
     echo "   1) 静态网站(位于/usr/share/nginx/html)"
     echo "   2) 小说站(随机选择)"
@@ -334,14 +332,16 @@ getData() {
     fi
     echo ""
     colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
-    echo ""
 
+    echo ""
     read -p " 是否安装BBR(默认安装)?[y/n]:" NEED_BBR
     [[ -z "$NEED_BBR" ]] && NEED_BBR=y
     [[ "$NEED_BBR" = "Y" ]] && NEED_BBR=y
+    colorEcho $BLUE " 安装BBR：$NEED_BBR"
 }
 
 installNginx() {
+    echo ""
     colorEcho $BLUE " 安装nginx..."
     if [[ "$BT" = "false" ]]; then
         if [[ "$PMT" = "yum" ]]; then
@@ -359,6 +359,7 @@ installNginx() {
 }
 
 getCert() {
+    mkdir -p /etc/trojan-go
     if [[ -z ${CERT_FILE+x} ]]; then
         nginx -s stop
         systemctl stop trojan-go
@@ -371,50 +372,17 @@ getCert() {
             exit 1
         fi
 
-        res=`which pip3`
-        if [[ "$?" != "0" ]]; then
-            $CMD_INSTALL python3 python3-setuptools python3-pip
-        fi
-        res=`which pip3`
-        if [[ "$?" != "0" ]]; then
-            echo -e " $OS pip3安装失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
-            exit 1
-        fi
-        pip3 install --upgrade pip
-        pip3 install wheel
-        res=`pip3 list --format=columns | grep cryptography | awk '{print $2}'`
-        if [[ "$res" < "2.8" ]]; then
-            pip3 uninstall -y cryptography
-            pip3 install cryptography
-        fi
-        pip3 install certbot
-        res=`which certbot`
-        if [[ "$?" != "0" ]]; then
-            export PATH=$PATH:/usr/local/bin
-        fi
-        res=`which certbot`
-        if [[ "$?" != "0" ]]; then
-            pip3 install certbot
-            res=`which certbot`
-            if [[ "$?" != "0" ]]; then
-                colorEcho $RED " certbot安装失败，请到 https://hijk.art 反馈"
-                exit 1
-            fi
-        fi
-        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
-        if [[ "$?" != "0" ]]; then
-            echo -e " $OS 获取证书失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
-            exit 1
-        fi
-
-        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
-        KEY_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
-
-        sed -i '/certbot/d' /etc/crontab
-        certbotpath=`which certbot`
-        echo "0 3 1 */2 0 root nginx -s stop; ${certbotpath} renew; ${START_NGINX}" >> /etc/crontab
+        $CMD_INSTALL socat openssl
+        curl -sL https://get.acme.sh | sh
+        source ~/.bashrc
+        ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
+        CERT_FILE="/etc/trojan-go/${DOMAIN}.pem"
+        KEY_FILE="/etc/trojan-go/${DOMAIN}.key"
+        ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN \
+            --key-file       $KEY_FILE  \
+            --fullchain-file $CERT_FILE \
+            --reloadcmd     "service nginx force-reload"
     else
-        mkdir -p /etc/trojan-go
         cp ~/trojan-go.pem /etc/trojan-go/${DOMAIN}.pem
         cp ~/trojan-go.key /etc/trojan-go/${DOMAIN}.key
     fi
@@ -779,6 +747,7 @@ uninstall() {
         fi
 
         rm -rf $NGINX_CONF_PATH${domain}.conf
+        ~/.acme.sh/acme.sh --uninstall
         echo -e " ${GREEN}trojan-go卸载成功${PLAIN}"
     fi
 }

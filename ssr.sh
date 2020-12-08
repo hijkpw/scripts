@@ -68,8 +68,8 @@ getData() {
     [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     echo ""
     colorEcho $BLUE " 密码： $PASSWORD"
+
     echo ""
-    
     while true
     do
         read -p " 请设置SSR的端口号[1-65535]:" PORT
@@ -83,7 +83,6 @@ getData() {
             if [ $PORT -ge 1 ] && [ $PORT -le 65535 ]; then
                 echo ""
                 colorEcho $BLUE " 端口号： $PORT"
-                echo ""
                 break
             else
                 colorEcho $RED " 输入错误，端口号为1-65535的数字"
@@ -93,7 +92,7 @@ getData() {
         fi
     done
 
-
+    echo ""
     colorEcho $BLUE " 请选择SSR的加密方式:" 
     echo "  1)aes-256-cfb"
     echo "  2)aes-192-cfb"
@@ -159,8 +158,8 @@ getData() {
     fi
     echo ""
     colorEcho $BLUE " 加密方式： $METHOD"
-    echo ""
 
+    echo ""
     colorEcho $BLUE " 请选择SSR协议："
     echo "   1)origin"
     echo "   2)verify_deflate"
@@ -218,9 +217,8 @@ getData() {
     fi
     echo ""
     colorEcho $BLUE " SSR协议： $PROTOCOL"
+
     echo ""
-
-
     colorEcho $BLUE " 请选择SSR混淆模式："
     echo "   1)plain"
     echo "   2)http_simple"
@@ -254,7 +252,6 @@ getData() {
     fi
     echo ""
     colorEcho $BLUE " 混淆模式： $OBFS"
-    echo ""
 }
 
 status() {
@@ -292,9 +289,9 @@ statusText() {
 }
 
 preinstall() {
-    colorEcho $BLUE " 更新系统..."
     $PMT clean all
     #echo $CMD_UPGRADE | bash
+    echo ""
     colorEcho $BLUE " 安装必要软件"
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release

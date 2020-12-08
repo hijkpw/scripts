@@ -127,8 +127,8 @@ function getData()
     if [ "${answer}" != "y" ] && [ "${answer}" != "Y" ]; then
         exit 0
     fi
-    echo ""
 
+    echo ""
     while true
     do
         read -p " 请输入伪装域名：" DOMAIN
@@ -140,8 +140,8 @@ function getData()
     done
     DOMAIN=${DOMAIN,,}
     colorEcho $BLUE " 伪装域名(host)： $DOMAIN"
-    echo ""
 
+    echo ""
     if [[ -f ~/trojan.pem && -f ~/trojan.key ]]; then
         echo -e "${GREEN} 检测到自有证书，将使用其部署${PLAIN}"
         echo 
@@ -157,11 +157,12 @@ function getData()
         fi
     fi
 
+    echo ""
     read -p " 请设置trojan密码（不输入则随机生成）:" PASSWORD
     [ -z "$PASSWORD" ] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
     colorEcho $BLUE " 密码： " $PASSWORD
+
     echo ""
-    
     read -p " 请输入trojan端口[100-65535的一个数字，默认443]：" PORT
     [ -z "${PORT}" ] && PORT=443
     if [ "${PORT:0:1}" = "0" ]; then
@@ -169,8 +170,8 @@ function getData()
         exit 1
     fi
     colorEcho $BLUE " trojan端口： " $PORT
-    echo ""
 
+    echo ""
     colorEcho $BLUE " 请选择伪装站类型:"
     echo "   1) 静态网站(位于/usr/share/nginx/html)"
     echo "   2) 小说站(随机选择)"
@@ -230,11 +231,12 @@ function getData()
     fi
     echo ""
     colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
-    echo ""
 
+    echo ""
     read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" NEED_BBR
     [ -z "$NEED_BBR" ] && NEED_BBR=y
     [ "$NEED_BBR" = "Y" ] && NEED_BBR=y
+    colorEcho $BLUE " 安装BBR：$NEED_BBR"
 }
 
 function preinstall()
@@ -388,8 +390,8 @@ configTrojan() {
 EOF
 }
 
-getCert()
-{
+getCert() {
+    mkdir -p /usr/local/etc/trojan
     if [[ -z ${CERT_FILE+x} ]]; then
         systemctl stop nginx
         res=`netstat -ntlp| grep -E ':80|:443'`
@@ -399,50 +401,18 @@ getCert()
             echo ${res}
             exit 1
         fi
-        res=`which pip3`
-        if [[ "$?" != "0" ]]; then
-            $CMD_INSTALL python3 python3-setuptools python3-pip
-        fi
-        res=`which pip3`
-        if [[ "$?" != "0" ]]; then
-            echo -e " $OS pip3安装失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
-            exit 1
-        fi
-        pip3 install --upgrade pip
-        pip3 install wheel
-        res=`pip3 list --format=columns | grep cryptography | awk '{print $2}'`
-        if [[ "$res" < "2.8" ]]; then
-            pip3 uninstall -y cryptography
-            pip3 install cryptography
-        fi
-        pip3 install certbot
-        res=`which certbot`
-        if [[ "$?" != "0" ]]; then
-            export PATH=$PATH:/usr/local/bin
-        fi
-        res=`which certbot`
-        if [[ "$?" != "0" ]]; then
-            pip3 install certbot
-            res=`which certbot`
-            if [[ "$?" != "0" ]]; then
-                colorEcho $RED " certbot安装失败，请到 https://hijk.art 反馈"
-                exit 1
-            fi
-        fi
-        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
-        if [[ "$?" != "0" ]]; then
-            echo -e " $OS 获取证书失败，请到 ${RED}https://hijk.art${PLAIN} 反馈"
-            exit 1
-        fi
 
-        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
-        KEY_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
-
-        sed -i '/certbot/d' /etc/crontab
-        certbotpath=`which certbot`
-        echo "0 3 1 */2 0 root nginx -s stop; ${certbotpath} renew ; $START_NGINX" >> /etc/crontab
+        $CMD_INSTALL socat openssl
+        curl -sL https://get.acme.sh | sh
+        source ~/.bashrc
+        ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
+        CERT_FILE="/usr/local/etc/trojan/${DOMAIN}.pem"
+        KEY_FILE="/usr/local/etc/trojan/${DOMAIN}.key"
+        ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN \
+            --key-file       $KEY_FILE  \
+            --fullchain-file $CERT_FILE \
+            --reloadcmd     "service nginx force-reload"
     else
-        mkdir -p /usr/local/etc/trojan
         cp ~/trojan.pem /usr/local/etc/trojan/${DOMAIN}.pem
         cp ~/trojan.key /usr/local/etc/trojan/${DOMAIN}.key
     fi
@@ -818,6 +788,7 @@ function uninstall() {
             fi
         fi
         rm -rf $NGINX_CONF_PATH${domain}.conf
+        ~/.acme.sh/acme.sh --uninstall
         echo -e " ${RED}trojan卸载成功${PLAIN}"
     fi
 }

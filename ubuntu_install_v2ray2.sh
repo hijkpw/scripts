@@ -272,6 +272,7 @@ installV2ray() {
 }
 
 getCert() {
+    mkdir -p /etc/v2ray
     if [[ -z ${CERT_FILE+x} ]]; then
         systemctl stop nginx
         systemctl stop v2ray
@@ -283,46 +284,17 @@ getCert() {
             exit 1
         fi
 
-        res=`which pip3`
-        if [[ "$?" != "0" ]]; then
-            apt install -y python3 python3-setuptools python3-pip
-        fi
-        res=`which pip3`
-        if [[ "$?" != "0" ]]; then
-            colorEcho ${RED}  " $OS pip3安装失败，请到 https://hijk.art 反馈"
-            exit 1
-        fi
-        pip3 install --upgrade pip
-        pip3 install wheel
-        res=`pip3 list --format=columns | grep cryptography| awk '{print $2}'`
-        if [[ "$res" < "2.8" ]]; then
-            pip3 uninstall -y cryptography
-            pip3 install cryptography
-        fi
-        pip3 install certbot
-        res=`which certbot`
-        if [[ "$?" != "0" ]]; then
-            export PATH=$PATH:/usr/local/bin
-        fi
-        res=`which certbot`
-        if [[ "$?" != "0" ]]; then
-            pip3 install certbot
-            res=`which certbot`
-            if [[ "$?" != "0" ]]; then
-                colorEcho $RED " certbot安装失败，请到 https://hijk.art 反馈"
-                exit 1
-            fi
-        fi
-        certbot certonly --standalone --agree-tos --register-unsafely-without-email -d ${DOMAIN}
-        if [[ "$?" != "0" ]]; then
-            colorEcho ${RED}  " $OS 获取证书失败，请到 https://hijk.art 反馈"
-            exit 1
-        fi
-
-        CERT_FILE="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
-        KEY_FILE="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"
+        apt install -y socat openssl
+        curl -sL https://get.acme.sh | sh
+        source ~/.bashrc
+        ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
+        CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
+        KEY_FILE="/etc/v2ray/${DOMAIN}.key"
+        ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN \
+            --key-file       $KEY_FILE  \
+            --fullchain-file $CERT_FILE \
+            --reloadcmd     "service nginx force-reload"
     else
-        mkdir -p /etc/v2ray
         cp ~/v2ray.pem /etc/v2ray/${DOMAIN}.pem
         cp ~/v2ray.key /etc/v2ray/${DOMAIN}.key
     fi
@@ -583,6 +555,7 @@ install() {
 }
 
 uninstall() {
+    echo ""
     read -p " 确定卸载v2ray吗？(y/n)" answer
     [ -z ${answer} ] && answer="n"
 
@@ -594,7 +567,6 @@ uninstall() {
         rm -rf /usr/bin/v2ray/*
         rm -rf /var/log/v2ray/*
         rm -rf /etc/systemd/system/v2ray.service
-        rm -rf /etc/systemd/system/multi-user.target.wants/v2ray.service
 
         apt remove -y nginx
         apt remove -y nginx-common
@@ -604,6 +576,7 @@ uninstall() {
             mv /usr/share/nginx/html.bak /usr/share/nginx/html
         fi
         rm -rf /etc/nginx/conf.d/${domain}.conf
+        ~/.acme.sh/acme.sh --uninstall
         echo -e " ${RED}卸载成功${PLAIN}"
     fi
 }
