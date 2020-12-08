@@ -241,7 +241,7 @@ function preinstall()
 {
     $PMT clean all
     colorEcho $BLUE " 更新系统..."
-    echo $CMD_UPGRADE | bash
+    #echo $CMD_UPGRADE | bash
 
     colorEcho $BLUE " 安装必要软件"
     if [[ "$PMT" = "yum" ]]; then

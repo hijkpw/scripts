@@ -1214,7 +1214,7 @@ install() {
     getData
 
     $PMT clean all
-    echo $CMD_UPGRADE | bash
+    #echo $CMD_UPGRADE | bash
     $CMD_INSTALL wget vim unzip tar gcc openssl
     $CMD_INSTALL net-tools
     if [[ "$PMT" = "apt" ]]; then

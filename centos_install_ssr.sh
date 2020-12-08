@@ -262,7 +262,7 @@ getData() {
 preinstall() {
     colorEcho $BLUE " 更新系统..."
     yum clean all
-    yum update -y
+    #yum update -y
     colorEcho $BLUE " 安装必要软件"
     yum install -y epel-release telnet curl wget vim net-tools libsodium openssl unzip tar qrencode
     res=`which wget`

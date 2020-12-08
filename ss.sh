@@ -200,7 +200,7 @@ getData() {
 
 preinstall() {
     $PMT clean all
-    echo $CMD_UPGRADE | bash
+    #echo $CMD_UPGRADE | bash
     
     colorEcho $BULE " 安装必要软件"
     if [[ "$PMT" = "yum" ]]; then

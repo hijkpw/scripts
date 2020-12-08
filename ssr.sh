@@ -293,7 +293,7 @@ statusText() {
 preinstall() {
     colorEcho $BLUE " 更新系统..."
     $PMT clean all
-    echo $CMD_UPGRADE | bash
+    #echo $CMD_UPGRADE | bash
     colorEcho $BLUE " 安装必要软件"
     if [[ "$PMT" = "yum" ]]; then
         $CMD_INSTALL epel-release

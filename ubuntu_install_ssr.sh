@@ -260,7 +260,7 @@ preinstall() {
     colorEcho $BLUE " 更新系统"
     auto clean all
     apt update
-    apt upgrade -y
+    #apt upgrade -y
 
     colorEcho $BLUE " 安装必要软件"
     apt install -y telnet curl wget vim net-tools libsodium18 openssl unzip qrencode

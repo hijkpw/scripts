@@ -168,7 +168,7 @@ getData() {
 
 preinstall() {
     yum clean all
-    yum update -y
+    #yum update -y
     
     colorEcho $BULE " 安装必要软件"
     yum install -y epel-release telnet wget vim net-tools unzip tar qrencode
