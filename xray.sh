@@ -37,12 +37,10 @@ fi
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
-START_NGINX="systemctl start nginx"
 res=`which bt`
 if [[ "$res" != "" ]]; then
     BT="true"
     NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
-    START_NGINX="nginx -c /www/server/nginx/conf/nginx.conf"
 fi
 
 VLESS="false"
@@ -458,10 +456,29 @@ installNginx() {
     fi
 }
 
+startNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl start nginx
+    else
+        nginx -c /www/server/nginx/conf/nginx.conf
+    fi
+}
+
+stopNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl stop nginx
+    else
+        res=`ps aux | grep -i nginx`
+        if [[ "$res" != "" ]]; then
+            nginx -s stop
+        fi
+    fi
+}
+
 getCert() {
     mkdir -p /usr/local/etc/xray
     if [[ -z ${CERT_FILE+x} ]]; then
-        nginx -s stop
+        stopNginx
         systemctl stop xray
         res=`netstat -ntlp| grep -E ':80|:443'`
         if [[ "${res}" != "" ]]; then
@@ -1302,8 +1319,8 @@ start() {
         colorEcho $RED " Xray未安装，请先安装！"
         return
     fi
-    nginx -s stop
-    $START_NGINX
+    stopNginx
+    startNginx
     systemctl restart xray
     sleep 2
     
@@ -1317,7 +1334,7 @@ start() {
 }
 
 stop() {
-    nginx -s stop
+    stopNginx
     systemctl stop xray
     colorEcho $BLUE " Xray停止成功"
 }

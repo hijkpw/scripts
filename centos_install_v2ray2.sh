@@ -323,7 +323,8 @@ installNginx() {
         fi
         BT=true
         confpath="/www/server/panel/vhost/nginx/"
-        nginx -s stop
+        res=`ps aux | grep -i nginx`
+        [[ "$res" != "" ]] && nginx -s stop
     else
         systemctl stop nginx
     fi
@@ -437,13 +438,6 @@ server {
 }
 EOF
 
-    sed -i '/certbot/d' /etc/crontab
-    certbotpath=`which certbot`
-    if [[ "$BT" = "true" ]]; then
-        echo "0 3 1 */2 0 root nginx -s stop; ${certbotpath} renew ; nginx -c /www/server/nginx/conf/nginx.conf" >> /etc/crontab
-    else
-        echo "0 3 1 */2 0 root systemctl stop nginx ; ${certbotpath} renew ; systemctl restart nginx" >> /etc/crontab
-    fi
     if [[ "$BT" = "false" ]]; then
         systemctl enable nginx && systemctl restart nginx
     else

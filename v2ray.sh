@@ -38,12 +38,10 @@ fi
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
-START_NGINX="systemctl start nginx"
 res=`which bt`
 if [[ "$res" != "" ]]; then
     BT="true"
     NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
-    START_NGINX="nginx -c /www/server/nginx/conf/nginx.conf"
 fi
 
 VLESS="false"
@@ -449,11 +447,30 @@ installNginx() {
     fi
 }
 
+startNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl start nginx
+    else
+        nginx -c /www/server/nginx/conf/nginx.conf
+    fi
+}
+
+stopNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl stop nginx
+    else
+        res=`ps aux | grep -i nginx`
+        if [[ "$res" != "" ]]; then
+            nginx -s stop
+        fi
+    fi
+}
+
 getCert() {
     mkdir -p /etc/v2ray
     if [[ -z ${CERT_FILE+x} ]]; then
         systemctl stop v2ray
-        nginx -s stop
+        stopNginx
         sleep 2
         res=`netstat -ntlp| grep -E ':80|:443'`
         if [[ "${res}" != "" ]]; then
@@ -1300,8 +1317,8 @@ start() {
         colorEcho $RED " V2ray未安装，请先安装！"
         return
     fi
-    nginx -s stop
-    $START_NGINX
+    stopNginx
+    startNginx
     systemctl restart v2ray
     sleep 2
     port=`grep port $CONFIG_FILE| head -n 1| cut -d: -f2| tr -d \",' '`
@@ -1314,7 +1331,7 @@ start() {
 }
 
 stop() {
-    nginx -s stop
+    stopNginx
     systemctl stop v2ray
     colorEcho $BLUE " V2ray停止成功"
 }

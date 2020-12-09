@@ -19,12 +19,10 @@ fi
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
-START_NGINX="systemctl start nginx"
 res=`which bt`
 if [[ "$res" != "" ]]; then
     BT="true"
     NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
-    START_NGINX="nginx -c /www/server/nginx/conf/nginx.conf"
 fi
 
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
@@ -523,6 +521,25 @@ EOF
     fi
 }
 
+startNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl start nginx
+    else
+        nginx -c /www/server/nginx/conf/nginx.conf
+    fi
+}
+
+stopNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl stop nginx
+    else
+        res=`ps aux | grep -i nginx`
+        if [[ "$res" != "" ]]; then
+            nginx -s stop
+        fi
+    fi
+}
+
 function setFirewall()
 {
     res=`which firewall-cmd`
@@ -719,8 +736,8 @@ start() {
         echo -e "${RED}trojan未安装，请先安装！${PLAIN}"
         return
     fi
-    nginx -s stop
-    $START_NGINX
+    stopNginx
+    startNginx
     systemctl restart trojan
     sleep 2
     port=`grep local_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
@@ -733,7 +750,7 @@ start() {
 }
 
 stop() {
-    nginx -s stop
+    stopNginx
     systemctl stop trojan
     colorEcho $BLUE " trojan停止成功"
 }

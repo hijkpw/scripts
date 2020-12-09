@@ -20,12 +20,11 @@ fi
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
-START_NGINX="systemctl start nginx"
+
 res=`which bt`
 if [[ "$res" != "" ]]; then
     BT="true"
     NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
-    START_NGINX="nginx -c /www/server/nginx/conf/nginx.conf"
 fi
 
 # 以下网站是随机从Google上找到的无广告小说网站，不喜欢请改成其他网址，以http或https开头
@@ -361,10 +360,29 @@ installNginx() {
     fi
 }
 
+startNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl start nginx
+    else
+        nginx -c /www/server/nginx/conf/nginx.conf
+    fi
+}
+
+stopNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl stop nginx
+    else
+        res=`ps aux | grep -i nginx`
+        if [[ "$res" != "" ]]; then
+            nginx -s stop
+        fi
+    fi
+}
+
 getCert() {
     mkdir -p /etc/trojan-go
     if [[ -z ${CERT_FILE+x} ]]; then
-        nginx -s stop
+        stopNginx
         systemctl stop trojan-go
         sleep 2
         res=`ss -ntlp| grep -E ':80|:443'`
@@ -762,8 +780,8 @@ start() {
         return
     fi
 
-    nginx -s stop
-    $START_NGINX
+    stopNginx
+    startNginx
     systemctl restart trojan-go
     sleep 2
     port=`grep local_port $CONFIG_FILE|cut -d: -f2| tr -d \",' '`
@@ -776,7 +794,7 @@ start() {
 }
 
 stop() {
-    nginx -s stop
+    stopNginx
     systemctl stop trojan-go
     colorEcho $BLUE " trojan-go停止成功"
 }
