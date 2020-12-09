@@ -385,7 +385,7 @@ getCert() {
         stopNginx
         systemctl stop trojan-go
         sleep 2
-        res=`ss -ntlp| grep -E ':80|:443'`
+        res=`ss -ntlp| grep -E ':80 |:443 '`
         if [[ "${res}" != "" ]]; then
             echo -e "${RED} 其他进程占用了80或443端口，请先关闭再运行一键脚本${PLAIN}"
             echo " 端口占用信息如下："
