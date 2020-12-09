@@ -34,9 +34,9 @@ checkSystem() {
         exit 1
     fi
 
-    res=`which yum`
+    res=`which yum 2>/dev/null`
     if [[ "$?" != "0" ]]; then
-        res=`which apt`
+        res=`which apt 2>/dev/null`
         if [[ "$?" != "0" ]]; then
             colorEcho $RED " 不受支持的Linux系统"
             exit 1
@@ -51,7 +51,7 @@ checkSystem() {
         CMD_REMOVE="yum remove -y "
         CMD_UPGRADE="yum update -y"
     fi
-    res=`which systemctl`
+    res=`which systemctl 2>/dev/null`
     if [[ "$?" != "0" ]]; then
         colorEcho $RED " 系统版本过低，请升级到最新版本"
         exit 1
@@ -214,9 +214,9 @@ preinstall() {
         $CMD_INSTALL libssl-dev libudns-dev libev-dev libpcre3 libpcre3-dev libmbedtls-dev libc-ares2 libc-ares-dev g++
         $CMD_INSTALL libsodium*
     fi
-    res=`which wget`
+    res=`which wget 2>/dev/null`
     [[ "$?" != "0" ]] && $CMD_INSTALL wget
-    res=`which netstat`
+    res=`which netstat 2>/dev/null`
     [[ "$?" != "0" ]] && $CMD_INSTALL net-tools
 
     if [[ -s /etc/selinux/config ]] && grep 'SELINUX=enforcing' /etc/selinux/config; then
@@ -256,7 +256,7 @@ installNewVer() {
         cd ${BASE} && rm -rf shadowsocks-libev*
         exit 1
     fi
-    ssPath=`which ss-server`
+    ssPath=`which ss-server 2>/dev/null`
     [[ "$ssPath" != "" ]] || {
         cd ${BASE} && rm -rf shadowsocks-libev*
         colorEcho $RED " SS安装失败，请到 https://hijk.art 反馈"
@@ -293,7 +293,7 @@ installSS() {
 
     tag_url="${V6_PROXY}https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest"
     new_ver="$(normalizeVersion "$(curl -s "${tag_url}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
-    ssPath=`which ss-server`
+    ssPath=`which ss-server 2>/dev/null`
     if [[ "$?" != "0" ]]; then
         installNewVer $new_ver
     else
@@ -378,7 +378,7 @@ installBBR() {
 }
 
 setFirewall() {
-    res=`which firewall-cmd`
+    res=`which firewall-cmd 2>/dev/null`
     if [[ $? -eq 0 ]]; then
         systemctl status firewalld > /dev/null 2>&1
         if [[ $? -eq 0 ]];then
@@ -393,7 +393,7 @@ setFirewall() {
             fi
         fi
     else
-        res=`which iptables`
+        res=`which iptables 2>/dev/null`
         if [[ $? -eq 0 ]]; then
             nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
             if [[ "$nl" != "3" ]]; then
@@ -401,7 +401,7 @@ setFirewall() {
                 iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
             fi
         else
-            res=`which ufw`
+            res=`which ufw 2>/dev/null`
             if [[ $? -eq 0 ]]; then
                 res=`ufw status | grep -i inactive`
                 if [[ "$res" = "" ]]; then

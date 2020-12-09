@@ -38,9 +38,9 @@ checkSystem() {
         exit 1
     fi
 
-    res=`which yum`
+    res=`which yum 2>/dev/null`
     if [[ "$?" != "0" ]]; then
-        res=`which apt`
+        res=`which apt 2>/dev/null`
         if [[ "$?" != "0" ]]; then
             colorEcho $RED " 不受支持的Linux系统"
             exit 1
@@ -55,7 +55,7 @@ checkSystem() {
         CMD_REMOVE="yum remove -y "
         CMD_UPGRADE="yum update -y"
     fi
-    res=`which systemctl`
+    res=`which systemctl 2>/dev/null`
     if [[ "$?" != "0" ]]; then
         colorEcho $RED " 系统版本过低，请升级到最新版本"
         exit 1
@@ -255,7 +255,7 @@ getData() {
 }
 
 status() {
-    res=`which python`
+    res=`which python 2>/dev/null`
     if [[ "$?" != "0" ]]; then
         echo 0
         return
@@ -297,11 +297,11 @@ preinstall() {
         $CMD_INSTALL epel-release
     fi
     $CMD_INSTALL curl wget vim net-tools libsodium* openssl unzip tar qrencode
-    res=`which wget`
+    res=`which wget 2>/dev/null`
     [[ "$?" != "0" ]] && $CMD_INSTALL wget
-    res=`which netstat`
+    res=`which netstat 2>/dev/null`
     [[ "$?" != "0" ]] && $CMD_INSTALL net-tools
-    res=`which python`
+    res=`which python 2>/dev/null`
     if [[ "$?" != "0" ]]; then
         ln -s /usr/bin/python3 /usr/bin/python
     fi
@@ -375,7 +375,7 @@ EOF
 }
 
 setFirewall() {
-    res=`which firewall-cmd`
+    res=`which firewall-cmd 2>/dev/null`
     if [[ $? -eq 0 ]]; then
         systemctl status firewalld > /dev/null 2>&1
         if [[ $? -eq 0 ]];then
@@ -390,7 +390,7 @@ setFirewall() {
             fi
         fi
     else
-        res=`which iptables`
+        res=`which iptables 2>/dev/null`
         if [[ $? -eq 0 ]]; then
             nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
             if [[ "$nl" != "3" ]]; then
@@ -398,7 +398,7 @@ setFirewall() {
                 iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
             fi
         else
-            res=`which ufw`
+            res=`which ufw 2>/dev/null`
             if [[ $? -eq 0 ]]; then
                 res=`ufw status | grep -i inactive`
                 if [[ "$res" = "" ]]; then

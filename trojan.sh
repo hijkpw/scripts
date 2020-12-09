@@ -19,7 +19,7 @@ fi
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
-res=`which bt`
+res=`which bt 2>/dev/null`
 if [[ "$res" != "" ]]; then
     BT="true"
     NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
@@ -55,9 +55,9 @@ function checkSystem()
         exit 1
     fi
 
-    res=`which yum`
+    res=`which yum 2>/dev/null`
     if [ "$?" != "0" ]; then
-        res=`which apt`
+        res=`which apt 2>/dev/null`
         if [ "$?" != "0" ]; then
             colorEcho $RED " 不受支持的Linux系统"
             exit 1
@@ -72,7 +72,7 @@ function checkSystem()
         CMD_REMOVE="yum remove -y "
         CMD_UPGRADE="yum update -y"
     fi
-    res=`which systemctl`
+    res=`which systemctl 2>/dev/null`
     if [ "$?" != "0" ]; then
         colorEcho $RED " 系统版本过低，请升级到最新版本"
         exit 1
@@ -439,7 +439,7 @@ function installNginx()
         $CMD_INSTALL nginx
         systemctl enable nginx
     else
-        res=`which nginx`
+        res=`which nginx 2>/dev/null`
         if [[ "$?" != "0" ]]; then
             colorEcho $RED " 您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
             exit 1
@@ -458,7 +458,7 @@ configNginx() {
         if [ ! -f /etc/nginx/nginx.conf.bak ]; then
             mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
         fi
-        res=`id nginx`
+        res=`id nginx 2>/dev/null`
         if [[ "$?" != "0" ]]; then
             user="www-data"
         else
@@ -555,7 +555,7 @@ stopNginx() {
 
 function setFirewall()
 {
-    res=`which firewall-cmd`
+    res=`which firewall-cmd 2>/dev/null`
     if [[ $? -eq 0 ]]; then
         systemctl status firewalld > /dev/null 2>&1
         if [[ $? -eq 0 ]];then
@@ -576,7 +576,7 @@ function setFirewall()
             fi
         fi
     else
-        res=`which iptables`
+        res=`which iptables 2>/dev/null`
         if [[ $? -eq 0 ]]; then
             nl=`iptables -nL | nl | grep FORWARD | awk '{print $1}'`
             if [[ "$nl" != "3" ]]; then
@@ -587,7 +587,7 @@ function setFirewall()
                 fi
             fi
         else
-            res=`which ufw`
+            res=`which ufw 2>/dev/null`
             if [[ $? -eq 0 ]]; then
                 res=`ufw status | grep -i inactive`
                 if [[ "$res" = "" ]]; then
