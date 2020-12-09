@@ -289,7 +289,9 @@ getCert() {
             exit 1
         fi
 
-        apt install -y socat openssl
+        apt install -y socat openssl cron
+        systemctl start cron
+        systemctl enable cron
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
         ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
@@ -299,6 +301,10 @@ getCert() {
             --key-file       $KEY_FILE  \
             --fullchain-file $CERT_FILE \
             --reloadcmd     "service nginx force-reload"
+        [[ -f $CERT_FILE && -f $KEY_FILE ]] || {
+            colorEcho $RED " 获取证书失败，请到 https://hijk.art 反馈"
+            exit 1
+        }
     else
         cp ~/v2ray.pem /etc/v2ray/${DOMAIN}.pem
         cp ~/v2ray.key /etc/v2ray/${DOMAIN}.key

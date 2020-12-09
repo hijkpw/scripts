@@ -257,6 +257,11 @@ installNewVer() {
         exit 1
     fi
     ssPath=`which ss-server`
+    [[ "$ssPath" != "" ]] || {
+        cd ${BASE} && rm -rf shadowsocks-libev*
+        colorEcho $RED " SS安装失败，请到 https://hijk.art 反馈"
+        exit 1
+    }
     cat > $SERVICE_FILE <<-EOF
 [Unit]
 Description=shadowsocks

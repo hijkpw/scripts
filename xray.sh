@@ -489,6 +489,15 @@ getCert() {
         fi
 
         $CMD_INSTALL socat openssl
+        if [[ "$PMT" = "yum" ]]; then
+            $CMD_INSTALL cronie
+            systemctl start crond
+            systemctl enable crond
+        else
+            $CMD_INSTALL cron
+            systemctl start cron
+            systemctl enable cron
+        fi
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
         ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
@@ -498,6 +507,10 @@ getCert() {
             --key-file       $KEY_FILE  \
             --fullchain-file $CERT_FILE \
             --reloadcmd     "service nginx force-reload"
+        [[ -f $CERT_FILE && -f $KEY_FILE ]] || {
+            colorEcho $RED " 获取证书失败，请到 https://hijk.art 反馈"
+            exit 1
+        }
     else
         cp ~/xray.pem /usr/local/etc/xray/${DOMAIN}.pem
         cp ~/xray.key /usr/local/etc/xray/${DOMAIN}.key
