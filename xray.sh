@@ -48,6 +48,7 @@ TROJAN="false"
 TLS="false"
 WS="false"
 XTLS="false"
+KCP="false"
 
 checkSystem() {
     result=$(id | awk '{print $1}')
@@ -269,7 +270,6 @@ getData() {
         echo ""
         if [[ -f ~/xray.pem && -f ~/xray.key ]]; then
             colorEcho ${BLUE}  " 检测到自有证书，将使用其部署"
-            echo 
             CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
             KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
         else
@@ -298,7 +298,7 @@ getData() {
         fi
         colorEcho ${BLUE}  " xray端口：$PORT"
     else
-        read -p "请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
+        read -p " 请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
         [[ -z "${PORT}" ]] && PORT=443
         if [ "${PORT:0:1}" = "0" ]; then
             colorEcho ${BLUE}  " 端口不能以0开头"
@@ -306,6 +306,40 @@ getData() {
         fi
         colorEcho ${BLUE}  " Nginx端口：$PORT"
         XPORT=`shuf -i10000-65000 -n1`
+    fi
+
+    if [[ "$KCP" = "true" ]]; then
+        echo ""
+        colorEcho $BLUE " 请选择伪装类型："
+        echo "   1) 无"
+        echo "   2) BT下载"
+        echo "   3) 视频通话"
+        echo "   4) 微信视频通话"
+        echo "   5) dtls"
+        echo "   6) wiregard"
+        read -p "  请选择伪装类型[默认：无]" answer
+        case $answer in
+            2)
+                HEADER_TYPE="utp"
+                ;;
+            3)
+                HEADER_TYPE="srtp"
+                ;;
+            4)
+                HEADER_TYPE="wechat-video"
+                ;;
+            5)
+                HEADER_TYPE="dtls"
+                ;;
+            6)
+                HEADER_TYPE="wireguard"
+                ;;
+            *)
+                HEADER_TYPE="none"
+                ;;
+        esac
+        colorEcho $BLUE " 伪装类型：$HEADER_TYPE"
+        SEED=`cat /proc/sys/kernel/random/uuid`
     fi
 
     if [[ "$TROJAN" = "true" ]]; then
@@ -333,7 +367,6 @@ getData() {
                 FLOW="xtls-rprx-origin"
                 ;;
         esac
-        echo ""
         colorEcho $BLUE " 流控模式：$FLOW"
     fi
 
@@ -412,7 +445,6 @@ getData() {
             esac
         fi
         REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
-        echo ""
         colorEcho $BLUE " 伪装网站：$PROXY_URL"
 
         echo ""
@@ -427,7 +459,6 @@ getData() {
         else
             ALLOW_SPIDER="n"
         fi
-        echo ""
         colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
     fi
 
@@ -801,51 +832,8 @@ EOF
     systemctl enable xray.service
 }
 
-configXray() {
-    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
-    if [[ "$VLESS" = "false" ]]; then
-        # VMESS
-        if [[ "$TLS" = "false" ]]; then
-            local alterid=`shuf -i50-80 -n1`
-            cat > $CONFIG_FILE<<-EOF
-{
-  "inbounds": [{
-    "port": $PORT,
-    "protocol": "vmess",
-    "settings": {
-      "clients": [
-        {
-          "id": "$uuid",
-          "level": 1,
-          "alterId": $alterid
-        }
-      ]
-    }
-  }],
-  "outbounds": [{
-    "protocol": "freedom",
-    "settings": {}
-  },{
-    "protocol": "blackhole",
-    "settings": {},
-    "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
-}
-EOF
-        elif [[ "$WS" = "false" ]]; then
-            # trojan
-            if [[ "$TROJAN" = "true" ]]; then
-                if [[ "$XTLS" = "false" ]]; then
-                    cat > $CONFIG_FILE<<-EOF
+trojanConfig() {
+    cat > $CONFIG_FILE<<-EOF
 {
   "inbounds": [{
     "port": $PORT,
@@ -890,9 +878,10 @@ EOF
   }
 }
 EOF
-                # trojan+XTLS
-                else
-                    cat > $CONFIG_FILE<<-EOF
+}
+
+trojanXTLSConfig() {
+    cat > $CONFIG_FILE<<-EOF
 {
   "inbounds": [{
     "port": $PORT,
@@ -941,10 +930,101 @@ EOF
   }
 }
 EOF
-                fi
-            # VMESS+TCP+TLS
-            else
-                cat > $CONFIG_FILE<<-EOF
+}
+
+vmessConfig() {
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    local alterid=`shuf -i50-80 -n1`
+    cat > $CONFIG_FILE<<-EOF
+{
+  "inbounds": [{
+    "port": $PORT,
+    "protocol": "vmess",
+    "settings": {
+      "clients": [
+        {
+          "id": "$uuid",
+          "level": 1,
+          "alterId": $alterid
+        }
+      ]
+    }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",
+    "settings": {}
+  },{
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "blocked"
+  }],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "blocked"
+      }
+    ]
+  }
+}
+EOF
+}
+
+vmessKCPConfig() {
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    local alterid=`shuf -i50-80 -n1`
+    cat > $CONFIG_FILE<<-EOF
+{
+  "inbounds": [{
+    "port": $PORT,
+    "protocol": "vmess",
+    "settings": {
+      "clients": [
+        {
+          "id": "$uuid",
+          "level": 1,
+          "alterId": $alterid
+        }
+      ]
+    },
+    "streamSettings": {
+        "network": "mkcp",
+        "kcpSettings": {
+            "uplinkCapacity": 100,
+            "downlinkCapacity": 100,
+            "congestion": true,
+            "header": {
+                "type": "$HEADER_TYPE"
+            },
+            "seed": "$SEED"
+        }
+    }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",
+    "settings": {}
+  },{
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "blocked"
+  }],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "blocked"
+      }
+    ]
+  }
+}
+EOF
+}
+
+vmessTLSConfig() {
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    cat > $CONFIG_FILE<<-EOF
 {
   "inbounds": [{
     "port": $PORT,
@@ -992,10 +1072,11 @@ EOF
   }
 }
 EOF
-            fi
-        # VMESS+WS+TLS
-        else
-            cat > $CONFIG_FILE<<-EOF
+}
+
+vmessWSConfig() {
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    cat > $CONFIG_FILE<<-EOF
 {
   "inbounds": [{
     "port": $XPORT,
@@ -1040,14 +1121,11 @@ EOF
   }
 }
 EOF
-        fi
-    #VLESS
-    else
-        # VLESS+TCP
-        if [[ "$WS" = "false" ]]; then
-            # VLESS+TCP+TLS
-            if [[ "$XTLS" = "false" ]]; then
-                cat > $CONFIG_FILE<<-EOF
+}
+
+vlessTLSConfig() {
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    cat > $CONFIG_FILE<<-EOF
 {
   "inbounds": [{
     "port": $PORT,
@@ -1102,9 +1180,11 @@ EOF
   }
 }
 EOF
-            # VLESS+TCP+XTLS
-            else
-                cat > $CONFIG_FILE<<-EOF
+}
+
+vlessXTLSConfig() {
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    cat > $CONFIG_FILE<<-EOF
 {
   "inbounds": [{
     "port": $PORT,
@@ -1160,10 +1240,11 @@ EOF
   }
 }
 EOF
-            fi
-        # VLESS+WS+TLS
-        else
-            cat > $CONFIG_FILE<<-EOF
+}
+
+vlessWSConfig() {
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    cat > $CONFIG_FILE<<-EOF
 {
   "inbounds": [{
     "port": $XPORT,
@@ -1208,6 +1289,104 @@ EOF
   }
 }
 EOF
+}
+
+vlessKCPConfig() {
+    local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+    cat > $CONFIG_FILE<<-EOF
+{
+  "inbounds": [{
+    "port": $PORT,
+    "protocol": "vless",
+    "settings": {
+      "clients": [
+        {
+          "id": "$uuid",
+          "level": 0
+        }
+      ],
+      "decryption": "none"
+    },
+    "streamSettings": {
+        "streamSettings": {
+            "network": "mkcp",
+            "kcpSettings": {
+                "uplinkCapacity": 100,
+                "downlinkCapacity": 100,
+                "congestion": true,
+                "header": {
+                    "type": "$HEADER_TYPE"
+                },
+                "seed": "$SEED"
+            }
+        }
+    }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",
+    "settings": {}
+  },{
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "blocked"
+  }],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "blocked"
+      }
+    ]
+  }
+}
+EOF
+}
+
+configXray() {
+    mkdir -p /usr/local/xray
+    if [[ "$TROJAN" = "true" ]]; then
+        if [[ "$XTLS" = "true" ]]; then
+            trojanXTLSConfig
+        else
+            trojanConfig
+        fi
+        return 0
+    fi
+    if [[ "$VLESS" = "false" ]]; then
+        # VMESS + kcp
+        if [[ "$KCP" = "true" ]]; then
+            vmessKCPConfig
+            return 0
+        fi
+        # VMESS
+        if [[ "$TLS" = "false" ]]; then
+            vmessConfig
+        elif [[ "$WS" = "false" ]]; then
+            # VMESS+TCP+TLS
+            vmessTLSConfig
+        # VMESS+WS+TLS
+        else
+            vmessWSConfig
+        fi
+    #VLESS
+    else
+        if [[ "$KCP" = "true" ]]; then
+            vlessKCPConfig
+            return 0
+        fi
+        # VLESS+TCP
+        if [[ "$WS" = "false" ]]; then
+            # VLESS+TCP+TLS
+            if [[ "$XTLS" = "false" ]]; then
+                vlessTLSConfig
+            # VLESS+TCP+XTLS
+            else
+                vlessXTLSConfig
+            fi
+        # VLESS+WS+TLS
+        else
+            vlessWSConfig
         fi
     fi
 }
@@ -1321,7 +1500,7 @@ uninstall() {
         if [[ "$domain" != "" ]]; then
             rm -rf ${NGINX_CONF_PATH}${domain}.conf
         fi
-        ~/.acme.sh/acme.sh --uninstall
+        [[ -f ~/.acme.sh/acme.sh ]] && ~/.acme.sh/acme.sh --uninstall
         colorEcho $GREEN " Xray卸载成功"
     fi
 }
@@ -1365,19 +1544,14 @@ restart() {
 }
 
 
-showInfo() {
-    res=`status`
-    if [[ $res -lt 2 ]]; then
-        colorEcho $RED " Xray未安装，请先安装！"
-        return
-    fi
-
+getConfigFileInfo() {
     vless="false"
     tls="false"
     ws="false"
     xtls="false"
     trojan="false"
     protocol="VMess"
+    kcp="false"
 
     uid=`grep id $CONFIG_FILE | head -n1| cut -d: -f2 | tr -d \",' '`
     alterid=`grep alterId $CONFIG_FILE  | cut -d: -f2 | tr -d \",' '`
@@ -1395,9 +1569,15 @@ showInfo() {
         tls="true"
     fi
     if [[ "$ws" = "true" ]]; then
-        port=`grep -i ssl ${NGINX_CONF_PATH}${domain}.conf| head -n1 | awk '{print $2}'`
+        port=`grep -i ssl $NGINX_CONF_PATH${domain}.conf| head -n1 | awk '{print $2}'`
     else
         port=`grep port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    fi
+    res=`grep -i kcp $CONFIG_FILE`
+    if [[ "$res" != "" ]]; then
+        kcp="true"
+        type=`grep header -A 3 $CONFIG_FILE | grep 'type' | cut -d: -f2 | tr -d \",' '`
+        seed=`grep seed $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     fi
 
     vmess=`grep vmess $CONFIG_FILE`
@@ -1421,17 +1601,10 @@ showInfo() {
             flow="无"
         fi
     fi
-    
-    echo 
-    colorEcho $BLUE " Xray配置信息："
-    echo -n -e " ${BLUE}运行状态：${PLAIN}"
-    statusText
-    echo
+}
 
-    echo -e " ${BLUE}协议: ${PLAIN} ${RED}${protocol}${PLAIN}"
-    if [[ "$vless" = "false" ]]; then
-        if [[ "$tls" = "false" ]]; then
-            raw="{
+outputVmess() {
+    raw="{
   \"v\":\"2\",
   \"ps\":\"\",
   \"add\":\"$IP\",
@@ -1444,36 +1617,50 @@ showInfo() {
   \"path\":\"\",
   \"tls\":\"\"
 }"
-            link=`echo -n ${raw} | base64 -w 0`
-            link="vmess://${link}"
+    link=`echo -n ${raw} | base64 -w 0`
+    link="vmess://${link}"
 
-            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
-            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
-            echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
-            echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}auto${PLAIN}"
-            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-            echo  
-            echo -e " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
-        elif [[ "$ws" = "false" ]]; then
-            if [[ "$trojan" = "true" ]]; then
-                if [[ "$xtls" = "true" ]]; then
-                    echo -e " ${BLUE}IP/域名(address): ${PLAIN} ${RED}${domain}${PLAIN}"
-                    echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-                    echo -e " ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
-                    echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
-                    echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
-                    echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-                    echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
-                else
-                    echo -e " ${BLUE}IP/域名(address): ${PLAIN} ${RED}${domain}${PLAIN}"
-                    echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-                    echo -e " ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
-                    echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-                    echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
-                fi
-            else
-                raw="{
+    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
+    echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+    echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+    echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+    echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}auto${PLAIN}"
+    echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+    echo  
+    echo -e "   ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
+}
+
+outputVmessKCP() {
+    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
+    echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+    echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+    echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+    echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}auto${PLAIN}"
+    echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
+    echo -e "   ${BLUE}伪装类型(type)：${PLAIN} ${RED}${type}${PLAIN}"
+    echo -e "   ${BLUE}mkcp seed：${PLAIN} ${RED}${seed}${PLAIN}" 
+}
+
+outputTrojan() {
+    if [[ "$xtls" = "true" ]]; then
+        echo -e "   ${BLUE}IP/域名(address): ${PLAIN} ${RED}${domain}${PLAIN}"
+        echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+        echo -e "   ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
+        echo -e "   ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
+        echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+        echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+        echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
+    else
+        echo -e "   ${BLUE}IP/域名(address): ${PLAIN} ${RED}${domain}${PLAIN}"
+        echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+        echo -e "   ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
+        echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+        echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
+    fi
+}
+
+outputVmessTLS() {
+    raw="{
   \"v\":\"2\",
   \"ps\":\"\",
   \"add\":\"$IP\",
@@ -1486,21 +1673,22 @@ showInfo() {
   \"path\":\"\",
   \"tls\":\"tls\"
 }"
-                link=`echo -n ${raw} | base64 -w 0`
-                link="vmess://${link}"
-                echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
-                echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-                echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
-                echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
-                echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
-                echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-                echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
-                echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
-                echo  
-                echo -e " ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
-            fi
-        else
-            raw="{
+    link=`echo -n ${raw} | base64 -w 0`
+    link="vmess://${link}"
+    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
+    echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+    echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+    echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+    echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
+    echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+    echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+    echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
+    echo  
+    echo -e "   ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
+}
+
+outputVmessWS() {
+    raw="{
   \"v\":\"2\",
   \"ps\":\"\",
   \"add\":\"$IP\",
@@ -1513,23 +1701,65 @@ showInfo() {
   \"path\":\"${wspath}\",
   \"tls\":\"tls\"
 }"
-            link=`echo -n ${raw} | base64 -w 0`
-            link="vmess://${link}"
+    link=`echo -n ${raw} | base64 -w 0`
+    link="vmess://${link}"
 
-            echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
-            echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-            echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
-            echo -e " ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
-            echo -e " ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
-            echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-            echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
-            echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
-            echo -e " ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
-            echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
-            echo  
-            echo -e " ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
+    echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
+    echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+    echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+    echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
+    echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
+    echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
+    echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
+    echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+    echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
+    echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
+    echo  
+    echo -e "   ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
+}
+
+showInfo() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        colorEcho $RED " Xray未安装，请先安装！"
+        return
+    fi
+    
+    echo 
+    echo -n -e " ${BLUE}Xray运行状态：${PLAIN}"
+    statusText
+    colorEcho $BLUE " Xray配置信息："
+
+    getConfigFileInfo
+
+    echo -e "   ${BLUE}协议: ${PLAIN} ${RED}${protocol}${PLAIN}"
+    if [[ "$trojan" = "true" ]]; then
+        outputTrojan
+        return 0
+    fi
+    if [[ "$vless" = "false" ]]; then
+        if [[ "$kcp" = "true" ]]; then
+            outputVmessKCP
+            return 0
+        fi
+        if [[ "$tls" = "false" ]]; then
+            outputVmess
+        elif [[ "$ws" = "false" ]]; then
+            outputVmessTLS
+        else
+            outputVmessWS
         fi
     else
+        if [[ "$kcp" = "true" ]]; then
+            echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
+            echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+            echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+            echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+            echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
+            echo -e "   ${BLUE}伪装类型(type)：${PLAIN} ${RED}${type}${PLAIN}"
+            echo -e "   ${BLUE}mkcp seed：${PLAIN} ${RED}${seed}${PLAIN}" 
+            return 0
+        fi
         if [[ "$xtls" = "true" ]]; then
             echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
@@ -1540,7 +1770,6 @@ showInfo() {
             echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
             echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
-            echo  
         elif [[ "$ws" = "false" ]]; then
             echo -e " ${BLUE}IP(address):  ${PLAIN}${RED}${IP}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
@@ -1551,7 +1780,6 @@ showInfo() {
             echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
             echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
-            echo  
         else
             echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
             echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
@@ -1563,10 +1791,8 @@ showInfo() {
             echo -e " ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e " ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
             echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
-            echo  
         fi
     fi
-    echo ""
 }
 
 showLog() {
@@ -1589,19 +1815,19 @@ menu() {
     echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
     echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
     echo "#############################################################"
-    echo ""
-
     echo -e "  ${GREEN}1.${PLAIN}   安装Xray-VMESS"
-    echo -e "  ${GREEN}2.${PLAIN}   安装Xray-VMESS+TCP+TLS"
-    echo -e "  ${GREEN}3.${PLAIN}   安装Xray-VMESS+WS+TLS${RED}(推荐)${PLAIN}"
-    echo -e "  ${GREEN}4.${PLAIN}   安装Xray-VLESS+TCP+TLS"
-    echo -e "  ${GREEN}5.${PLAIN}   安装Xray-VLESS+WS+TLS${RED}(可过cdn)${PLAIN}"
-    echo -e "  ${GREEN}6.${PLAIN}   安装Xray-VLESS+TCP+XTLS${RED}(推荐)${PLAIN}"
-    echo -e "  ${GREEN}7.${PLAIN}   安装trojan${RED}(推荐)${PLAIN}"
-    echo -e "  ${GREEN}8.${PLAIN}   安装trojan+XTLS${RED}(推荐)${PLAIN}"
+    echo -e "  ${GREEN}2.${PLAIN}   安装Xray-${BLUE}VMESS+mKCP${PLAIN}"
+    echo -e "  ${GREEN}3.${PLAIN}   安装Xray-VMESS+TCP+TLS"
+    echo -e "  ${GREEN}4.${PLAIN}   安装Xray-${BLUE}VMESS+WS+TLS${PLAIN}${RED}(推荐)${PLAIN}"
+    echo -e "  ${GREEN}5.${PLAIN}   安装Xray-${BLUE}VLESS+mKCP${PLAIN}"
+    echo -e "  ${GREEN}6.${PLAIN}   安装Xray-VLESS+TCP+TLS"
+    echo -e "  ${GREEN}7.${PLAIN}   安装Xray-${BLUE}VLESS+WS+TLS${PLAIN}${RED}(可过cdn)${PLAIN}"
+    echo -e "  ${GREEN}8.${PLAIN}   安装Xray-${BLUE}VLESS+TCP+XTLS${PLAIN}${RED}(推荐)${PLAIN}"
+    echo -e "  ${GREEN}9.${PLAIN}   安装${BLUE}trojan${PLAIN}${RED}(推荐)${PLAIN}"
+    echo -e "  ${GREEN}10.${PLAIN}  安装${BLUE}trojan+XTLS${PLAIN}${RED}(推荐)${PLAIN}"
     echo " -------------"
-    echo -e "  ${GREEN}10.${PLAIN}  更新Xray"
-    echo -e "  ${GREEN}11.${PLAIN}  卸载Xray"
+    echo -e "  ${GREEN}11.${PLAIN}  更新Xray"
+    echo -e "  ${GREEN}12.${PLAIN}  卸载Xray"
     echo " -------------"
     echo -e "  ${GREEN}13.${PLAIN}  启动Xray"
     echo -e "  ${GREEN}14.${PLAIN}  重启Xray"
@@ -1610,8 +1836,7 @@ menu() {
     echo -e "  ${GREEN}16.${PLAIN}  查看Xray配置"
     echo -e "  ${GREEN}17.${PLAIN}  查看Xray日志"
     echo " -------------"
-    echo -e "  ${GREEN}0.${PLAIN} 退出"
-    echo 
+    echo -e "  ${GREEN}0.${PLAIN}   退出"
     echo -n " 当前状态："
     statusText
     echo 
@@ -1625,46 +1850,55 @@ menu() {
             install
             ;;
         2)
-            TLS="true"
+            KCP="true"
             install
             ;;
         3)
             TLS="true"
-            WS="true"
             install
             ;;
         4)
-            VLESS="true"
             TLS="true"
+            WS="true"
             install
             ;;
         5)
             VLESS="true"
-            TLS="true"
-            WS="true"
+            KCP="true"
             install
             ;;
         6)
             VLESS="true"
             TLS="true"
-            XTLS="true"
             install
             ;;
         7)
+            VLESS="true"
+            TLS="true"
+            WS="true"
+            install
+            ;;
+        8)
+            VLESS="true"
+            TLS="true"
+            XTLS="true"
+            install
+            ;;
+        9)
             TROJAN="true"
             TLS="true"
             install
             ;;
-        8)
+        10)
             TROJAN="true"
             TLS="true"
             XTLS="true"
             install
             ;;
-        10)
+        11)
             update
             ;;
-        11)
+        12)
             uninstall
             ;;
         13)
