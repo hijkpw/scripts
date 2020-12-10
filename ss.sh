@@ -295,6 +295,7 @@ installSS() {
     new_ver="$(normalizeVersion "$(curl -s "${tag_url}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
     ssPath=`which ss-server 2>/dev/null`
     if [[ "$?" != "0" ]]; then
+        [[ "$new_ver" != "" ]] || new_ver="3.3.5"
         installNewVer $new_ver
     else
         ver=`ss-server -h | grep ${NAME} | grep -oE '[0-9+\.]+'`
