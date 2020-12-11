@@ -200,6 +200,7 @@ getData() {
 preinstall() {
     $PMT clean all
     #echo $CMD_UPGRADE | bash
+    [[ "$PMT" = "apt" ]] && $PMT update
 
     echo ""
     colorEcho $BULE " 安装必要软件"
@@ -435,6 +436,18 @@ showInfo() {
     echo -e "  ${BLUE}加密方式(method)：${PLAIN} ${RED}${method}${PLAIN}"
     echo
     echo -e " ${BLUE}ss链接${PLAIN}： ${link}"
+    #qrencode -o - -t utf8 ${link}
+}
+
+showQR() {
+    port=`grep server_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    res=`netstat -nltp | grep ${port} | grep 'ss-server'`
+    [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
+    password=`grep password $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    method=`grep method $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    
+    res=`echo -n "${method}:${password}@${IP}:${port}" | base64 -w 0`
+    link="ss://${res}"
     qrencode -o - -t utf8 ${link}
 }
 
@@ -568,8 +581,9 @@ menu() {
     echo -e "  ${GREEN}6.${PLAIN}  停止SS"
     echo " -------------"
     echo -e "  ${GREEN}7.${PLAIN}  查看SS配置"
-    echo -e "  ${GREEN}8.${PLAIN}  修改SS配置"
-    echo -e "  ${GREEN}9.${PLAIN}  查看SS日志"
+    echo -e "  ${GREEN}8.${PLAIN}  查看配置二维码"
+    echo -e "  ${GREEN}9.${PLAIN}  修改SS配置"
+    echo -e "  ${GREEN}10.${PLAIN} 查看SS日志"
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"
     echo 
@@ -604,9 +618,12 @@ menu() {
             showInfo
             ;;
         8)
-            reconfig
+            showQR
             ;;
         9)
+            reconfig
+            ;;
+        10)
             showLog
             ;;
         *)

@@ -290,6 +290,7 @@ statusText() {
 
 preinstall() {
     $PMT clean all
+    [[ "$PMT" = "apt" ]] && $PMT update
     #echo $CMD_UPGRADE | bash
     echo ""
     colorEcho $BLUE " 安装必要软件"
@@ -487,6 +488,23 @@ showInfo() {
     echo -e "   ${BLUE}混淆(obfuscation)：${PLAIN} ${RED}${obfs}${PLAIN}"
     echo
     echo -e " ${BLUE}ssr链接:${PLAIN} $link"
+    #qrencode -o - -t utf8 $link
+}
+
+showQR() {
+    port=`grep server_port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    res=`netstat -nltp | grep ${port} | grep python`
+    [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
+    password=`grep password $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    method=`grep method $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    protocol=`grep protocol $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    obfs=`grep obfs $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
+    
+    p1=`echo -n ${password} | base64 -w 0`
+    p1=`echo -n ${p1} | tr -d =`
+    res=`echo -n "${IP}:${port}:${protocol}:${method}:${obfs}:${p1}/?remarks=&protoparam=&obfsparam=" | base64 -w 0`
+    res=`echo -n ${res} | tr -d =`
+    link="ssr://${res}"
     qrencode -o - -t utf8 $link
 }
 
@@ -606,8 +624,9 @@ menu() {
     echo -e "  ${GREEN}6.${PLAIN}  停止SSR"
     echo " -------------"
     echo -e "  ${GREEN}7.${PLAIN}  查看SSR配置"
-    echo -e "  ${GREEN}8.${PLAIN}  修改SSR配置"
-    echo -e "  ${GREEN}9.${PLAIN}  查看SSR日志"
+    echo -e "  ${GREEN}8.${PLAIN}  查看配置二维码"
+    echo -e "  ${GREEN}9.${PLAIN}  修改SSR配置"
+    echo -e "  ${GREEN}10.${PLAIN} 查看SSR日志"
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"
     echo 
@@ -639,9 +658,12 @@ menu() {
             showInfo
             ;;
         8)
-            reconfig
+            showQR
             ;;
         9)
+            reconfig
+            ;;
+        10)
             showLog
             ;;
         *)

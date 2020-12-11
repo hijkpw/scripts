@@ -840,6 +840,11 @@ trojanConfig() {
         {
           "password": "$PASSWORD"
         }
+      ],
+      "fallbacks": [
+        {
+            "dest": 80
+        }
       ]
     },
     "streamSettings": {
@@ -888,6 +893,11 @@ trojanXTLSConfig() {
         {
           "password": "$PASSWORD",
           "flow": "$FLOW"
+        }
+      ],
+      "fallbacks": [
+        {
+            "dest": 80
         }
       ]
     },
@@ -1392,6 +1402,7 @@ install() {
     getData
 
     $PMT clean all
+    [[ "$PMT" = "apt" ]] && $PMT update
     #echo $CMD_UPGRADE | bash
     $CMD_INSTALL wget vim unzip tar gcc openssl
     $CMD_INSTALL net-tools
