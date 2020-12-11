@@ -863,19 +863,20 @@ showInfo() {
     line1=`grep -n 'websocket' $CONFIG_FILE  | head -n1 | cut -d: -f1`
     line11=`expr $line1 + 1`
     ws=`sed -n "${line11}p" $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
-    echo 
-    echo -e "  ${RED}trojan-go配置信息：${PLAIN}"
-    echo 
-    echo -n "  当前状态："
+    echo ""
+    echo -n "  trojan-go运行状态："
     statusText
-    echo -e "  IP：${RED}$IP${PLAIN}"
-    echo -e "  伪装域名/主机名(host)：${RED}$domain${PLAIN}"
-    echo -e "  端口(port)：${RED}$port${PLAIN}"
-    echo -e "  密码(password)：${RED}$password${PLAIN}"
+    echo ""
+    echo -e " ${BLUE}trojan-go配置文件: ${PLAIN} ${RED}${CONFIG_FILE}${PLAIN}"
+    echo -e " ${BLUE}trojan-go配置信息：${PLAIN}"
+    echo -e "   IP：${RED}$IP${PLAIN}"
+    echo -e "   伪装域名/主机名(host)：${RED}$domain${PLAIN}"
+    echo -e "   端口(port)：${RED}$port${PLAIN}"
+    echo -e "   密码(password)：${RED}$password${PLAIN}"
     if [[ $ws = "true" ]]; then
-        echo -e "  websocket：${RED}true${PLAIN}"
+        echo -e "   websocket：${RED}true${PLAIN}"
         wspath=`grep path $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
-        echo -e "  ws路径(ws path)：${RED}${wspath}${PLAIN}"
+        echo -e "   ws路径(ws path)：${RED}${wspath}${PLAIN}"
     fi
     echo ""
 }

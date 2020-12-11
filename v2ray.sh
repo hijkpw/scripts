@@ -1731,9 +1731,10 @@ showInfo() {
         return
     fi
 
-    echo 
+    echo ""
     echo -n -e " ${BLUE}V2ray运行状态：${PLAIN}"
     statusText
+    echo -e " ${BLUE}V2ray配置文件: ${PLAIN} ${RED}${CONFIG_FILE}${PLAIN}"
     colorEcho $BLUE " V2ray配置信息："
 
     getConfigFileInfo

@@ -1736,9 +1736,10 @@ showInfo() {
         return
     fi
     
-    echo 
+    echo ""
     echo -n -e " ${BLUE}Xray运行状态：${PLAIN}"
     statusText
+    echo -e " ${BLUE}Xray配置文件: ${PLAIN} ${RED}${CONFIG_FILE}${PLAIN}"
     colorEcho $BLUE " Xray配置信息："
 
     getConfigFileInfo

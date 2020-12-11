@@ -676,8 +676,8 @@ function showInfo()
     
     echo ============================================
     echo -e " ${BLUE}trojan运行状态：${PLAIN}${status}"
-    echo -e " ${BLUE}trojan配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo ""
+    echo -e " ${BLUE}trojan配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo -e " ${RED}trojan配置信息：${PLAIN}               "
     echo -e "   ${BLUE}IP/域名(address):${PLAIN}  ${RED}${domain}${PLAIN}"
     echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
@@ -688,7 +688,7 @@ function showInfo()
 
 function bbrReboot() {
     if [ "${INSTALL_BBR}" == "true" ]; then
-        echo  
+        echo ""
         colorEcho $BLUE " 为使BBR模块生效，系统将在30秒后重启"
         echo  
         echo -e " 您可以按 ctrl + c 取消重启，稍后输入 ${RED}reboot${PLAIN} 重启系统"
