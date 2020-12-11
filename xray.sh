@@ -354,7 +354,8 @@ getData() {
         colorEcho $BLUE " 请选择流控模式:" 
         echo -e "   1) xtls-rprx-direct [$RED推荐$PLAIN]"
         echo "   2) xtls-rprx-origin"
-        read -p "  请选择流控模式[默认:origin]" answer
+        read -p "  请选择流控模式[默认:direct]" answer
+        [[ -z "$answer" ]] && answer=1
         case $answer in
             1)
                 FLOW="xtls-rprx-direct"
@@ -363,8 +364,8 @@ getData() {
                 FLOW="xtls-rprx-origin"
                 ;;
             *)
-                colorEcho $RED " 无效选项，使用默认的xtls-rprx-origin"
-                FLOW="xtls-rprx-origin"
+                colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct"
+                FLOW="xtls-rprx-direct"
                 ;;
         esac
         colorEcho $BLUE " 流控模式：$FLOW"
