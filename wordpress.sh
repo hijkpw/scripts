@@ -289,6 +289,7 @@ configNginx() {
         cat > $NGINX_CONFIG_FILE<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     return 301 https://\$server_name:${NGINX_PORT}\$request_uri;
 }
@@ -350,6 +351,7 @@ EOF
         cat > $NGINX_CONFIG_FILE<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
 
     charset utf-8;
@@ -385,6 +387,7 @@ EOF
     cat > $NGINX_CONFIG_FILE<<-EOF
 server {
     listen 80;
+    listen [::]:80;
     server_name ${DOMAIN};
     return 301 https://\$server_name:${PORT}\$request_uri;
 }

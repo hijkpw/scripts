@@ -662,8 +662,8 @@ EOF
             # trojan
             cat > ${NGINX_CONF_PATH}${DOMAIN}.conf<<-EOF
 server {
-    listen 80;
-    listen [::]:80;
+    listen 80 http2;
+    listen [::]:80 http2;
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
