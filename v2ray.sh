@@ -524,6 +524,7 @@ getCert() {
         fi
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
+        ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
         ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
         CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
         KEY_FILE="/etc/v2ray/${DOMAIN}.key"

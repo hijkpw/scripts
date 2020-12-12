@@ -532,6 +532,7 @@ getCert() {
         fi
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
+        ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
         ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
         CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
         KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"

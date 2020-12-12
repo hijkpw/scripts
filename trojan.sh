@@ -413,6 +413,7 @@ getCert() {
         fi
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
+        ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
         ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
         CERT_FILE="/usr/local/etc/trojan/${DOMAIN}.pem"
         KEY_FILE="/usr/local/etc/trojan/${DOMAIN}.key"
