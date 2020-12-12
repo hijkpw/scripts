@@ -695,6 +695,7 @@ setFirewall() {
             firewall-cmd --permanent --add-service=https
             if [[ "$PORT" != "443" ]]; then
                 firewall-cmd --permanent --add-port=${PORT}/tcp
+                firewall-cmd --permanent --add-port=${PORT}/udp
             fi
             firewall-cmd --reload
         else
@@ -704,6 +705,7 @@ setFirewall() {
                 iptables -I INPUT -p tcp --dport 443 -j ACCEPT
                 if [[ "$PORT" != "443" ]]; then
                     iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
+                    iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
                 fi
             fi
         fi
@@ -716,6 +718,7 @@ setFirewall() {
                 iptables -I INPUT -p tcp --dport 443 -j ACCEPT
                 if [[ "$PORT" != "443" ]]; then
                     iptables -I INPUT -p tcp --dport ${PORT} -j ACCEPT
+                    iptables -I INPUT -p udp --dport ${PORT} -j ACCEPT
                 fi
             fi
         else
@@ -727,6 +730,7 @@ setFirewall() {
                     ufw allow https/tcp
                     if [[ "$PORT" != "443" ]]; then
                         ufw allow ${PORT}/tcp
+                        ufw allow ${PORT}/udp
                     fi
                 fi
             fi
