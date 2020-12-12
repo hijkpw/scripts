@@ -103,6 +103,7 @@ checkV2() {
         WS="true"
         TLS="true"
         DOMAIN=`grep Host $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+        [[ "$1" = "install" ]] && colorEcho $BLUE " 伪装域名：$DOMAIN"
         NGINX_CONFIG_FILE="$NGINX_CONF_PATH${DOMAIN}.conf"
         [[ -f $NGINX_CONFIG_FILE ]] || {
             colorEcho $RED " 未找到域名的nginx配置文件"
@@ -111,6 +112,7 @@ checkV2() {
         V2PORT=`grep port $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
         WSPATH=`grep path $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
         NGINX_PORT=`grep -i ssl $NGINX_CONFIG_FILE | grep listen | head -n1 | awk '{print $2}'`
+        [[ "$1" = "install" ]] && colorEcho $BLUE " Nginx端口：$NGINX_PORT"
         CERT_FILE=`grep ssl_certificate $NGINX_CONFIG_FILE | grep -v _key`
         KEY_FILE=`grep ssl_certificate_key $NGINX_CONFIG_FILE`
     }
@@ -121,6 +123,8 @@ checkV2() {
         PORT=`grep port $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
         DOMAIN=`grep serverName $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
         [[ "$DOMAIN" = "" ]] && DOMAIN=`grep Host $V2_CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+        [[ "$1" = "install" ]] && colorEcho $BLUE " 伪装域名：$DOMAIN"
+        [[ "$1" = "install" ]] && colorEcho $BLUE " V2ray/Xray监听端口：$PORT"
         NGINX_CONFIG_FILE="$NGINX_CONF_PATH${DOMAIN}.conf"
     }
 
@@ -430,10 +434,12 @@ install() {
     installMysql
     installWordPress
     colorEcho $BLUE " WordPress安装成功！"
-
+    
     config
     # restart service
     systemctl restart $PHP_SERVICE mariadb nginx $SERVICE
+    sleep 2
+    statusText
 
     showInfo
 }

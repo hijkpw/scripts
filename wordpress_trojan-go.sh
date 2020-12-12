@@ -69,6 +69,8 @@ checkTrojan() {
         exit 1
     fi
     PORT=`grep local_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    [[ "$1" = "install" ]] && colorEcho $BLUE " 伪装域名：$DOMAIN"
+    [[ "$1" = "install" ]] && colorEcho $BLUE " trojan-go监听端口：$PORT"
 }
 
 statusText() {
@@ -268,7 +270,7 @@ EOF
 }
 
 install() {
-    checkTrojan
+    checkTrojan "install"
     installPHP
     installMysql
     installWordPress
@@ -277,6 +279,9 @@ install() {
     config
     # restart service
     systemctl restart $PHP_SERVICE mariadb nginx
+
+    sleep 2
+    statusText
 
     showInfo
 }
