@@ -113,7 +113,7 @@ status() {
         return
     fi
     port=`grep port $CONFIG_FILE| head -n 1| cut -d: -f2| tr -d \",' '`
-    res=`ss -ntlp| grep ${port} | grep -i v2ray`
+    res=`ss -nutlp| grep ${port} | grep -i v2ray`
     if [[ -z "$res" ]]; then
         echo 2
         return
@@ -122,7 +122,7 @@ status() {
     if [[ `configNeedNginx` != "yes" ]]; then
         echo 3
     else
-        res=`ss -ntlp|grep -i nginx`
+        res=`ss -nutlp|grep -i nginx`
         if [[ -z "$res" ]]; then
             echo 4
         else
@@ -1530,7 +1530,7 @@ start() {
     systemctl restart v2ray
     sleep 2
     port=`grep port $CONFIG_FILE| head -n 1| cut -d: -f2| tr -d \",' '`
-    res=`ss -ntlp| grep ${port} | grep -i v2ray`
+    res=`ss -nutlp| grep ${port} | grep -i v2ray`
     if [[ "$res" = "" ]]; then
         colorEcho $RED " v2ray启动失败，请检查日志或查看端口是否被占用！"
     else

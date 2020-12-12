@@ -112,7 +112,7 @@ status() {
         return
     fi
     port=`grep port $CONFIG_FILE| head -n 1| cut -d: -f2| tr -d \",' '`
-    res=`ss -ntlp| grep ${port} | grep -i xray`
+    res=`ss -nutlp| grep ${port} | grep -i xray`
     if [[ -z "$res" ]]; then
         echo 2
         return
@@ -121,7 +121,7 @@ status() {
     if [[ `configNeedNginx` != "yes" ]]; then
         echo 3
     else
-        res=`ss -ntlp|grep -i nginx`
+        res=`ss -nutlp|grep -i nginx`
         if [[ -z "$res" ]]; then
             echo 4
         else
@@ -1534,7 +1534,7 @@ start() {
     sleep 2
     
     port=`grep port $CONFIG_FILE| head -n 1| cut -d: -f2| tr -d \",' '`
-    res=`ss -ntlp| grep ${port} | grep -i xray`
+    res=`ss -nutlp| grep ${port} | grep -i xray`
     if [[ "$res" = "" ]]; then
         colorEcho $RED " Xray启动失败，请检查日志或查看端口是否被占用！"
     else
