@@ -182,17 +182,6 @@ GRANT ALL PRIVILEGES ON ${DBNAME}.* to ${DBUSER}@'%';
 FLUSH PRIVILEGES;
 EOF
 
-    #config php
-    sed -i 's/expose_php = On/expose_php = Off/' /etc/php.ini
-    line=`cat -n /etc/php.ini | grep 'date.timezone' | tail -n1 | awk '{print $1}'`
-    sed -i "${line}a date.timezone = Asia/Shanghai" /etc/php.ini
-    sed -i 's/;opcache.revalidate_freq=2/opcache.revalidate_freq=30/' /etc/php.d/10-opcache.ini
-    if [[ $MAIN -eq 7 ]]; then
-        sed -i 's/listen = 127.0.0.1:9000/listen = \/run\/php-fpm\/www.sock/' /etc/php-fpm.d/www.conf
-    fi
-    line=`cat -n /etc/php-fpm.d/www.conf | grep 'listen.mode' | tail -n1 | awk '{print $1}'`
-    sed -i "${line}a listen.mode=0666" /etc/php-fpm.d/www.conf
-
     # config wordpress
     cd /var/www/$DOMAIN
     cp wp-config-sample.php wp-config.php

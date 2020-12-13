@@ -428,6 +428,9 @@ configNginx() {
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+        ROBOT_CONIFG="    location = /robots.txt {}"
+    else
+        ROBOT_CONIFG=""
     fi
     if [[ "$BT" = "false" ]]; then
         if [[ ! -f /etc/nginx/nginx.conf.bak ]]; then
@@ -486,6 +489,8 @@ server {
     listen [::]:80;
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
+
+    $ROBOT_CONFIG
 }
 EOF
     else
@@ -503,8 +508,7 @@ server {
         sub_filter_once off;
     }
     
-    location = /robots.txt {
-    }
+    $ROBOT_CONFIG
 }
 EOF
     fi

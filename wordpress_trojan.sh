@@ -70,6 +70,8 @@ checkTrojan() {
         exit 1
     fi
     PORT=`grep local_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    CERT_FILE=`grep -m1 cert $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
+    KEY_FILE=`grep -m1 key $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     [[ "$1" = "install" ]] && colorEcho $BLUE " 伪装域名：$DOMAIN"
     [[ "$1" = "install" ]] && colorEcho $BLUE " trojan监听端口：$PORT"
 }
@@ -183,17 +185,6 @@ GRANT ALL PRIVILEGES ON ${DBNAME}.* to ${DBUSER}@'%';
 FLUSH PRIVILEGES;
 EOF
 
-    #config php
-    sed -i 's/expose_php = On/expose_php = Off/' /etc/php.ini
-    line=`cat -n /etc/php.ini | grep 'date.timezone' | tail -n1 | awk '{print $1}'`
-    sed -i "${line}a date.timezone = Asia/Shanghai" /etc/php.ini
-    sed -i 's/;opcache.revalidate_freq=2/opcache.revalidate_freq=30/' /etc/php.d/10-opcache.ini
-    if [ $MAIN -eq 7 ]; then
-        sed -i 's/listen = 127.0.0.1:9000/listen = \/run\/php-fpm\/www.sock/' /etc/php-fpm.d/www.conf
-    fi
-    line=`cat -n /etc/php-fpm.d/www.conf | grep 'listen.mode' | tail -n1 | awk '{print $1}'`
-    sed -i "${line}a listen.mode=0666" /etc/php-fpm.d/www.conf
-
     # config wordpress
     cd /var/www/$DOMAIN
     cp wp-config-sample.php wp-config.php
@@ -225,6 +216,23 @@ server {
     listen 80;
     listen [::]:80;
     server_name ${DOMAIN};
+    return 301 https://\$server_name:${PORT}\$request_uri;
+}
+server {
+    listen 81 ssl http2;
+    server_name ${DOMAIN};
+    root /usr/share/nginx/html;
+
+    ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    ssl_ecdh_curve secp384r1;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_session_tickets off;
+    $CERT_FILE
+    $KEY_FILE
+
     return 301 https://\$server_name:${PORT}\$request_uri;
 }
 server {

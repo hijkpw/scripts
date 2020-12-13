@@ -388,6 +388,7 @@ EOF
 
     res=`grep -E 'dest.*8080' $V2_CONFIG_FILE`
     [[ "$res" = "" ]] && sed -i 's/"dest": 80/"dest": 8080/' $V2_CONFIG_FILE
+    # VLESS 
     cat > $NGINX_CONFIG_FILE<<-EOF
 server {
     listen 80;
@@ -397,7 +398,8 @@ server {
 }
 
 server {
-    listen       8080 http2;
+    listen 8080;
+    listen 81 http2;
     server_name ${DOMAIN};
     charset utf-8;
 

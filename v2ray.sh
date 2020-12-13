@@ -547,6 +547,9 @@ configNginx() {
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
+        ROBOT_CONIFG="    location = /robots.txt {}"
+    else
+        ROBOT_CONIFG=""
     fi
 
     if [[ "$BT" = "false" ]]; then
@@ -642,8 +645,7 @@ server {
     location / {
         $action
     }
-    location = /robots.txt {
-    }
+    $ROBOT_CONFIG
 
     location ${WSPATH} {
       proxy_redirect off;
@@ -664,15 +666,15 @@ EOF
             # trojan
             cat > ${NGINX_CONF_PATH}${DOMAIN}.conf<<-EOF
 server {
-    listen 80 http2;
-    listen [::]:80 http2;
+    listen 80;
+    listen [::]:80;
+    listen 81 http2;
     server_name ${DOMAIN};
     root /usr/share/nginx/html;
     location / {
         $action
     }
-    location = /robots.txt {
-    }
+    location = /r
 }
 EOF
         fi
@@ -849,8 +851,13 @@ trojanConfig() {
       ],
       "fallbacks": [
         {
-            "dest": 80
-        }
+              "alpn": "http/1.1",
+              "dest": 80
+          },
+          {
+              "alpn": "h2",
+              "dest": 81
+          }
       ]
     },
     "streamSettings": {
@@ -902,9 +909,14 @@ trojanXTLSConfig() {
         }
       ],
       "fallbacks": [
-        {
-            "dest": 80
-        }
+          {
+              "alpn": "http/1.1",
+              "dest": 80
+          },
+          {
+              "alpn": "h2",
+              "dest": 81
+          }
       ]
     },
     "streamSettings": {
@@ -1150,7 +1162,12 @@ vlessTLSConfig() {
       "decryption": "none",
       "fallbacks": [
           {
+              "alpn": "http/1.1",
               "dest": 80
+          },
+          {
+              "alpn": "h2",
+              "dest": 81
           }
       ]
     },
@@ -1207,7 +1224,12 @@ vlessXTLSConfig() {
       "decryption": "none",
       "fallbacks": [
           {
+              "alpn": "http/1.1",
               "dest": 80
+          },
+          {
+              "alpn": "h2",
+              "dest": 81
           }
       ]
     },
