@@ -216,9 +216,9 @@ getData() {
     fi
 
     echo ""
-    read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
+    read -p " 请设置trojan-go密码（不输则随机生成）:" PASSWORD
     [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
-    colorEcho $BLUE " trojan密码：$PASSWORD"
+    colorEcho $BLUE " trojan-go密码：$PASSWORD"
     echo ""
     while true
     do
@@ -226,21 +226,21 @@ getData() {
         if [[ ${answer,,} = "n" ]]; then
             break
         fi
-        read -p " 请设置trojan密码（不输则随机生成）:" pass
+        read -p " 请设置trojan-go密码（不输则随机生成）:" pass
         [[ -z "$pass" ]] && pass=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
         echo ""
-        colorEcho $BLUE " trojan密码：$pass"
+        colorEcho $BLUE " trojan-go密码：$pass"
         PASSWORD="${PASSWORD}\",\"$pass"
     done
 
     echo ""
-    read -p " 请输入trojan端口[100-65535的一个数字，默认443]：" PORT
+    read -p " 请输入trojan-go端口[100-65535的一个数字，默认443]：" PORT
     [[ -z "${PORT}" ]] && PORT=443
     if [[ "${PORT:0:1}" = "0" ]]; then
         echo -e "${RED}端口不能以0开头${PLAIN}"
         exit 1
     fi
-    colorEcho $BLUE " trojan端口：$PORT"
+    colorEcho $BLUE " trojan-go端口：$PORT"
 
     if [[ ${WS} = "true" ]]; then
         echo ""
@@ -428,9 +428,9 @@ configNginx() {
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
-        ROBOT_CONIFG="    location = /robots.txt {}"
+        ROBOT_CONFIG="    location = /robots.txt {}"
     else
-        ROBOT_CONIFG=""
+        ROBOT_CONFIG=""
     fi
     if [[ "$BT" = "false" ]]; then
         if [[ ! -f /etc/nginx/nginx.conf.bak ]]; then
@@ -539,7 +539,6 @@ installTrojan() {
 }
 
 configTrojan() {
-    rm -rf /etc/trojan-go
     mkdir -p /etc/trojan-go
     cat > $CONFIG_FILE <<-EOF
 {

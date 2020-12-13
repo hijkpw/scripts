@@ -317,7 +317,7 @@ getData() {
         echo "   4) 微信视频通话"
         echo "   5) dtls"
         echo "   6) wiregard"
-        read -p "  请选择伪装类型[默认：无]" answer
+        read -p "  请选择伪装类型[默认：无]：" answer
         case $answer in
             2)
                 HEADER_TYPE="utp"
@@ -555,9 +555,9 @@ configNginx() {
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
-        ROBOT_CONIFG="    location = /robots.txt {}"
+        ROBOT_CONFIG="    location = /robots.txt {}"
     else
-        ROBOT_CONIFG=""
+        ROBOT_CONFIG=""
     fi
 
     if [[ "$BT" = "false" ]]; then

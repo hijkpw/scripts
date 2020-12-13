@@ -231,7 +231,7 @@ function getData()
     colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
 
     echo ""
-    read -p " 是否安装BBR（安装请按y，不安装请输n，默认安装）:" NEED_BBR
+    read -p "  是否安装BBR(默认安装)?[y/n]:" NEED_BBR
     [ -z "$NEED_BBR" ] && NEED_BBR=y
     [ "$NEED_BBR" = "Y" ] && NEED_BBR=y
     colorEcho $BLUE " 安装BBR：$NEED_BBR"
@@ -454,9 +454,9 @@ configNginx() {
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
-        ROBOT_CONIFG="    location = /robots.txt {}"
+        ROBOT_CONFIG="    location = /robots.txt {}"
     else
-        ROBOT_CONIFG=""
+        ROBOT_CONFIG=""
     fi
 
     if [[ "$BT" = "false" ]]; then
@@ -827,7 +827,7 @@ function uninstall() {
         fi
         rm -rf $NGINX_CONF_PATH${domain}.conf
         ~/.acme.sh/acme.sh --uninstall
-        echo -e " ${RED}trojan卸载成功${PLAIN}"
+        colorEcho $GREEN " trojan卸载成功"
     fi
 }
 

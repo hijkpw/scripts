@@ -70,8 +70,6 @@ checkTrojan() {
         exit 1
     fi
     PORT=`grep local_port $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
-    CERT_FILE=`grep -m1 cert $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
-    KEY_FILE=`grep -m1 key $CONFIG_FILE | cut -d: -f2 | tr -d \",' '`
     [[ "$1" = "install" ]] && colorEcho $BLUE " 伪装域名：$DOMAIN"
     [[ "$1" = "install" ]] && colorEcho $BLUE " trojan监听端口：$PORT"
 }
@@ -219,24 +217,8 @@ server {
     return 301 https://\$server_name:${PORT}\$request_uri;
 }
 server {
-    listen 81 ssl http2;
-    server_name ${DOMAIN};
-    root /usr/share/nginx/html;
-
-    ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
-    ssl_ecdh_curve secp384r1;
-    ssl_prefer_server_ciphers on;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
-    ssl_session_tickets off;
-    $CERT_FILE
-    $KEY_FILE
-
-    return 301 https://\$server_name:${PORT}\$request_uri;
-}
-server {
     listen 8080;
+    listen 81 http2;
     server_name ${DOMAIN};
     
     charset utf-8;
