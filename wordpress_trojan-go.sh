@@ -64,7 +64,8 @@ checkTrojan() {
         exit 1
     fi
     DOMAIN=`grep sni $CONFIG_FILE | cut -d\" -f4`
-    if [[ ! -f /etc/nginx/conf.d/${DOMAIN}.conf ]]; then
+    NGINX_CONFIG_FILE="$NGINX_CONF_PATH${DOMAIN}.conf"
+    if [[ ! -f $NGINX_CONFIG_FILE ]]; then
         colorEcho $RED " 未找到域名的nginx配置文件"
         exit 1
     fi
