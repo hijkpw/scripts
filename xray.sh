@@ -868,6 +868,7 @@ trojanConfig() {
         "security": "tls",
         "tlsSettings": {
             "serverName": "$DOMAIN",
+            "alpn": ["http/1.1", "h2"],
             "certificates": [
                 {
                     "certificateFile": "$CERT_FILE",
@@ -927,6 +928,7 @@ trojanXTLSConfig() {
         "security": "xtls",
         "xtlsSettings": {
             "serverName": "$DOMAIN",
+            "alpn": ["http/1.1", "h2"],
             "certificates": [
                 {
                     "certificateFile": "$CERT_FILE",
@@ -1069,6 +1071,7 @@ vmessTLSConfig() {
         "security": "tls",
         "tlsSettings": {
             "serverName": "$DOMAIN",
+            "alpn": ["http/1.1", "h2"],
             "certificates": [
                 {
                     "certificateFile": "$CERT_FILE",
@@ -1179,6 +1182,7 @@ vlessTLSConfig() {
         "security": "tls",
         "tlsSettings": {
             "serverName": "$DOMAIN",
+            "alpn": ["http/1.1", "h2"],
             "certificates": [
                 {
                     "certificateFile": "$CERT_FILE",
@@ -1241,6 +1245,7 @@ vlessXTLSConfig() {
         "security": "xtls",
         "xtlsSettings": {
             "serverName": "$DOMAIN",
+            "alpn": ["http/1.1", "h2"],
             "certificates": [
                 {
                     "certificateFile": "$CERT_FILE",

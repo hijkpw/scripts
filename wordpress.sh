@@ -442,6 +442,7 @@ install() {
     systemctl restart $PHP_SERVICE mariadb nginx $SERVICE
     sleep 2
     statusText
+    echo ""
 
     showInfo
 }

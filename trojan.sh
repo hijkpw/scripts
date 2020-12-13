@@ -354,7 +354,7 @@ configTrojan() {
         "cipher_tls13": "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384",
         "prefer_server_cipher": true,
         "alpn": [
-            "http/1.1"
+            "http/1.1", "h2"
         ],
         "alpn_port_override": {
             "h2": 81

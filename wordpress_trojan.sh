@@ -269,6 +269,7 @@ install() {
 
     sleep 2
     statusText
+    echo ""
     
     showInfo
 }
