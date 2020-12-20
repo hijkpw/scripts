@@ -809,6 +809,7 @@ installXray() {
         colorEcho $RED " 下载Xray文件失败，请检查服务器网络设置"
         exit 1
     fi
+    systemctl stop xray
     mkdir -p /usr/local/etc/xray /usr/local/share/xray && \
     unzip /tmp/xray/xray.zip -d /tmp/xray
     cp /tmp/xray/xray /usr/local/bin
