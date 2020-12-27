@@ -264,7 +264,7 @@ getCert() {
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
         ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
-        ~/.acme.sh/acme.sh   --issue -d $DOMAIN   --standalone
+        ~/.acme.sh/acme.sh   --issue -d $DOMAIN --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx"  --standalone
         CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
         KEY_FILE="/etc/v2ray/${DOMAIN}.key"
         ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN \
