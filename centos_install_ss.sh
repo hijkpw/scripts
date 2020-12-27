@@ -236,9 +236,6 @@ installSS() {
         fi
     fi
 
-    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
-
     interface="0.0.0.0"
     if [[ "$V6_PROXY" != "" ]]; then
         interface="::"

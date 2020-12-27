@@ -354,8 +354,6 @@ installBBR() {
     if [ "$result" != "" ]; then
         colorEcho $BLUE " BBR模块已安装"
         INSTALL_BBR=false
-        echo "3" > /proc/sys/net/ipv4/tcp_fastopen
-        echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
         return
     fi
 
@@ -368,7 +366,6 @@ installBBR() {
 
     echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
     echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
-    echo "net.ipv4.tcp_fastopen = 3" >> /etc/sysctl.conf
     sysctl -p
     result=$(lsmod | grep bbr)
     if [[ "$result" != "" ]]; then
@@ -381,7 +378,6 @@ installBBR() {
     apt install -y --install-recommends linux-generic-hwe-16.04
     grub-set-default 0
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
-    echo "3" > /proc/sys/net/ipv4/tcp_fastopen
     INSTALL_BBR=false
 }
 
