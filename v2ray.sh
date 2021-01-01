@@ -1857,7 +1857,7 @@ menu() {
     echo -e "  ${GREEN}10.${PLAIN}  安装${BLUE}trojan+XTLS${PLAIN}${RED}(推荐)${PLAIN}"
     echo " -------------"
     echo -e "  ${GREEN}11.${PLAIN}  更新V2ray"
-    echo -e "  ${GREEN}12.${PLAIN}  卸载V2ray"
+    echo -e "  ${GREEN}12.  ${RED}卸载V2ray${PLAIN}"
     echo " -------------"
     echo -e "  ${GREEN}13.${PLAIN}  启动V2ray"
     echo -e "  ${GREEN}14.${PLAIN}  重启V2ray"

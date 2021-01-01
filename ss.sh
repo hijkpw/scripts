@@ -569,7 +569,7 @@ menu() {
 
     echo -e "  ${GREEN}1.${PLAIN}  安装SS"
     echo -e "  ${GREEN}2.${PLAIN}  更新SS"
-    echo -e "  ${GREEN}3.${PLAIN}  卸载SS"
+    echo -e "  ${GREEN}3.  ${RED}卸载SS${PLAIN}"
     echo " -------------"
     echo -e "  ${GREEN}4.${PLAIN}  启动SS"
     echo -e "  ${GREEN}5.${PLAIN}  重启SS"
@@ -577,7 +577,7 @@ menu() {
     echo " -------------"
     echo -e "  ${GREEN}7.${PLAIN}  查看SS配置"
     echo -e "  ${GREEN}8.${PLAIN}  查看配置二维码"
-    echo -e "  ${GREEN}9.${PLAIN}  修改SS配置"
+    echo -e "  ${GREEN}9.  ${RED}修改SS配置${PLAIN}"
     echo -e "  ${GREEN}10.${PLAIN} 查看SS日志"
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"

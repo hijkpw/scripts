@@ -612,7 +612,7 @@ menu() {
     echo ""
 
     echo -e "  ${GREEN}1.${PLAIN}  安装SSR"
-    echo -e "  ${GREEN}2.${PLAIN}  卸载SSR"
+    echo -e "  ${GREEN}2.  ${RED}卸载SSR${PLAIN}"
     echo " -------------"
     echo -e "  ${GREEN}4.${PLAIN}  启动SSR"
     echo -e "  ${GREEN}5.${PLAIN}  重启SSR"
@@ -620,7 +620,7 @@ menu() {
     echo " -------------"
     echo -e "  ${GREEN}7.${PLAIN}  查看SSR配置"
     echo -e "  ${GREEN}8.${PLAIN}  查看配置二维码"
-    echo -e "  ${GREEN}9.${PLAIN}  修改SSR配置"
+    echo -e "  ${GREEN}9.  ${RED}修改SSR配置${PLAIN}"
     echo -e "  ${GREEN}10.${PLAIN} 查看SSR日志"
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"

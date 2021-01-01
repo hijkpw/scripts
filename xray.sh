@@ -1860,7 +1860,7 @@ menu() {
     echo -e "  ${GREEN}10.${PLAIN}  安装${BLUE}trojan+XTLS${PLAIN}${RED}(推荐)${PLAIN}"
     echo " -------------"
     echo -e "  ${GREEN}11.${PLAIN}  更新Xray"
-    echo -e "  ${GREEN}12.${PLAIN}  卸载Xray"
+    echo -e "  ${GREEN}12.  ${RED}卸载Xray${PLAIN}"
     echo " -------------"
     echo -e "  ${GREEN}13.${PLAIN}  启动Xray"
     echo -e "  ${GREEN}14.${PLAIN}  重启Xray"
