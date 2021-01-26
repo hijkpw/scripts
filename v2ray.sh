@@ -529,6 +529,10 @@ getCert() {
         source ~/.bashrc
         ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
         ~/.acme.sh/acme.sh   --issue -d $DOMAIN --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx"  --standalone
+        if [[ "$?" != "0" ]]; then
+            colorEcho $RED " 获取证书失败，请复制上面的红色文字到 https://hijk.art 反馈"
+            exit 1
+        fi
         CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
         KEY_FILE="/etc/v2ray/${DOMAIN}.key"
         ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN \
