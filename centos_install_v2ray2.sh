@@ -36,6 +36,15 @@ if [[ "$?" != "0" ]]; then
     V6_PROXY="https://gh.hijk.art/"
 fi
 
+BT="false"
+NGINX_CONF_PATH="/etc/nginx/conf.d/"
+
+res=`which bt 2>/dev/null`
+if [[ "$res" != "" ]]; then
+    BT="true"
+    NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
+fi
+
 checkSystem() {
     result=$(id | awk '{print $1}')
     if [[ $result != "uid=0(root)" ]]; then
@@ -248,7 +257,7 @@ preinstall() {
 getCert() {
     mkdir -p /etc/v2ray
     if [[ -z ${CERT_FILE+x} ]]; then
-        systemctl stop nginx
+        stopNginx
         systemctl stop v2ray
         res=`netstat -ntlp| grep -E ':80 |:443 '`
         if [[ "${res}" != "" ]]; then
@@ -264,7 +273,11 @@ getCert() {
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
         ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
-        ~/.acme.sh/acme.sh   --issue -d $DOMAIN --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx"  --standalone
+        if [[ "$BT" = "false" ]]; then
+            ~/.acme.sh/acme.sh   --issue -d $DOMAIN --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx"  --standalone
+        else
+            ~/.acme.sh/acme.sh   --issue -d $DOMAIN --pre-hook "nginx -s stop" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf"  --standalone
+        fi
         [[ -f ~/.acme.sh/$DOMAIN/ca.cer ]] || {
             colorEcho $RED " 获取证书失败，请复制上面的红色文字到 https://hijk.art 反馈"
             exit 1
@@ -323,21 +336,20 @@ installV2ray() {
 }
 
 installNginx() {
-    BT=false
-    confpath="/etc/nginx/conf.d/"
-    yum install -y nginx
-    if [[ "$?" != "0" ]]; then
-        res=`which nginx`
-        if [[ "$?" != "0" ]]; then
+    if [[ "$BT" = "false" ]]; then
+        yum install -y nginx
+        res=$(command -v nginx)
+        if [[ "$res" = "" ]]; then
+            colorEcho $RED " Nginx安装失败，请到 https://hijk.art 反馈"
+            exit 1
+        fi
+        systemctl enable nginx
+    else
+        res=$(command -v nginx)
+        if [[ "$res" = "" ]]; then
             colorEcho $RED " 您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
             exit 1
         fi
-        BT=true
-        confpath="/www/server/panel/vhost/nginx/"
-        res=`ps aux | grep -i nginx`
-        [[ "$res" != "" ]] && nginx -s stop
-    else
-        systemctl stop nginx
     fi
     
     getCert
@@ -383,10 +395,10 @@ http {
 }
 EOF
 
-        mkdir -p /etc/nginx/conf.d;
+        mkdir -p /etc/nginx/conf.d
     fi
     
-    mkdir -p /usr/share/nginx/html;
+    mkdir -p /usr/share/nginx/html
     if [[ "$ALLOW_SPIDER" = "n" ]]; then
         echo 'User-Agent: *' > /usr/share/nginx/html/robots.txt
         echo 'Disallow: /' >> /usr/share/nginx/html/robots.txt
@@ -400,7 +412,7 @@ EOF
         sub_filter \"$REMOTE_HOST\" \"$DOMAIN\";
         sub_filter_once off;"
     fi
-    cat > ${confpath}${DOMAIN}.conf<<-EOF
+    cat > ${NGINX_CONF_PATH}${DOMAIN}.conf<<-EOF
 server {
     listen 80;
     listen [::]:80;
@@ -449,11 +461,7 @@ server {
 }
 EOF
 
-    if [[ "$BT" = "false" ]]; then
-        systemctl enable nginx && systemctl restart nginx
-    else
-        nginx -c /www/server/nginx/conf/nginx.conf
-    fi
+    startNginx
     systemctl start v2ray
     
     sleep 3
@@ -461,6 +469,25 @@ EOF
     if [[ "${res}" = "" ]]; then
         echo -e " nginx启动失败！ 请到 ${RED}https://www.hijk.pw${PLAIN} 反馈"
         exit 1
+    fi
+}
+
+startNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl start nginx
+    else
+        nginx -c /www/server/nginx/conf/nginx.conf
+    fi
+}
+
+stopNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl stop nginx
+    else
+        res=`ps aux | grep -i nginx`
+        if [[ "$res" != "" ]]; then
+            nginx -s stop
+        fi
     fi
 }
 
@@ -543,11 +570,7 @@ info() {
         exit 1
     fi
     path=`grep path $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
-    confpath="/etc/nginx/conf.d/"
-    if [[ ! -f $confpath${domain}.conf ]]; then
-        confpath="/www/server/panel/vhost/nginx/"
-    fi
-    port=`cat ${confpath}${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
+    port=`cat ${NGINX_CONF_PATH}${domain}.conf | grep -i ssl | head -n1 | awk '{print $2}'`
     security="none"
     
     res=`netstat -nltp | grep ${port} | grep nginx`
@@ -574,7 +597,7 @@ info() {
     echo -e " ${BLUE}v2ray运行状态：${PLAIN}${v2status}"
     echo -e " ${BLUE}v2ray配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo -e " ${BLUE}nginx运行状态：${PLAIN}${ngstatus}"
-    echo -e " ${BLUE}nginx配置文件：${PLAIN}${RED}${confpath}${domain}.conf${PLAIN}"
+    echo -e " ${BLUE}nginx配置文件：${PLAIN}${RED}${NGINX_CONF_PATH}${domain}.conf${PLAIN}"
     echo ""
     echo -e " ${RED}v2ray配置信息：${PLAIN}               "
     echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"

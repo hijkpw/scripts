@@ -406,7 +406,11 @@ getCert() {
         curl -sL https://get.acme.sh | sh
         source ~/.bashrc
         ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
-        ~/.acme.sh/acme.sh   --issue -d $DOMAIN --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx"  --standalone
+        if [[ "$BT" = "false" ]]; then
+            ~/.acme.sh/acme.sh   --issue -d $DOMAIN --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx"  --standalone
+        else
+            ~/.acme.sh/acme.sh   --issue -d $DOMAIN --pre-hook "nginx -s stop" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf"  --standalone
+        fi
         [[ -f ~/.acme.sh/$DOMAIN/ca.cer ]] || {
             colorEcho $RED " 获取证书失败，请复制上面的红色文字到 https://hijk.art 反馈"
             exit 1

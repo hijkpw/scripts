@@ -318,6 +318,11 @@ getCert() {
 
 installNginx() {
     apt install -y nginx
+    res=$(command -v nginx)
+    if [[ "$res" = "" ]]; then
+        colorEcho $RED " Nginx安装失败，请到 https://hijk.art 反馈"
+        exit 1
+    fi
     
     getCert
 
@@ -373,7 +378,7 @@ http {
 }
 EOF
 
-    mkdir -p /etc/nginx/conf.d;
+    mkdir -p /etc/nginx/conf.d
     cat > /etc/nginx/conf.d/${DOMAIN}.conf<<-EOF
 server {
     listen 80;
@@ -524,7 +529,7 @@ info() {
     echo -e " ${BLUE}v2ray运行状态：${PLAIN}${v2status}"
     echo -e " ${BLUE}v2ray配置文件：${PLAIN}${RED}$CONFIG_FILE${PLAIN}"
     echo -e " ${BLUE}nginx运行状态：${PLAIN}${ngstatus}"
-    echo -e " ${BLUE}nginx配置文件：${PLAIN}${RED}${confpath}${domain}.conf${PLAIN}"
+    echo -e " ${BLUE}nginx配置文件：${PLAIN}${RED}/etc/nginx/conf.d/${domain}.conf${PLAIN}"
     echo ""
     echo -e " ${RED}v2ray配置信息：${PLAIN}               "
     echo -e "  ${BLUE}IP(address):${PLAIN}  ${RED}${IP}${PLAIN}"
