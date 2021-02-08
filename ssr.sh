@@ -455,6 +455,11 @@ installBBR() {
 }
 
 showInfo() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SSR未安装，请先安装！${PLAIN}"
+        return
+    fi
     port=`grep server_port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep python`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
@@ -487,6 +492,11 @@ showInfo() {
 }
 
 showQR() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e " ${RED}SSR未安装，请先安装！${PLAIN}"
+        return
+    fi
     port=`grep server_port $CONFIG_FILE| cut -d: -f2 | tr -d \",' '`
     res=`netstat -nltp | grep ${port} | grep python`
     [[ -z "$res" ]] && status="${RED}已停止${PLAIN}" || status="${GREEN}正在运行${PLAIN}"
@@ -670,4 +680,15 @@ menu() {
 
 checkSystem
 
-menu
+action=$1
+[[ -z $1 ]] && action=menu
+case "$action" in
+    menu|install|uninstall|start|restart|stop|showInfo|showQR|showLog)
+        ${action}
+        ;;
+    *)
+        echo " 参数错误"
+        echo " 用法: `basename $0` [menu|install|uninstall|start|restart|stop|showInfo|showQR|showLog]"
+        ;;
+esac
+
