@@ -467,7 +467,8 @@ EOF
     sleep 3
     res=`netstat -nltp | grep ${PORT} | grep nginx`
     if [[ "${res}" = "" ]]; then
-        echo -e " nginx启动失败！ 请到 ${RED}https://www.hijk.pw${PLAIN} 反馈"
+        nginx -t
+        echo -e " nginx启动失败！ 请到 ${RED}https://hijk.art${PLAIN} 反馈"
         exit 1
     fi
 }

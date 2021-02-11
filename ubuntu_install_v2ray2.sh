@@ -427,9 +427,7 @@ server {
     }
 }
 EOF
-    sed -i '/certbot/d' /etc/crontab
-    certbotpath=`which certbot`
-    echo "0 3 1 */2 0 root systemctl stop nginx; ${certbotpath} renew; systemctl restart nginx" >> /etc/crontab
+
     systemctl enable nginx && systemctl restart nginx
     systemctl start v2ray
     sleep 3

@@ -141,7 +141,7 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 
 [Mac电脑连接Linux教程](https://v2raytech.com/mac-connect-to-linux-tutorial/)
 
-[vultr常见问题](hijk.pw/vultr-faq/)
+[vultr常见问题](https://v2raytech.com/vultr-faq/)
 
 [v2ray使用cloudflare中转流量，拯救被墙ip](https://v2raytech.com/use-cloudflare-unlock-blocked-ip/)
 
