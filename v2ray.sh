@@ -1,5 +1,5 @@
 #!/bin/bash
-# MTProto一键安装脚本
+# v2ray一键安装脚本
 # Author: hijk<https://hijk.art>
 
 

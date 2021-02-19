@@ -1,5 +1,5 @@
 #!/bin/bash
-# shadowsocksR/SSR CentOS 7/8一键安装教程
+# shadowsocksR/SSR一键安装教程
 # Author: hijk<https://hijk.art>
 
 

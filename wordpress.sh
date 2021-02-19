@@ -1,5 +1,5 @@
 #!/bin/bash
-# v2ray centos7/8 WordPress一键安装脚本
+# v2ray/xray WordPress一键安装脚本
 # Author: hijk<https://hijk.art>
 
 RED="\033[31m"      # Error message

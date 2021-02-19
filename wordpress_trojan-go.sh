@@ -1,5 +1,5 @@
 #!/bin/bash
-# centos7/8 trojan-go WordPress一键安装脚本
+# trojan-go WordPress一键安装脚本
 # Author: hijk<https://hijk.art>
 
 

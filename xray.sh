@@ -1,5 +1,5 @@
 #!/bin/bash
-# MTProto一键安装脚本
+# xray一键安装脚本
 # Author: hijk<https://hijk.art>
 
 
