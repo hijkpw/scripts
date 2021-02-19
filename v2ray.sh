@@ -1509,6 +1509,12 @@ update() {
 }
 
 uninstall() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        colorEcho $RED " V2ray未安装，请先安装！"
+        return
+    fi
+
     echo ""
     read -p " 确定卸载V2ray？[y/n]：" answer
     if [[ "${answer,,}" = "y" ]]; then

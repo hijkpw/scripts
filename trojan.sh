@@ -802,6 +802,12 @@ showLog() {
 }
 
 function uninstall() {
+    res=`status`
+    if [[ $res -lt 2 ]]; then
+        echo -e "${RED}trojan未安装，请先安装！${PLAIN}"
+        return
+    fi
+
     echo ""
     read -p " 确定卸载trojan？(y/n)" answer
     [[ -z ${answer} ]] && answer="n"
