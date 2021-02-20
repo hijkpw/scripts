@@ -80,11 +80,11 @@ function checkSystem()
 }
 
 status() {
-    trojan_cmd="$(command -v trojan)"
-    if [[ "$trojan_cmd" = "" ]]; then
+    if [[ ! -f /usr/local/bin/trojan ]]; then
         echo 0
         return
     fi
+
     if [[ ! -f $CONFIG_FILE ]]; then
         echo 1
         return
