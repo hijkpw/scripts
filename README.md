@@ -67,6 +67,8 @@ Youtube频道：<https://www.youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ>
 
 ## V2Ray
 
+[V2rayN 4.12配置教程](https://v2raytech.com/v2rayn-4-12-config-tutorial/)
+
 [V2rayN配置教程](https://v2raytech.com/v2rayn-config-tutorial/)
 
 [V2rayW配置教程](https://v2raytech.com/v2rayw-config-tutorial/)
