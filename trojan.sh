@@ -174,7 +174,7 @@ function getData()
     echo "   1) 静态网站(位于/usr/share/nginx/html)"
     echo "   2) 小说站(随机选择)"
     echo "   3) 美女站(https://imeizi.me)"
-    echo "   4) VPS优惠博客(https://vpsgongyi.com)"
+    echo "   4) VPS优惠博客(https://www.lowendtalk.com)"
     echo "   5) 自定义反代站点(需以http或者https开头)"
     read -p "  请选择伪装网站类型[默认:美女站]" answer
     if [[ -z "$answer" ]]; then
@@ -194,7 +194,7 @@ function getData()
             PROXY_URL="https://imeizi.me"
             ;;
         4)
-            PROXY_URL="https://vpsgongyi.com"
+            PROXY_URL="https://www.lowendtalk.com"
             ;;
         5)
             read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
