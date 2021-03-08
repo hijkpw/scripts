@@ -14,12 +14,12 @@ PLAIN='\033[0m'
 SITES=(
 http://www.zhuizishu.com/
 http://xs.56dyc.com/
-http://www.xiaoshuosk.com/
-https://www.quledu.net/
+#http://www.xiaoshuosk.com/
+#https://www.quledu.net/
 http://www.ddxsku.com/
 http://www.biqu6.com/
 https://www.wenshulou.cc/
-http://www.auutea.com/
+#http://www.auutea.com/
 http://www.55shuba.com/
 http://www.39shubao.com/
 https://www.23xsw.cc/
@@ -173,7 +173,7 @@ getVersion() {
     RETVAL=$?
     CUR_VER="$(normalizeVersion "$(echo "$VER" | head -n 1 | cut -d " " -f2)")"
     TAG_URL="${V6_PROXY}https://api.github.com/repos/v2fly/v2ray-core/releases/latest"
-    NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
+    NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10| tr ',' '\n' | grep 'tag_name' | cut -d\" -f4)")"
     if [[ "$XTLS" = "true" ]]; then
         NEW_VER=v4.32.1
     fi

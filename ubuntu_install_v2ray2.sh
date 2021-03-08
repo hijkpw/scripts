@@ -14,12 +14,12 @@ PLAIN='\033[0m'
 SITES=(
 http://www.zhuizishu.com/
 http://xs.56dyc.com/
-http://www.xiaoshuosk.com/
-https://www.quledu.net/
+#http://www.xiaoshuosk.com/
+#https://www.quledu.net/
 http://www.ddxsku.com/
 http://www.biqu6.com/
 https://www.wenshulou.cc/
-http://www.auutea.com/
+#http://www.auutea.com/
 http://www.55shuba.com/
 http://www.39shubao.com/
 https://www.23xsw.cc/
