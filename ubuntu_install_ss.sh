@@ -222,6 +222,7 @@ installSS() {
 
     tag_url="${V6_PROXY}https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases/latest"
     new_ver="$(normalizeVersion "$(curl -s "${tag_url}" --connect-timeout 10| grep 'tag_name' | cut -d\" -f4)")"
+    export PATH=/usr/local/bin:$PATH
     res=`which ss-server`
     if [ "$?" != "0" ]; then
         installNewVer $new_ver
