@@ -39,6 +39,11 @@ https://www.wenshulou.cc/
 http://www.55shuba.com/
 http://www.39shubao.com/
 https://www.23xsw.cc/
+https://www.huanbige.com/
+https://www.jueshitangmen.info/
+https://www.zhetian.org/
+http://www.bequgexs.com/
+http://www.tjwl.com/
 )
 
 CONFIG_FILE=/usr/local/etc/trojan/config.json

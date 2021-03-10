@@ -136,7 +136,7 @@ installDocker() {
             "deb [arch=amd64] https://download.docker.com/linux/$OS \
             $(lsb_release -cs) \
             stable"
-        #apt update -y
+        apt update
     else
         wget -O /etc/yum.repos.d/docker-ce.repo https://download.docker.com/linux/centos/docker-ce.repo
         yum clean all
