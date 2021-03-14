@@ -23,7 +23,7 @@ https://www.wenshulou.cc/
 http://www.55shuba.com/
 http://www.39shubao.com/
 https://www.23xsw.cc/
-https://www.huanbige.com/
+#https://www.huanbige.com/
 https://www.jueshitangmen.info/
 https://www.zhetian.org/
 http://www.bequgexs.com/

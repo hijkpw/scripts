@@ -23,7 +23,7 @@ https://www.wenshulou.cc/
 http://www.55shuba.com/
 http://www.39shubao.com/
 https://www.23xsw.cc/
-https://www.huanbige.com/
+#https://www.huanbige.com/
 https://www.jueshitangmen.info/
 https://www.zhetian.org/
 http://www.bequgexs.com/
@@ -480,9 +480,22 @@ installNginx() {
     colorEcho $BLUE " 安装nginx..."
     if [[ "$BT" = "false" ]]; then
         if [[ "$PMT" = "yum" ]]; then
-            $CMD_INSTALL epel-release 
+            $CMD_INSTALL epel-release
+            if [[ "$?" != "0" ]]; then
+                echo '[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true' > /etc/yum.repos.d/nginx.repo
+            fi
         fi
         $CMD_INSTALL nginx
+        if [[ "$?" != "0" ]]; then
+            colorEcho $RED " Nginx安装失败，请到 https://hijk.art 反馈"
+            exit 1
+        fi
         systemctl enable nginx
     else
         res=`which nginx 2>/dev/null`
