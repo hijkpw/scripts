@@ -556,7 +556,7 @@ getCert() {
         }
         CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
         KEY_FILE="/etc/v2ray/${DOMAIN}.key"
-        ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN \
+        ~/.acme.sh/acme.sh  --install-cert -d $DOMAIN --ecc \
             --key-file       $KEY_FILE  \
             --fullchain-file $CERT_FILE \
             --reloadcmd     "service nginx force-reload"
