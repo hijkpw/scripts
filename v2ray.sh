@@ -374,7 +374,7 @@ getData() {
         echo ""
         while true
         do
-            read -p " 请输入伪装路径，以/开头：" WSPATH
+            read -p " 请输入伪装路径，以/开头(不懂请直接回车)：" WSPATH
             if [[ -z "${WSPATH}" ]]; then
                 len=`shuf -i5-12 -n1`
                 ws=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $len | head -n 1`
@@ -1740,7 +1740,7 @@ outputVmessTLS() {
     echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
     echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
     echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
-    echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+    echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
     echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
     echo  
     echo -e "   ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
@@ -1770,7 +1770,7 @@ outputVmessWS() {
     echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}none${PLAIN}"
     echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
     echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
-    echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+    echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
     echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
     echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
     echo  
@@ -1828,7 +1828,7 @@ showInfo() {
             echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
             echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
             echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
-            echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+            echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
         elif [[ "$ws" = "false" ]]; then
             echo -e "   ${BLUE}IP(address):  ${PLAIN}${RED}${IP}${PLAIN}"
@@ -1838,7 +1838,7 @@ showInfo() {
             echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
             echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
             echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
-            echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+            echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
         else
             echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
@@ -1848,7 +1848,7 @@ showInfo() {
             echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
             echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
             echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
-            echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+            echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
             echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
             echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
         fi

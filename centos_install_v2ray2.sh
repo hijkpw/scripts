@@ -139,7 +139,7 @@ getData() {
     echo ""
     while true
     do
-        read -p " 请输入伪装路径，以/开头：" WSPATH
+        read -p " 请输入伪装路径，以/开头(不懂请直接回车)：" WSPATH
         if [[ -z "${WSPATH}" ]]; then
             len=`shuf -i5-12 -n1`
             ws=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w $len | head -n 1`
@@ -613,7 +613,7 @@ info() {
     echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}$security${PLAIN}"
     echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}" 
     echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none${PLAIN}"
-    echo -e "   ${BLUE}伪装域名/主机名(host)：${PLAIN}${RED}${domain}${PLAIN}"
+    echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
     echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${path}${PLAIN}"
     echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
     echo  
