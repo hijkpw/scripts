@@ -186,7 +186,7 @@ installPHP() {
             rpm -iUh https://rpms.remirepo.net/enterprise/remi-release-7.rpm
             sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/remi-php74.repo
         else
-            rpm -iUh https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+            dnf install https://rpms.remirepo.net/enterprise/remi-release-8.rpm
             sed -i '0,/enabled=0/{s/enabled=0/enabled=1/}' /etc/yum.repos.d/remi.repo
             dnf module install -y php:remi-7.4
         fi
