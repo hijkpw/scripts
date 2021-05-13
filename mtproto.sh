@@ -12,7 +12,7 @@ export MTG_CONFIG="${MTG_CONFIG:-$HOME/.config/mtg}"
 export MTG_ENV="$MTG_CONFIG/env"
 export MTG_SECRET="$MTG_CONFIG/secret"
 export MTG_CONTAINER="${MTG_CONTAINER:-mtg}"
-export MTG_IMAGENAME="${MTG_IMAGENAME:-nineseconds/mtg:stable}"
+export MTG_IMAGENAME="${MTG_IMAGENAME:-nineseconds/mtg:1}"
 
 DOCKER_CMD="$(command -v docker)"
 OSNAME=`hostnamectl | grep -i system | cut -d: -f2`
