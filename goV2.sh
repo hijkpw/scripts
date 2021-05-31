@@ -110,11 +110,14 @@ archAffix(){
         x86_64|amd64)
             echo '64'
         ;;
-        *armv7*|armv6l)
-            echo 'arm'
+        *armv7*)
+            echo 'arm32-v7a'
+            ;;
+        armv6*)
+            echo 'arm32-v6a'
         ;;
         *armv8*|aarch64)
-            echo 'arm64'
+            echo 'arm64-v8a'
         ;;
         *mips64le*)
             echo 'mips64le'
