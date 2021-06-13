@@ -275,7 +275,7 @@ getCert() {
         yum install -y socat openssl cronie
         systemctl enable crond
         systemctl start crond
-        curl -sL https://get.acme.sh | sh
+        curl -sL https://get.acme.sh | sh -s email=hijk.pw@protonmail.ch
         source ~/.bashrc
         ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
         if [[ "$BT" = "false" ]]; then

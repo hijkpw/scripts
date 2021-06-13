@@ -542,7 +542,7 @@ getCert() {
             systemctl start cron
             systemctl enable cron
         fi
-        curl -sL https://get.acme.sh | sh
+        curl -sL https://get.acme.sh | sh -s email=hijk.pw@protonmail.ch
         source ~/.bashrc
         ~/.acme.sh/acme.sh  --upgrade  --auto-upgrade
         if [[ "$BT" = "false" ]]; then
