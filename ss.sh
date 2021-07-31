@@ -59,6 +59,7 @@ checkSystem() {
 }
 
 status() {
+    export PATH=/usr/local/bin:$PATH
     cmd="$(command -v ss-server)"
     if [[ "$cmd" = "" ]]; then
         echo 0
