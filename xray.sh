@@ -912,16 +912,7 @@ trojanConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -972,16 +963,7 @@ trojanXTLSConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -1011,16 +993,7 @@ vmessConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -1062,16 +1035,7 @@ vmessKCPConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -1115,16 +1079,7 @@ vmessTLSConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -1164,16 +1119,7 @@ vmessWSConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -1226,16 +1172,7 @@ vlessTLSConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -1289,16 +1226,7 @@ vlessXTLSConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -1338,16 +1266,7 @@ vlessWSConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
@@ -1390,16 +1309,7 @@ vlessKCPConfig() {
     "protocol": "blackhole",
     "settings": {},
     "tag": "blocked"
-  }],
-  "routing": {
-    "rules": [
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  }]
 }
 EOF
 }
