@@ -74,7 +74,8 @@ function acme() {
 			bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force --listen-v6
 		fi
 		if [[ -n $(echo $domainIP | grep nginx) ]]; then
-			yellow "域名解析无效，请检查域名是否填写正确或等待域名解析完成再执行脚本"
+			green "当前域名解析IP：$domainIP"
+			yellow "域名未解析到当前服务器IP，请检查域名是否填写正确或等待域名解析完成再执行脚本"
 			exit 0
 		elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
 			if [[ $domainIP != $v4 ]] && [[ $domainIP != $v6 ]]; then
