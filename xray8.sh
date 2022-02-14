@@ -27,7 +27,7 @@ CONFIG_FILE="/usr/local/etc/xray/config.json"
 OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
 checkwarp(){
-	[[ -n $(wg 2>/dev/null) ]] && echo " 检测到WARP已打开，脚本中断运行" && exit 1
+	[[ -n $(wg 2>/dev/null) ]] && colorEcho $RED " 检测到WARP已打开，脚本中断运行" && exit 1
 }
 
 V6_PROXY=""
