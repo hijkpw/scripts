@@ -31,8 +31,8 @@ checkwarp(){
 }
 
 V6_PROXY=""
-IP=$(curl -sL -4 ip.gs)
-[[ "$?" != "0" ]] && IP=$(curl -sL -6 ip.gs) && V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
+IP=$(curl -s4m2 https://ip.gs)
+[[ "$?" != "0" ]] && IP=$(curl -s6m2 https://ip.gs) && V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
 [ -n $V6_PROXY ] && echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
 
 BT="false"
@@ -203,7 +203,7 @@ getData() {
 			CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
 			KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
 		else
-			resolve=$(curl -sL ipget.net/?ip=${DOMAIN})
+			resolve=$(curl -sm2 ipget.net/?ip=${DOMAIN})
 			res=$(echo -n ${resolve} | grep ${IP})
 			if [[ -z "${res}" ]]; then
 				colorEcho ${BLUE} "${DOMAIN} 解析结果：${resolve}"
@@ -319,7 +319,7 @@ getData() {
 						index=$(shuf -i0-${len} -n1)
 						PROXY_URL=${SITES[$index]}
 						host=$(echo ${PROXY_URL} | cut -d/ -f3)
-						ip=$(curl -sL ipget.net/?ip=${host})
+						ip=$(curl -sm2 ipget.net/?ip=${host})
 						res=$(echo -n ${ip} | grep ${host})
 						if [[ "${res}" == "" ]]; then
 							echo "$ip $host" >>/etc/hosts
