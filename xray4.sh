@@ -735,7 +735,7 @@ installXray() {
 	cat >/etc/systemd/system/xray.service <<-EOF
 		[Unit]
 		Description=Xray Service
-		Documentation=https://github.com/xtls https://hijk.art
+		Documentation=https://github.com/xtls
 		After=network.target nss-lookup.target
 		
 		[Service]
