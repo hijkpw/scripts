@@ -31,19 +31,13 @@ CONFIG_FILE="/usr/local/etc/xray/config.json"
 OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
 V6_PROXY=""
-IP=$(curl -sL -4 ip.sb)
-if [[ "$?" != "0" ]]; then
-	IP=$(curl -sL -6 ip.sb)
-	V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
-fi
+IP=$(curl -sL -4 ip.gs)
+[[ "$?" != "0" ]] && IP=$(curl -sL -6 ip.gs) && V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
 res=$(which bt 2>/dev/null)
-if [[ "$res" != "" ]]; then
-	BT="true"
-	NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
-fi
+[[ "$res" != "" ]] && BT="true" && NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
 
 VLESS="false"
 TROJAN="false"
@@ -100,10 +94,7 @@ status() {
 	[[ ! -f $CONFIG_FILE ]] && echo 1 && return
 	port=$(grep port $CONFIG_FILE | head -n 1 | cut -d: -f2 | tr -d \",' ')
 	res=$(ss -nutlp | grep ${port} | grep -i xray)
-	if [[ -z "$res" ]]; then
-		echo 2
-		return
-	fi
+	[[ -z "$res" ]] && echo 2 && return
 
 	if [[ $(configNeedNginx) != "yes" ]]; then
 		echo 3
