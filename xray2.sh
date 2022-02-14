@@ -111,36 +111,20 @@ status() {
 statusText() {
 	res=$(status)
 	case $res in
-	2)
-		echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN}
-		;;
-	3)
-		echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN}
-		;;
-	4)
-		echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN}, ${RED}Nginx未运行${PLAIN}
-		;;
-	5)
-		echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行, Nginx正在运行${PLAIN}
-		;;
-	*)
-		echo -e ${RED}未安装${PLAIN}
-		;;
+		2) echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN} ;;
+		3) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN} ;;
+		4) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN}, ${RED}Nginx未运行${PLAIN} ;;
+		5) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行, Nginx正在运行${PLAIN} ;;
+		*) echo -e ${RED}未安装${PLAIN} ;;
 	esac
 }
 
 normalizeVersion() {
 	if [ -n "$1" ]; then
 		case "$1" in
-		v*)
-			echo "$1"
-			;;
-		http*)
-			echo "v1.4.2"
-			;;
-		*)
-			echo "v$1"
-			;;
+			v*) echo "$1" ;;
+			http*) echo "v1.4.2" ;;
+			*) echo "v$1" ;;
 		esac
 	else
 		echo ""
@@ -168,55 +152,22 @@ getVersion() {
 
 archAffix() {
 	case "$(uname -m)" in
-	i686 | i386)
-		echo '32'
-		;;
-	x86_64 | amd64)
-		echo '64'
-		;;
-	armv5tel)
-		echo 'arm32-v5'
-		;;
-	armv6l)
-		echo 'arm32-v6'
-		;;
-	armv7 | armv7l)
-		echo 'arm32-v7a'
-		;;
-	armv8 | aarch64)
-		echo 'arm64-v8a'
-		;;
-	mips64le)
-		echo 'mips64le'
-		;;
-	mips64)
-		echo 'mips64'
-		;;
-	mipsle)
-		echo 'mips32le'
-		;;
-	mips)
-		echo 'mips32'
-		;;
-	ppc64le)
-		echo 'ppc64le'
-		;;
-	ppc64)
-		echo 'ppc64'
-		;;
-	ppc64le)
-		echo 'ppc64le'
-		;;
-	riscv64)
-		echo 'riscv64'
-		;;
-	s390x)
-		echo 's390x'
-		;;
-	*)
-		colorEcho $RED " 不支持的CPU架构！"
-		exit 1
-		;;
+		i686 | i386) echo '32' ;;
+		x86_64 | amd64) echo '64' ;;
+		armv5tel) echo 'arm32-v5' ;;
+		armv6l) echo 'arm32-v6' ;;
+		armv7 | armv7l) echo 'arm32-v7a' ;;
+		armv8 | aarch64) echo 'arm64-v8a' ;;
+		mips64le) echo 'mips64le' ;;
+		mips64) echo 'mips64' ;;
+		mipsle) echo 'mips32le' ;;
+		mips) echo 'mips32' ;;
+		ppc64le) echo 'ppc64le' ;;
+		ppc64) echo 'ppc64' ;;
+		ppc64le) echo 'ppc64le' ;;
+		riscv64) echo 'riscv64' ;;
+		s390x) echo 's390x' ;;
+		*) colorEcho $RED " 不支持的CPU架构！" && exit 1;;
 	esac
 
 	return 0
