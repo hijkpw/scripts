@@ -1728,25 +1728,25 @@ menu() {
 
 	read -p " 请选择操作[0-17]：" answer
 	case $answer in
-	0) exit 1 ;;
-	1) install ;;
-	2) KCP="true" && install ;;
-	3) TLS="true" && install ;;
-	4) TLS="true" && WS="true" && install ;;
-	5) VLESS="true" && KCP="true" && install ;;
-	6) VLESS="true" && TLS="true" && install ;;
-	7) VLESS="true" && TLS="true" && WS="true" && install ;;
-	8) VLESS="true" && TLS="true" && XTLS="true" && install ;;
-	9) TROJAN="true" && TLS="true" && install ;;
-	10) TROJAN="true" && TLS="true" && XTLS="true" && install ;;
-	11) update ;;
-	12) uninstall ;;
-	13) start ;;
-	14) restart ;;
-	15) stop ;;
-	16) showInfo ;;
-	17) showLog ;;
-	*) colorEcho $RED " 请选择正确的操作！" && exit 1 ;;
+		0) exit 1 ;;
+		1) install ;;
+		2) KCP="true" && install ;;
+		3) TLS="true" && install ;;
+		4) TLS="true" && WS="true" && install ;;
+		5) VLESS="true" && KCP="true" && install ;;
+		6) VLESS="true" && TLS="true" && install ;;
+		7) VLESS="true" && TLS="true" && WS="true" && install ;;
+		8) VLESS="true" && TLS="true" && XTLS="true" && install ;;
+		9) TROJAN="true" && TLS="true" && install ;;
+		10) TROJAN="true" && TLS="true" && XTLS="true" && install ;;
+		11) update ;;
+		12) uninstall ;;
+		13) start ;;
+		14) restart ;;
+		15) stop ;;
+		16) showInfo ;;
+		17) showLog ;;
+		*) colorEcho $RED " 请选择正确的操作！" && exit 1 ;;
 	esac
 }
 
