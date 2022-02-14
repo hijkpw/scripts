@@ -1252,7 +1252,6 @@ configXray() {
 
 install() {
 	getData
-
 	$PMT clean all
 	[[ "$PMT" == "apt" ]] && $PMT update
 	#echo $CMD_UPGRADE | bash
