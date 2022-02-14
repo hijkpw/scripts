@@ -315,7 +315,7 @@ getData() {
 						index=$(shuf -i0-${len} -n1)
 						PROXY_URL=${SITES[$index]}
 						host=$(echo ${PROXY_URL} | cut -d/ -f3)
-						ip=$(curl -sL https://hijk.art/hostip.php?d=${host})
+						ip=$(curl -sL ipget.net/?ip=${host})
 						res=$(echo -n ${ip} | grep ${host})
 						if [[ "${res}" == "" ]]; then
 							echo "$ip $host" >>/etc/hosts
