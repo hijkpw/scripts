@@ -1310,11 +1310,7 @@ bbrReboot() {
 
 update() {
 	res=$(status)
-	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
-		return
-	fi
-
+	[[ $res -lt 2 ]] && colorEcho $RED " Xray未安装，请先安装！" && return
 	getVersion
 	RETVAL="$?"
 	if [[ $RETVAL == 0 ]]; then
