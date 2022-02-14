@@ -1691,11 +1691,7 @@ showInfo() {
 
 showLog() {
 	res=$(status)
-	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
-		return
-	fi
-
+	[[ $res -lt 2 ]] && colorEcho $RED " Xray未安装，请先安装！" && return
 	journalctl -xen -u xray --no-pager
 }
 
@@ -1703,11 +1699,9 @@ menu() {
 	clear
 	echo "#############################################################"
 	echo -e "#                     ${RED}Xray一键安装脚本${PLAIN}                      #"
-	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
-	echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
-	echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
-	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
-	echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
+	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk) & MisakaNo                            #"
+	echo -e "# ${GREEN}博客${PLAIN}: https://owo.misaka.rest                             #"
+	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
 	echo "#############################################################"
 	echo -e "  ${GREEN}1.${PLAIN}   安装Xray-VMESS"
 	echo -e "  ${GREEN}2.${PLAIN}   安装Xray-${BLUE}VMESS+mKCP${PLAIN}"
