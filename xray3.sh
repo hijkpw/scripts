@@ -241,24 +241,12 @@ getData() {
 		echo "   6) wiregard"
 		read -p "  请选择伪装类型[默认：无]：" answer
 		case $answer in
-		2)
-			HEADER_TYPE="utp"
-			;;
-		3)
-			HEADER_TYPE="srtp"
-			;;
-		4)
-			HEADER_TYPE="wechat-video"
-			;;
-		5)
-			HEADER_TYPE="dtls"
-			;;
-		6)
-			HEADER_TYPE="wireguard"
-			;;
-		*)
-			HEADER_TYPE="none"
-			;;
+			2) HEADER_TYPE="utp" ;;
+			3) HEADER_TYPE="srtp" ;;
+			4) HEADER_TYPE="wechat-video" ;;
+			5) HEADER_TYPE="dtls" ;;
+			6) HEADER_TYPE="wireguard" ;;
+			*) HEADER_TYPE="none" ;;
 		esac
 		colorEcho $BLUE " 伪装类型：$HEADER_TYPE"
 		SEED=$(cat /proc/sys/kernel/random/uuid)
