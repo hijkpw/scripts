@@ -96,14 +96,8 @@ needNginx() {
 }
 
 status() {
-	if [[ ! -f /usr/local/bin/xray ]]; then
-		echo 0
-		return
-	fi
-	if [[ ! -f $CONFIG_FILE ]]; then
-		echo 1
-		return
-	fi
+	[[ ! -f /usr/local/bin/xray ]] && echo 0 && return
+	[[ ! -f $CONFIG_FILE ]] && echo 1 && return
 	port=$(grep port $CONFIG_FILE | head -n 1 | cut -d: -f2 | tr -d \",' ')
 	res=$(ss -nutlp | grep ${port} | grep -i xray)
 	if [[ -z "$res" ]]; then
