@@ -1322,7 +1322,6 @@ update() {
 		installXray
 		stop
 		start
-
 		colorEcho $GREEN " 最新版Xray安装成功！"
 	fi
 }
