@@ -307,44 +307,44 @@ getData() {
 			PROXY_URL="https://bing.imeizi.me"
 		else
 			case $answer in
-			1)
-				PROXY_URL=""
-				;;
-			2)
-				len=${#SITES[@]}
-				((len--))
-				while true; do
-					index=$(shuf -i0-${len} -n1)
-					PROXY_URL=${SITES[$index]}
-					host=$(echo ${PROXY_URL} | cut -d/ -f3)
-					ip=$(curl -sL https://hijk.art/hostip.php?d=${host})
-					res=$(echo -n ${ip} | grep ${host})
-					if [[ "${res}" == "" ]]; then
-						echo "$ip $host" >>/etc/hosts
-						break
+				1)
+					PROXY_URL=""
+					;;
+				2)
+					len=${#SITES[@]}
+					((len--))
+					while true; do
+						index=$(shuf -i0-${len} -n1)
+						PROXY_URL=${SITES[$index]}
+						host=$(echo ${PROXY_URL} | cut -d/ -f3)
+						ip=$(curl -sL https://hijk.art/hostip.php?d=${host})
+						res=$(echo -n ${ip} | grep ${host})
+						if [[ "${res}" == "" ]]; then
+							echo "$ip $host" >>/etc/hosts
+							break
+						fi
+					done
+					;;
+				3)
+					PROXY_URL="https://imeizi.me"
+					;;
+				4)
+					PROXY_URL="https://bing.imeizi.me"
+					;;
+				5)
+					read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
+					if [[ -z "$PROXY_URL" ]]; then
+						colorEcho $RED " 请输入反代网站！"
+						exit 1
+					elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+						colorEcho $RED " 反代网站必须以http或https开头！"
+						exit 1
 					fi
-				done
-				;;
-			3)
-				PROXY_URL="https://imeizi.me"
-				;;
-			4)
-				PROXY_URL="https://bing.imeizi.me"
-				;;
-			5)
-				read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
-				if [[ -z "$PROXY_URL" ]]; then
-					colorEcho $RED " 请输入反代网站！"
+					;;
+				*)
+					colorEcho $RED " 请输入正确的选项！"
 					exit 1
-				elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
-					colorEcho $RED " 反代网站必须以http或https开头！"
-					exit 1
-				fi
-				;;
-			*)
-				colorEcho $RED " 请输入正确的选项！"
-				exit 1
-				;;
+					;;
 			esac
 		fi
 		REMOTE_HOST=$(echo ${PROXY_URL} | cut -d/ -f3)
