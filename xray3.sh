@@ -1519,7 +1519,6 @@ outputVmess() {
 	echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
 	echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}auto${PLAIN}"
 	echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
-	echo
 	echo -e "   ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
 }
 
@@ -1576,7 +1575,6 @@ outputVmessTLS() {
 	echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
 	echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
 	echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
-	echo
 	echo -e "   ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
 }
 
@@ -1607,7 +1605,6 @@ outputVmessWS() {
 	echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
 	echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
 	echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
-	echo
 	echo -e "   ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
 }
 
@@ -1699,7 +1696,7 @@ menu() {
 	clear
 	echo "#############################################################"
 	echo -e "#                     ${RED}Xray一键安装脚本${PLAIN}                      #"
-	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk) & MisakaNo                            #"
+	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk) & MisakaNo                           #"
 	echo -e "# ${GREEN}博客${PLAIN}: https://owo.misaka.rest                             #"
 	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
 	echo "#############################################################"
