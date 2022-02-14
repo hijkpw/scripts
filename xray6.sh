@@ -299,9 +299,8 @@ getData() {
 		colorEcho $BLUE " 请选择伪装站类型:"
 		echo "   1) 静态网站(位于/usr/share/nginx/html)"
 		echo "   2) 小说站(随机选择)"
-		echo "   3) 美女站(https://imeizi.me)"
-		echo "   4) 高清壁纸站(https://bing.ioliu.cn)"
-		echo "   5) 自定义反代站点(需以http或者https开头)"
+		echo "   3) 高清壁纸站(https://bing.ioliu.cn)"
+		echo "   4) 自定义反代站点(需以http或者https开头)"
 		read -p "  请选择伪装网站类型[默认:高清壁纸站]" answer
 		if [[ -z "$answer" ]]; then
 			PROXY_URL="https://bing.ioliu.cn"
@@ -323,9 +322,8 @@ getData() {
 						fi
 					done
 					;;
-				3) PROXY_URL="https://imeizi.me" ;;
-				4) PROXY_URL="https://bing.ioliu.cn" ;;
-				5)
+				3) PROXY_URL="https://bing.ioliu.cn" ;;
+				4)
 					read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
 					if [[ -z "$PROXY_URL" ]]; then
 						colorEcho $RED " 请输入反代网站！"
@@ -335,10 +333,7 @@ getData() {
 						exit 1
 					fi
 					;;
-				*)
-					colorEcho $RED " 请输入正确的选项！"
-					exit 1
-					;;
+				*) colorEcho $RED " 请输入正确的选项！" && exit 1 ;;
 			esac
 		fi
 		REMOTE_HOST=$(echo ${PROXY_URL} | cut -d/ -f3)
