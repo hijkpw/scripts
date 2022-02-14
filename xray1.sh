@@ -86,18 +86,12 @@ colorEcho() {
 
 configNeedNginx() {
 	local ws=$(grep wsSettings $CONFIG_FILE)
-	if [[ -z "$ws" ]]; then
-		echo no
-		return
-	fi
+	[[ -z "$ws" ]] && echo no && return
 	echo yes
 }
 
 needNginx() {
-	if [[ "$WS" == "false" ]]; then
-		echo no
-		return
-	fi
+	[[ "$WS" == "false" ]] && echo no && return
 	echo yes
 }
 
