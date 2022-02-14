@@ -27,12 +27,13 @@ CONFIG_FILE="/usr/local/etc/xray/config.json"
 OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
 checkwarp(){
-	[[ -n $(wg 2>/dev/null) ]] && colorEcho $RED " 检测到WARP已打开，脚本中断运行" && exit 1
+	[[ -n $(wg 2>/dev/null) ]] && colorEcho $RED " 检测到WARP已打开，脚本中断运行" && colorEcho $YELLOW " 请关闭WARP之后再运行本脚本" && exit 1
 }
 
 V6_PROXY=""
 IP=$(curl -sL -4 ip.gs)
 [[ "$?" != "0" ]] && IP=$(curl -sL -6 ip.gs) && V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
+[ -n $V6_PROXY ] && echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
