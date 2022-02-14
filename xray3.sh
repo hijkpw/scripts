@@ -267,16 +267,9 @@ getData() {
 		read -p "  请选择流控模式[默认:direct]" answer
 		[[ -z "$answer" ]] && answer=1
 		case $answer in
-		1)
-			FLOW="xtls-rprx-direct"
-			;;
-		2)
-			FLOW="xtls-rprx-origin"
-			;;
-		*)
-			colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct"
-			FLOW="xtls-rprx-direct"
-			;;
+			1) FLOW="xtls-rprx-direct" ;;
+			2) FLOW="xtls-rprx-origin" ;;
+			*) colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
 		esac
 		colorEcho $BLUE " 流控模式：$FLOW"
 	fi
