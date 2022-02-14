@@ -182,9 +182,7 @@ getData() {
 		colorEcho ${BLUE} "  3. 如果/root目录下有 xray.pem 和 xray.key 证书密钥文件，无需理会条件2"
 		echo " "
 		read -p " 确认满足按y，按其他退出脚本：" answer
-		if [[ "${answer,,}" != "y" ]]; then
-			exit 0
-		fi
+		[[ "${answer,,}" != "y" ]] && exit 1
 
 		echo ""
 		while true; do
@@ -231,10 +229,7 @@ getData() {
 	else
 		read -p " 请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
 		[[ -z "${PORT}" ]] && PORT=443
-		if [ "${PORT:0:1}" = "0" ]; then
-			colorEcho ${BLUE} " 端口不能以0开头"
-			exit 1
-		fi
+		[ "${PORT:0:1}" = "0" ] && colorEcho ${BLUE} " 端口不能以0开头" && exit 1
 		colorEcho ${BLUE} " Nginx端口：$PORT"
 		XPORT=$(shuf -i10000-65000 -n1)
 	fi
