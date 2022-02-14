@@ -37,14 +37,14 @@ checktls() {
 			green "证书申请成功！证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
 			yellow "证书crt路径如下：/root/cert.crt"
 			yellow "私钥key路径如下：/root/private.key"
-			exit 0
+			exit 1
 		else
 			red "抱歉，证书申请失败"
 			green "建议如下："
 			yellow "1. 检测防火墙是否打开"
 			yellow "2. 检查80端口是否被占用（先lsof -i :80 后kill -9 进程id）"
 			yellow "3. 域名触发Acme.sh官方风控，更换域名或等待7天后再尝试执行脚本"
-			exit 0
+			exit 1
 		fi
 	fi
 }
@@ -74,14 +74,14 @@ acme() {
 		if [[ -n $(echo $domainIP | grep nginx) ]]; then
 			green "当前域名解析IP：$domainIP"
 			yellow "域名未解析到当前服务器IP，请检查域名是否填写正确或等待域名解析完成再执行脚本"
-			exit 0
+			exit 1
 		elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
 			if [[ $domainIP != $v4 ]] && [[ $domainIP != $v6 ]]; then
 				red "当前域名解析的IP与VPS的IP不匹配"
 				green "建议如下："
 				yellow "1、请确保Cloudflare小云朵为关闭状态(仅限DNS)"
 				yellow "2、请检查域名解析网站设置的IP是否正确"
-				exit 0
+				exit 1
 			fi
 		fi
 	else
@@ -100,37 +100,42 @@ acme() {
 	fi
 	bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
 	checktls
-	exit 0
+	exit 1
 }
 
 certificate() {
-	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 0
+	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 1
 	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
 	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
 		bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
 		bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
 		green "撤销并删除${domain}域名证书成功"
-		exit 0
+		exit 1
 	else
 		red "未找到你输入的${domain}域名证书，请自行检查！"
-		exit 0
+		exit 1
 	fi
 }
 
 acmerenew() {
-	[[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh无法执行" && exit 0
+	[[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh无法执行" && exit 1
 	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
 	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
 		[[ -n $(wg) ]] && wg-quick down wgcf && yellow "目前VPS已开启WARP，已为你自动关闭WARP以确保证书申请正常"
 		bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
 		checktls
-		exit 0
+		exit 1
 	else
 		red "未找到你输入的${domain}域名证书，请再次检查域名输入正确"
-		exit 0
+		exit 1
 	fi
+}
+
+uninstall() {
+	[[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh无法执行" && exit 1
+	~/.acme.sh/acme.sh --uninstall
 }
 
 upgrade() {
@@ -160,7 +165,7 @@ menu() {
 	2) certificate ;;
 	3) acmerenew ;;
 	4) upgrade ;;
-	0) exit 0 ;;
+	0) exit 1 ;;
 	esac
 }
 
