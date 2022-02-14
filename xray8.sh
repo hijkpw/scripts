@@ -26,6 +26,10 @@ SITES=(
 CONFIG_FILE="/usr/local/etc/xray/config.json"
 OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
+checkwarp(){
+	[[ -n $(wg 2>/dev/null) ]] && echo " 检测到WARP已打开，脚本中断运行" && exit 1
+}
+
 V6_PROXY=""
 IP=$(curl -sL -4 ip.gs)
 [[ "$?" != "0" ]] && IP=$(curl -sL -6 ip.gs) && V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
@@ -174,7 +178,7 @@ getData() {
 		echo ""
 		echo " Xray一键脚本，运行之前请确认如下条件已经具备："
 		colorEcho ${YELLOW} "  1. 一个伪装域名"
-		colorEcho ${YELLOW} "  2. 伪装域名DNS解析指向当前服务器ip（${IP}），如开启WARP请自行关闭WARP"
+		colorEcho ${YELLOW} "  2. 伪装域名DNS解析指向当前服务器ip（${IP}）"
 		colorEcho ${BLUE} "  3. 如果/root目录下有 xray.pem 和 xray.key 证书密钥文件，无需理会条件2"
 		echo " "
 		read -p " 确认满足按y，按其他退出脚本：" answer
@@ -202,7 +206,7 @@ getData() {
 			res=$(echo -n ${resolve} | grep ${IP})
 			if [[ -z "${res}" ]]; then
 				colorEcho ${BLUE} "${DOMAIN} 解析结果：${resolve}"
-				colorEcho ${RED} " 域名未解析到当前服务器IP(${IP})，或WARP未关闭！"
+				colorEcho ${RED} " 域名未解析到当前服务器IP(${IP})！"
 				exit 1
 			fi
 		fi
@@ -1715,6 +1719,7 @@ menu() {
 }
 
 checkSystem
+checkwarp
 
 action=$1
 [[ -z $1 ]] && action=menu
