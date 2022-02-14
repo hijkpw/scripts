@@ -59,7 +59,7 @@ function acme() {
 	[[ -z $v4 ]] && echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
 	read -p "请输入注册邮箱（例：admin@bilibili.com，或留空自动生成）：" acmeEmail
 	[ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
-	[[ -z $(/root/.acme.sh/acme.sh -v 2>/dev/null) ]] && curl https://get.acme.sh | sh -s email=$acmeEmail && source ~/.bashrc && bash /root/.acme.sh/acme.sh --upgrade --auto-upgrade
+	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && curl https://get.acme.sh | sh -s email=$acmeEmail && source ~/.bashrc && bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
 	read -p "请输入解析完成的域名:" domain
 	green "已输入的域名: $domain" && sleep 1
 	domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
@@ -67,11 +67,11 @@ function acme() {
 		domainIP=$(curl -s ipget.net/?ip="$domain")
 		if [[ $domainIP == $v4 ]]; then
 			yellow "当前域名解析的IPV4：$domainIP" && sleep 1
-			bash /root/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force
+			bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force
 		fi
 		if [[ $domainIP == $v6 ]]; then
 			yellow "当前域名解析的IPV6：$domainIP" && sleep 1
-			bash /root/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force --listen-v6
+			bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force --listen-v6
 		fi
 		if [[ -n $(echo $domainIP | grep nginx) ]]; then
 			yellow "域名解析无效，请检查域名是否填写正确或等待域名解析完成再执行脚本"
@@ -92,25 +92,25 @@ function acme() {
 		export CF_Email="$CFemail"
 		if [[ $domainIP == $v4 ]]; then
 			yellow "当前泛域名解析的IPV4：$domainIP" && sleep 1
-			bash /root/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt
+			bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt
 		fi
 		if [[ $domainIP == $v6 ]]; then
 			yellow "当前泛域名解析的IPV6：$domainIP" && sleep 1
-			bash /root/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt --listen-v6
+			bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt --listen-v6
 		fi
 	fi
-	bash /root/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
+	bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
 	checktls
 	exit 0
 }
 
 function certificate() {
-	[[ -z $(/root/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 0
-	bash /root/.acme.sh/acme.sh --list
+	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 0
+	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
-	if [[ -n $(bash /root/.acme.sh/acme.sh --list | grep $domain) ]]; then
-		bash /root/.acme.sh/acme.sh --revoke -d ${domain} --ecc
-		bash /root/.acme.sh/acme.sh --remove -d ${domain} --ecc
+	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
+		bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
+		bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
 		green "撤销并删除${domain}域名证书成功"
 		exit 0
 	else
@@ -120,12 +120,12 @@ function certificate() {
 }
 
 function acmerenew() {
-	[[ -z $(/root/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh无法执行" && exit 0
-	bash /root/.acme.sh/acme.sh --list
+	[[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh无法执行" && exit 0
+	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
-	if [[ -n $(bash /root/.acme.sh/acme.sh --list | grep $domain) ]]; then
+	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
 		[[ -n $(wg) ]] && wg-quick down wgcf && yellow "目前VPS已开启WARP，已为你自动关闭WARP以确保证书申请正常"
-		bash /root/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
+		bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
 		checktls
 		exit 0
 	else
