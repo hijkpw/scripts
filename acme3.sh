@@ -31,7 +31,7 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流操作系统" && exit 1
 
-function checktls() {
+checktls() {
 	if [[ -f /root/cert.crt && -f /root/private.key ]]; then
 		if [[ -s /root/cert.crt && -s /root/private.key ]]; then
 			green "证书申请成功！证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
@@ -49,7 +49,7 @@ function checktls() {
 	fi
 }
 
-function acme() {
+acme() {
 	green "正在安装acme.sh及其依赖......"
 	${PACKAGE_UPDATE[int]}
 	${PACKAGE_INSTALL[int]} curl wget socat binutils
@@ -103,7 +103,7 @@ function acme() {
 	exit 0
 }
 
-function certificate() {
+certificate() {
 	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 0
 	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
@@ -118,7 +118,7 @@ function certificate() {
 	fi
 }
 
-function acmerenew() {
+acmerenew() {
 	[[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh无法执行" && exit 0
 	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
@@ -133,11 +133,11 @@ function acmerenew() {
 	fi
 }
 
-function upgrade() {
+upgrade() {
 	wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/acme-1key@master/acme1key.sh && chmod -R 777 acme1key.sh && bash acme1key.sh
 }
 
-function menu() {
+menu() {
 	clear
 	red "=================================="
 	echo "                           "
