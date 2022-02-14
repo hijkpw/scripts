@@ -384,7 +384,7 @@ module_hotfixes=true' >/etc/yum.repos.d/nginx.repo
 		fi
 		$CMD_INSTALL nginx
 		if [[ "$?" != "0" ]]; then
-			colorEcho $RED " Nginx安装失败，请到 https://hijk.art 反馈"
+			colorEcho $RED " Nginx安装失败，请截图到TG群反馈"
 			exit 1
 		fi
 		systemctl enable nginx
@@ -449,7 +449,7 @@ getCert() {
 			~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "nginx -s stop || { echo -n ''; }" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf || { echo -n ''; }" --standalone
 		fi
 		[[ -f ~/.acme.sh/${DOMAIN}_ecc/ca.cer ]] || {
-			colorEcho $RED " 获取证书失败，请复制上面的红色文字到 https://hijk.art 反馈"
+			colorEcho $RED " 获取证书失败，请截图到TG群反馈"
 			exit 1
 		}
 		CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
@@ -459,7 +459,7 @@ getCert() {
 		--fullchain-file $CERT_FILE \
 		--reloadcmd "service nginx force-reload"
 		[[ -f $CERT_FILE && -f $KEY_FILE ]] || {
-			colorEcho $RED " 获取证书失败，请到 https://hijk.art 反馈"
+			colorEcho $RED " 获取证书失败，请截图到TG群反馈"
 			exit 1
 		}
 	else
