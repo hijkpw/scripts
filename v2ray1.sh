@@ -1421,7 +1421,6 @@ update() {
 		installV2ray
 		stop
 		start
-
 		colorEcho $GREEN " 最新版V2ray安装成功！"
 	fi
 }
