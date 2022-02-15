@@ -676,7 +676,6 @@ installBBR() {
 		INSTALL_BBR=false
 		return
 	fi
-
 	echo "net.core.default_qdisc=fq" >>/etc/sysctl.conf
 	echo "net.ipv4.tcp_congestion_control=bbr" >>/etc/sysctl.conf
 	sysctl -p
@@ -686,7 +685,6 @@ installBBR() {
 		INSTALL_BBR=false
 		return
 	fi
-
 	colorEcho $BLUE " 安装BBR模块..."
 	if [[ "$PMT" == "yum" ]]; then
 		if [[ "$V6_PROXY" == "" ]]; then
