@@ -54,17 +54,17 @@ acme() {
 	${PACKAGE_UPDATE[int]}
 	${PACKAGE_INSTALL[int]} curl wget socat binutils
 	[[ -n $(wg 2>/dev/null) ]] && wg-quick down wgcf && yellow "目前VPS已开启WARP，已为你自动关闭WARP以确保证书申请正常"
-	v6=$(curl -s6m2 https://ip.gs)
-	v4=$(curl -s4m2 https://ip.gs)
+	v6=$(curl -s6m8 https://ip.gs)
+	v4=$(curl -s4m8 https://ip.gs)
 	[[ -z $v4 ]] && echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
 	read -p "请输入注册邮箱（例：admin@bilibili.com，或留空自动生成）：" acmeEmail
 	[ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
 	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && curl https://get.acme.sh | sh -s email=$acmeEmail && source ~/.bashrc && bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
 	read -p "请输入解析完成的域名:" domain
 	green "已输入的域名: $domain" && sleep 1
-	domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
+	domainIP=$(curl -sm8 ipget.net/?ip="cloudflare.1.1.1.1.$domain")
 	if [[ -n $(echo $domainIP | grep nginx) ]]; then
-		domainIP=$(curl -s ipget.net/?ip="$domain")
+		domainIP=$(curl -sm8 ipget.net/?ip="$domain")
 		if [[ $domainIP == $v4 ]]; then
 			bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force
 		fi
