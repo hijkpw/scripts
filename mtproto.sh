@@ -378,40 +378,17 @@ menu() {
     echo 
     read -p " 请选择操作[0-9]：" answer
     case $answer in
-        0)
-            exit 0
-            ;;
-        1)
-            install
-            ;;
-        2)
-            update
-            ;;
-        3)
-            uninstall
-            ;;
-        4)
-            start
-            ;;
-        5)
-            restart
-            ;;
-        6)
-            stop
-            ;;
-        7)
-            showInfo
-            ;;
-        8)
-            reconfig
-            ;;
-        9)
-            showLog
-            ;;
-        *)
-            echo -e " ${RED}请选择正确的操作！${PLAIN}"
-            exit 1
-            ;;
+        0) exit 1 ;;
+        1) install ;;
+        2) update ;;
+        3) uninstall ;;
+        4) start ;;
+        5) restart ;;
+        6) stop ;;
+        7) showInfo ;;
+        8) reconfig ;;
+        9) showLog ;;
+        *) echo -e " ${RED}请选择正确的操作！${PLAIN}" && exit 1 ;;
     esac
 }
 
