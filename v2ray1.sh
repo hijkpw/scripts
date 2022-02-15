@@ -17,13 +17,15 @@ SITES=(
 	http://www.55shuba.com/
 	http://www.39shubao.com/
 	https://www.23xsw.cc/
+	https://www.huanbige.com/
 	https://www.jueshitangmen.info/
 	https://www.zhetian.org/
 	http://www.bequgexs.com/
 	http://www.tjwl.com/
 )
 
-CONFIG_FILE="/usr/local/etc/xray/config.json"
+CONFIG_FILE="/etc/v2ray/config.json"
+SERVICE_FILE="/etc/systemd/system/v2ray.service"
 OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
 checkwarp(){
@@ -31,11 +33,8 @@ checkwarp(){
 }
 
 V6_PROXY=""
-IP=$(curl -s4m8 https://ip.gs)
-[[ "$?" != "0" ]] && IP=$(curl -s6m8 https://ip.gs) && V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
-if [[ $V6_PROXY != "" ]]; then
-	echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
-fi
+IP=$(curl -s4m8 ip.gs)
+[[ "$?" != "0" ]] && IP=$(curl -s6m8 ip.gs) && V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
@@ -83,21 +82,36 @@ colorEcho() {
 
 configNeedNginx() {
 	local ws=$(grep wsSettings $CONFIG_FILE)
-	[[ -z "$ws" ]] && echo no && return
+	if [[ -z "$ws" ]]; then
+		echo no
+		return
+	fi
 	echo yes
 }
 
 needNginx() {
-	[[ "$WS" == "false" ]] && echo no && return
+	if [[ "$WS" == "false" ]]; then
+		echo no
+		return
+	fi
 	echo yes
 }
 
 status() {
-	[[ ! -f /usr/local/bin/xray ]] && echo 0 && return
-	[[ ! -f $CONFIG_FILE ]] && echo 1 && return
+	if [[ ! -f /usr/bin/v2ray/v2ray ]]; then
+		echo 0
+		return
+	fi
+	if [[ ! -f $CONFIG_FILE ]]; then
+		echo 1
+		return
+	fi
 	port=$(grep port $CONFIG_FILE | head -n 1 | cut -d: -f2 | tr -d \",' ')
-	res=$(ss -nutlp | grep ${port} | grep -i xray)
-	[[ -z "$res" ]] && echo 2 && return
+	res=$(ss -nutlp | grep ${port} | grep -i v2ray)
+	if [[ -z "$res" ]]; then
+		echo 2
+		return
+	fi
 
 	if [[ $(configNeedNginx) != "yes" ]]; then
 		echo 3
@@ -114,36 +128,52 @@ status() {
 statusText() {
 	res=$(status)
 	case $res in
-		2) echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN} ;;
-		3) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN} ;;
-		4) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN}, ${RED}Nginx未运行${PLAIN} ;;
-		5) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行, Nginx正在运行${PLAIN} ;;
-		*) echo -e ${RED}未安装${PLAIN} ;;
+	2)
+		echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN}
+		;;
+	3)
+		echo -e ${GREEN}已安装${PLAIN} ${GREEN}V2ray正在运行${PLAIN}
+		;;
+	4)
+		echo -e ${GREEN}已安装${PLAIN} ${GREEN}V2ray正在运行${PLAIN}, ${RED}Nginx未运行${PLAIN}
+		;;
+	5)
+		echo -e ${GREEN}已安装${PLAIN} ${GREEN}V2ray正在运行, Nginx正在运行${PLAIN}
+		;;
+	*)
+		echo -e ${RED}未安装${PLAIN}
+		;;
 	esac
 }
 
 normalizeVersion() {
 	if [ -n "$1" ]; then
 		case "$1" in
-			v*) echo "$1" ;;
-			http*) echo "v1.5.3" ;;
-			*) echo "v$1" ;;
+            v*)
+                echo "$1"
+                ;;
+            *)
+                echo "v$1"
+                ;;
 		esac
 	else
 		echo ""
 	fi
 }
 
-# 1: new Xray. 0: no. 1: yes. 2: not installed. 3: check failed.
+# 1: new V2Ray. 0: no. 1: yes. 2: not installed. 3: check failed.
 getVersion() {
-	VER=$(/usr/local/bin/xray version | head -n1 | awk '{print $2}')
+	VER="$(/usr/bin/v2ray/v2ray -version 2>/dev/null)"
 	RETVAL=$?
 	CUR_VER="$(normalizeVersion "$(echo "$VER" | head -n 1 | cut -d " " -f2)")"
-	TAG_URL="https://api.github.com/repos/XTLS/Xray-core/releases/latest"
-	NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10 | grep 'tag_name' | cut -d\" -f4)")"
+	TAG_URL="https://api.github.com/repos/v2fly/v2ray-core/releases/latest"
+	NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10 | tr ',' '\n' | grep 'tag_name' | cut -d\" -f4)")"
+	if [[ "$XTLS" == "true" ]]; then
+		NEW_VER=v4.32.1
+	fi
 
 	if [[ $? -ne 0 ]] || [[ $NEW_VER == "" ]]; then
-		colorEcho $RED " 检查Xray版本信息失败，请检查网络"
+		colorEcho $RED " 检查V2ray版本信息失败，请检查网络"
 		return 3
 	elif [[ $RETVAL -ne 0 ]]; then
 		return 2
@@ -155,22 +185,46 @@ getVersion() {
 
 archAffix() {
 	case "$(uname -m)" in
-		i686 | i386) echo '32' ;;
-		x86_64 | amd64) echo '64' ;;
-		armv5tel) echo 'arm32-v5' ;;
-		armv6l) echo 'arm32-v6' ;;
-		armv7 | armv7l) echo 'arm32-v7a' ;;
-		armv8 | aarch64) echo 'arm64-v8a' ;;
-		mips64le) echo 'mips64le' ;;
-		mips64) echo 'mips64' ;;
-		mipsle) echo 'mips32le' ;;
-		mips) echo 'mips32' ;;
-		ppc64le) echo 'ppc64le' ;;
-		ppc64) echo 'ppc64' ;;
-		ppc64le) echo 'ppc64le' ;;
-		riscv64) echo 'riscv64' ;;
-		s390x) echo 's390x' ;;
-		*) colorEcho $RED " 不支持的CPU架构！" && exit 1;;
+        i686 | i386)
+            echo '32'
+            ;;
+        x86_64 | amd64)
+            echo '64'
+            ;;
+        *armv7*)
+            echo 'arm32-v7a'
+            ;;
+        armv6*)
+            echo 'arm32-v6a'
+            ;;
+        *armv8* | aarch64)
+            echo 'arm64-v8a'
+            ;;
+        *mips64le*)
+            echo 'mips64le'
+            ;;
+        *mips64*)
+            echo 'mips64'
+            ;;
+        *mipsle*)
+            echo 'mipsle'
+            ;;
+        *mips*)
+            echo 'mips'
+            ;;
+        *s390x*)
+            echo 's390x'
+            ;;
+        ppc64le)
+            echo 'ppc64le'
+            ;;
+        ppc64)
+            echo 'ppc64'
+            ;;
+        *)
+            colorEcho $RED " 不支持的CPU架构！"
+            exit 1
+            ;;
 	esac
 
 	return 0
@@ -179,13 +233,16 @@ archAffix() {
 getData() {
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		echo ""
-		echo " Xray一键脚本，运行之前请确认如下条件已经具备："
+		echo " V2ray一键脚本，运行之前请确认如下条件已经具备："
 		colorEcho ${YELLOW} "  1. 一个伪装域名"
 		colorEcho ${YELLOW} "  2. 伪装域名DNS解析指向当前服务器ip（${IP}）"
-		colorEcho ${BLUE} "  3. 如果/root目录下有 xray.pem 和 xray.key 证书密钥文件，无需理会条件2"
+		colorEcho ${BLUE} "  3. 如果/root目录下有 v2ray.pem 和 v2ray.key 证书密钥文件，无需理会条件2"
 		echo " "
 		read -p " 确认满足按y，按其他退出脚本：" answer
-		[[ "${answer,,}" != "y" ]] && exit 1
+		if [[ "${answer,,}" != "y" ]]; then
+			exit 0
+		fi
+
 		echo ""
 		while true; do
 			read -p " 请输入伪装域名：" DOMAIN
@@ -197,42 +254,47 @@ getData() {
 		done
 		DOMAIN=${DOMAIN,,}
 		colorEcho ${BLUE} " 伪装域名(host)：$DOMAIN"
-		echo ""
-		if [[ -f ~/xray.pem && -f ~/xray.key ]]; then
+
+		if [[ -f ~/v2ray.pem && -f ~/v2ray.key ]]; then
 			colorEcho ${BLUE} " 检测到自有证书，将使用其部署"
-			CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
-			KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
+			CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
+			KEY_FILE="/etc/v2ray/${DOMAIN}.key"
 		else
-			resolve=$(curl -sm8 ipget.net/?ip=${DOMAIN})
+			resolve=$(curl -sL https://hijk.art/hostip.php?d=${DOMAIN})
 			res=$(echo -n ${resolve} | grep ${IP})
 			if [[ -z "${res}" ]]; then
 				colorEcho ${BLUE} "${DOMAIN} 解析结果：${resolve}"
-				colorEcho ${RED} " 域名未解析到当前服务器IP(${IP})！"
+				colorEcho ${RED} " 域名未解析到当前服务器IP(${IP})!"
 				exit 1
 			fi
 		fi
 	fi
+
 	echo ""
 	if [[ "$(needNginx)" == "no" ]]; then
 		if [[ "$TLS" == "true" ]]; then
-			read -p " 请输入xray监听端口[强烈建议443，默认443]：" PORT
+			read -p " 请输入v2ray监听端口[强烈建议443，默认443]：" PORT
 			[[ -z "${PORT}" ]] && PORT=443
 		else
-			read -p " 请输入xray监听端口[100-65535的一个数字]：" PORT
+			read -p " 请输入v2ray监听端口[100-65535的一个数字]：" PORT
 			[[ -z "${PORT}" ]] && PORT=$(shuf -i200-65000 -n1)
 			if [[ "${PORT:0:1}" == "0" ]]; then
 				colorEcho ${RED} " 端口不能以0开头"
 				exit 1
 			fi
 		fi
-		colorEcho ${BLUE} " xray端口：$PORT"
+		colorEcho ${BLUE} " v2ray端口：$PORT"
 	else
 		read -p " 请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
 		[[ -z "${PORT}" ]] && PORT=443
-		[ "${PORT:0:1}" = "0" ] && colorEcho ${BLUE} " 端口不能以0开头" && exit 1
+		if [ "${PORT:0:1}" = "0" ]; then
+			colorEcho ${BLUE} " 端口不能以0开头"
+			exit 1
+		fi
 		colorEcho ${BLUE} " Nginx端口：$PORT"
-		XPORT=$(shuf -i10000-65000 -n1)
+		V2PORT=$(shuf -i10000-65000 -n1)
 	fi
+
 	if [[ "$KCP" == "true" ]]; then
 		echo ""
 		colorEcho $BLUE " 请选择伪装类型："
@@ -244,22 +306,36 @@ getData() {
 		echo "   6) wiregard"
 		read -p "  请选择伪装类型[默认：无]：" answer
 		case $answer in
-			2) HEADER_TYPE="utp" ;;
-			3) HEADER_TYPE="srtp" ;;
-			4) HEADER_TYPE="wechat-video" ;;
-			5) HEADER_TYPE="dtls" ;;
-			6) HEADER_TYPE="wireguard" ;;
-			*) HEADER_TYPE="none" ;;
+            2)
+                HEADER_TYPE="utp"
+                ;;
+            3)
+                HEADER_TYPE="srtp"
+                ;;
+            4)
+                HEADER_TYPE="wechat-video"
+                ;;
+            5)
+                HEADER_TYPE="dtls"
+                ;;
+            6)
+                HEADER_TYPE="wireguard"
+                ;;
+            *)
+                HEADER_TYPE="none"
+                ;;
 		esac
 		colorEcho $BLUE " 伪装类型：$HEADER_TYPE"
 		SEED=$(cat /proc/sys/kernel/random/uuid)
 	fi
+
 	if [[ "$TROJAN" == "true" ]]; then
 		echo ""
 		read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
 		[[ -z "$PASSWORD" ]] && PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
 		colorEcho $BLUE " trojan密码：$PASSWORD"
 	fi
+
 	if [[ "$XTLS" == "true" ]]; then
 		echo ""
 		colorEcho $BLUE " 请选择流控模式:"
@@ -268,12 +344,20 @@ getData() {
 		read -p "  请选择流控模式[默认:direct]" answer
 		[[ -z "$answer" ]] && answer=1
 		case $answer in
-			1) FLOW="xtls-rprx-direct" ;;
-			2) FLOW="xtls-rprx-origin" ;;
-			*) colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
+            1)
+                FLOW="xtls-rprx-direct"
+                ;;
+            2)
+                FLOW="xtls-rprx-origin"
+                ;;
+            *)
+                colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct"
+                FLOW="xtls-rprx-direct"
+                ;;
 		esac
 		colorEcho $BLUE " 流控模式：$FLOW"
 	fi
+
 	if [[ "${WS}" == "true" ]]; then
 		echo ""
 		while true; do
@@ -293,50 +377,63 @@ getData() {
 		done
 		colorEcho ${BLUE} " ws路径：$WSPATH"
 	fi
+
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		echo ""
 		colorEcho $BLUE " 请选择伪装站类型:"
 		echo "   1) 静态网站(位于/usr/share/nginx/html)"
 		echo "   2) 小说站(随机选择)"
-		echo "   3) 高清壁纸站(https://bing.ioliu.cn)"
-		echo "   4) 自定义反代站点(需以http或者https开头)"
+		echo "   3) 美女站(https://imeizi.me)"
+		echo "   4) 高清壁纸站(https://bing.imeizi.me)"
+		echo "   5) 自定义反代站点(需以http或者https开头)"
 		read -p "  请选择伪装网站类型[默认:高清壁纸站]" answer
 		if [[ -z "$answer" ]]; then
-			PROXY_URL="https://bing.ioliu.cn"
+			PROXY_URL="https://bing.imeizi.me"
 		else
 			case $answer in
-				1) PROXY_URL="" ;;
-				2)
-					len=${#SITES[@]}
-					((len--))
-					while true; do
-						index=$(shuf -i0-${len} -n1)
-						PROXY_URL=${SITES[$index]}
-						host=$(echo ${PROXY_URL} | cut -d/ -f3)
-						ip=$(curl -sm8 ipget.net/?ip=${host})
-						res=$(echo -n ${ip} | grep ${host})
-						if [[ "${res}" == "" ]]; then
-							echo "$ip $host" >>/etc/hosts
-							break
-						fi
-					done
-					;;
-				3) PROXY_URL="https://bing.ioliu.cn" ;;
-				4)
-					read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
-					if [[ -z "$PROXY_URL" ]]; then
-						colorEcho $RED " 请输入反代网站！"
-						exit 1
-					elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
-						colorEcho $RED " 反代网站必须以http或https开头！"
-						exit 1
-					fi
-					;;
-				*) colorEcho $RED " 请输入正确的选项！" && exit 1 ;;
+                1)
+                    PROXY_URL=""
+                    ;;
+                2)
+                    len=${#SITES[@]}
+                    ((len--))
+                    while true; do
+                        index=$(shuf -i0-${len} -n1)
+                        PROXY_URL=${SITES[$index]}
+                        host=$(echo ${PROXY_URL} | cut -d/ -f3)
+                        ip=$(curl -sL https://hijk.art/hostip.php?d=${host})
+                        res=$(echo -n ${ip} | grep ${host})
+                        if [[ "${res}" == "" ]]; then
+                            echo "$ip $host" >>/etc/hosts
+                            break
+                        fi
+                    done
+                    ;;
+                3)
+                    PROXY_URL="https://imeizi.me"
+                    ;;
+                4)
+                    PROXY_URL="https://bing.imeizi.me"
+                    ;;
+                5)
+                    read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
+                    if [[ -z "$PROXY_URL" ]]; then
+                        colorEcho $RED " 请输入反代网站！"
+                        exit 1
+                    elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+                        colorEcho $RED " 反代网站必须以http或https开头！"
+                        exit 1
+                    fi
+                    ;;
+                *)
+                    colorEcho $RED " 请输入正确的选项！"
+                    exit 1
+                    ;;
 			esac
 		fi
 		REMOTE_HOST=$(echo ${PROXY_URL} | cut -d/ -f3)
 		colorEcho $BLUE " 伪装网站：$PROXY_URL"
+
 		echo ""
 		colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
 		echo "    y)允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
@@ -351,6 +448,7 @@ getData() {
 		fi
 		colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
 	fi
+
 	echo ""
 	read -p " 是否安装BBR(默认安装)?[y/n]:" NEED_BBR
 	[[ -z "$NEED_BBR" ]] && NEED_BBR=y
@@ -376,7 +474,7 @@ module_hotfixes=true' >/etc/yum.repos.d/nginx.repo
 		fi
 		$CMD_INSTALL nginx
 		if [[ "$?" != "0" ]]; then
-			colorEcho $RED " Nginx安装失败，请截图到TG群反馈"
+			colorEcho $RED " Nginx安装失败，请到 https://hijk.art 反馈"
 			exit 1
 		fi
 		systemctl enable nginx
@@ -409,10 +507,10 @@ stopNginx() {
 }
 
 getCert() {
-	mkdir -p /usr/local/etc/xray
+	mkdir -p /etc/v2ray
 	if [[ -z ${CERT_FILE+x} ]]; then
 		stopNginx
-		systemctl stop xray
+		sleep 2
 		res=$(netstat -ntlp | grep -E ':80 |:443 ')
 		if [[ "${res}" != "" ]]; then
 			colorEcho ${RED} " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
@@ -420,6 +518,7 @@ getCert() {
 			echo ${res}
 			exit 1
 		fi
+
 		$CMD_INSTALL socat openssl
 		if [[ "$PMT" == "yum" ]]; then
 			$CMD_INSTALL cronie
@@ -430,36 +529,32 @@ getCert() {
 			systemctl start cron
 			systemctl enable cron
 		fi
-		curl -sL https://get.acme.sh | sh -s email=hijk.pw@protonmail.sh
+		curl -sL https://get.acme.sh | sh -s email=hijk.pw@protonmail.ch
 		source ~/.bashrc
 		~/.acme.sh/acme.sh --upgrade --auto-upgrade
 		~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 		if [[ "$BT" == "false" ]]; then
-			if [ -n $V6_PROXY ]; then
-				~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx" --standalone --listen-v6
-			else
-				~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx" --standalone
-			fi
+			~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx" --standalone
 		else
 			~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "nginx -s stop || { echo -n ''; }" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf || { echo -n ''; }" --standalone
 		fi
 		[[ -f ~/.acme.sh/${DOMAIN}_ecc/ca.cer ]] || {
-			colorEcho $RED " 获取证书失败，请截图到TG群反馈"
+			colorEcho $RED " 获取证书失败，请复制上面的红色文字到 https://hijk.art 反馈"
 			exit 1
 		}
-		CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
-		KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
+		CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
+		KEY_FILE="/etc/v2ray/${DOMAIN}.key"
 		~/.acme.sh/acme.sh --install-cert -d $DOMAIN --ecc \
 		--key-file $KEY_FILE \
 		--fullchain-file $CERT_FILE \
 		--reloadcmd "service nginx force-reload"
 		[[ -f $CERT_FILE && -f $KEY_FILE ]] || {
-			colorEcho $RED " 获取证书失败，请截图到TG群反馈"
+			colorEcho $RED " 获取证书失败，请到 https://hijk.art 反馈"
 			exit 1
 		}
 	else
-		cp ~/xray.pem /usr/local/etc/xray/${DOMAIN}.pem
-		cp ~/xray.key /usr/local/etc/xray/${DOMAIN}.key
+		cp ~/v2ray.pem /etc/v2ray/${DOMAIN}.pem
+		cp ~/v2ray.key /etc/v2ray/${DOMAIN}.key
 	fi
 }
 
@@ -533,7 +628,7 @@ configNginx() {
 	fi
 
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
-		mkdir -p ${NGINX_CONF_PATH}
+		mkdir -p $NGINX_CONF_PATH
 		# VMESS+WS+TLS
 		# VLESS+WS+TLS
 		if [[ "$WS" == "true" ]]; then
@@ -570,11 +665,12 @@ configNginx() {
 				
 				    location ${WSPATH} {
 				      proxy_redirect off;
-				      proxy_pass http://127.0.0.1:${XPORT};
+				      proxy_pass http://127.0.0.1:${V2PORT};
 				      proxy_http_version 1.1;
 				      proxy_set_header Upgrade \$http_upgrade;
 				      proxy_set_header Connection "upgrade";
 				      proxy_set_header Host \$host;
+				      # Show real IP in v2ray access.log
 				      proxy_set_header X-Real-IP \$remote_addr;
 				      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
 				    }
@@ -677,6 +773,7 @@ installBBR() {
 		INSTALL_BBR=false
 		return
 	fi
+
 	echo "net.core.default_qdisc=fq" >>/etc/sysctl.conf
 	echo "net.ipv4.tcp_congestion_control=bbr" >>/etc/sysctl.conf
 	sysctl -p
@@ -686,6 +783,7 @@ installBBR() {
 		INSTALL_BBR=false
 		return
 	fi
+
 	colorEcho $BLUE " 安装BBR模块..."
 	if [[ "$PMT" == "yum" ]]; then
 		if [[ "$V6_PROXY" == "" ]]; then
@@ -705,47 +803,51 @@ installBBR() {
 	fi
 }
 
-installXray() {
-	rm -rf /tmp/xray
-	mkdir -p /tmp/xray
-	DOWNLOAD_LINK="${V6_PROXY}https://github.com/XTLS/Xray-core/releases/download/${NEW_VER}/Xray-linux-$(archAffix).zip"
-	colorEcho $BLUE " 下载Xray: ${DOWNLOAD_LINK}"
-	curl -L -H "Cache-Control: no-cache" -o /tmp/xray/xray.zip ${DOWNLOAD_LINK}
+installV2ray() {
+	rm -rf /tmp/v2ray
+	mkdir -p /tmp/v2ray
+	DOWNLOAD_LINK="${V6_PROXY}https://github.com/v2fly/v2ray-core/releases/download/${NEW_VER}/v2ray-linux-$(archAffix).zip"
+	colorEcho $BLUE " 下载V2Ray: ${DOWNLOAD_LINK}"
+	curl -L -H "Cache-Control: no-cache" -o /tmp/v2ray/v2ray.zip ${DOWNLOAD_LINK}
 	if [ $? != 0 ]; then
-		colorEcho $RED " 下载Xray文件失败，请检查服务器网络设置"
+		colorEcho $RED " 下载V2ray文件失败，请检查服务器网络设置"
 		exit 1
 	fi
-	systemctl stop xray
-	mkdir -p /usr/local/etc/xray /usr/local/share/xray && \
-	unzip /tmp/xray/xray.zip -d /tmp/xray
-	cp /tmp/xray/xray /usr/local/bin
-	cp /tmp/xray/geo* /usr/local/share/xray
-	chmod +x /usr/local/bin/xray || {
-		colorEcho $RED " Xray安装失败"
+	mkdir -p '/etc/v2ray' '/var/log/v2ray' && \
+	unzip /tmp/v2ray/v2ray.zip -d /tmp/v2ray
+	mkdir -p /usr/bin/v2ray
+	cp /tmp/v2ray/v2ctl /usr/bin/v2ray/
+	cp /tmp/v2ray/v2ray /usr/bin/v2ray/
+	cp /tmp/v2ray/geo* /usr/bin/v2ray/
+	chmod +x '/usr/bin/v2ray/v2ray' '/usr/bin/v2ray/v2ctl' || {
+		colorEcho $RED " V2ray安装失败"
 		exit 1
 	}
 
-	cat >/etc/systemd/system/xray.service <<-EOF
+	cat >$SERVICE_FILE <<-EOF
 		[Unit]
-		Description=Xray Service
-		Documentation=https://github.com/xtls
+		Description=V2ray Service
+		Documentation=https://hijk.art
 		After=network.target nss-lookup.target
 		
 		[Service]
+		# If the version of systemd is 240 or above, then uncommenting Type=exec and commenting out Type=simple
+		#Type=exec
+		Type=simple
+		# This service runs as root. You may consider to run it as another user for security concerns.
+		# By uncommenting User=nobody and commenting out User=root, the service will run as user nobody.
+		# More discussion at https://github.com/v2ray/v2ray-core/issues/1011
 		User=root
 		#User=nobody
-		#CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-		#AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 		NoNewPrivileges=true
-		ExecStart=/usr/local/bin/xray run -config /usr/local/etc/xray/config.json
+		ExecStart=/usr/bin/v2ray/v2ray -config /etc/v2ray/config.json
 		Restart=on-failure
-		RestartPreventExitStatus=23
 		
 		[Install]
 		WantedBy=multi-user.target
 	EOF
 	systemctl daemon-reload
-	systemctl enable xray.service
+	systemctl enable v2ray.service
 }
 
 trojanConfig() {
@@ -812,7 +914,7 @@ trojanXTLSConfig() {
 		        }
 		      ],
 		      "fallbacks": [
-		        {
+		          {
 		              "alpn": "http/1.1",
 		              "dest": 80
 		          },
@@ -970,7 +1072,7 @@ vmessWSConfig() {
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
-		    "port": $XPORT,
+		    "port": $V2PORT,
 		    "listen": "127.0.0.1",
 		    "protocol": "vmess",
 		    "settings": {
@@ -1117,7 +1219,7 @@ vlessWSConfig() {
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
-		    "port": $XPORT,
+		    "port": $V2PORT,
 		    "listen": "127.0.0.1",
 		    "protocol": "vless",
 		    "settings": {
@@ -1195,8 +1297,8 @@ vlessKCPConfig() {
 	EOF
 }
 
-configXray() {
-	mkdir -p /usr/local/xray
+configV2ray() {
+	mkdir -p /etc/v2ray
 	if [[ "$TROJAN" == "true" ]]; then
 		if [[ "$XTLS" == "true" ]]; then
 			trojanXTLSConfig
@@ -1245,10 +1347,11 @@ configXray() {
 
 install() {
 	getData
+
 	$PMT clean all
 	[[ "$PMT" == "apt" ]] && $PMT update
 	#echo $CMD_UPGRADE | bash
-	$CMD_INSTALL wget curl sudo vim unzip tar gcc openssl
+	$CMD_INSTALL wget vim unzip tar gcc openssl
 	$CMD_INSTALL net-tools
 	if [[ "$PMT" == "apt" ]]; then
 		$CMD_INSTALL libssl-dev g++
@@ -1258,28 +1361,34 @@ install() {
 		colorEcho $RED " unzip安装失败，请检查网络"
 		exit 1
 	fi
+
 	installNginx
 	setFirewall
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		getCert
 	fi
 	configNginx
-	colorEcho $BLUE " 安装Xray..."
+
+	colorEcho $BLUE " 安装V2ray..."
 	getVersion
 	RETVAL="$?"
 	if [[ $RETVAL == 0 ]]; then
-		colorEcho $BLUE " Xray最新版 ${CUR_VER} 已经安装"
+		colorEcho $BLUE " V2ray最新版 ${CUR_VER} 已经安装"
 	elif [[ $RETVAL == 3 ]]; then
 		exit 1
 	else
-		colorEcho $BLUE " 安装Xray ${NEW_VER} ，架构$(archAffix)"
-		installXray
+		colorEcho $BLUE " 安装V2Ray ${NEW_VER} ，架构$(archAffix)"
+		installV2ray
 	fi
-	configXray
+
+	configV2ray
+
 	setSelinux
 	installBBR
+
 	start
 	showInfo
+
 	bbrReboot
 }
 
@@ -1296,40 +1405,48 @@ bbrReboot() {
 
 update() {
 	res=$(status)
-	[[ $res -lt 2 ]] && colorEcho $RED " Xray未安装，请先安装！" && return
+	if [[ $res -lt 2 ]]; then
+		colorEcho $RED " V2ray未安装，请先安装！"
+		return
+	fi
+
 	getVersion
 	RETVAL="$?"
 	if [[ $RETVAL == 0 ]]; then
-		colorEcho $BLUE " Xray最新版 ${CUR_VER} 已经安装"
+		colorEcho $BLUE " V2ray最新版 ${CUR_VER} 已经安装"
 	elif [[ $RETVAL == 3 ]]; then
 		exit 1
 	else
-		colorEcho $BLUE " 安装Xray ${NEW_VER} ，架构$(archAffix)"
-		installXray
+		colorEcho $BLUE " 安装V2Ray ${NEW_VER} ，架构$(archAffix)"
+		installV2ray
 		stop
 		start
-		colorEcho $GREEN " 最新版Xray安装成功！"
+
+		colorEcho $GREEN " 最新版V2ray安装成功！"
 	fi
 }
 
 uninstall() {
 	res=$(status)
 	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
+		colorEcho $RED " V2ray未安装，请先安装！"
 		return
 	fi
+
 	echo ""
-	read -p " 确定卸载Xray？[y/n]：" answer
+	read -p " 确定卸载V2ray？[y/n]：" answer
 	if [[ "${answer,,}" == "y" ]]; then
 		domain=$(grep Host $CONFIG_FILE | cut -d: -f2 | tr -d \",' ')
 		if [[ "$domain" == "" ]]; then
 			domain=$(grep serverName $CONFIG_FILE | cut -d: -f2 | tr -d \",' ')
 		fi
+
 		stop
-		systemctl disable xray
-		rm -rf /etc/systemd/system/xray.service
-		rm -rf /usr/local/bin/xray
-		rm -rf /usr/local/etc/xray
+		systemctl disable v2ray
+		rm -rf $SERVICE_FILE
+		rm -rf /etc/v2ray
+		rm -rf /usr/bin/v2ray
+
 		if [[ "$BT" == "false" ]]; then
 			systemctl disable nginx
 			$CMD_REMOVE nginx
@@ -1342,44 +1459,45 @@ uninstall() {
 			fi
 		fi
 		if [[ "$domain" != "" ]]; then
-			rm -rf ${NGINX_CONF_PATH}${domain}.conf
+			rm -rf $NGINX_CONF_PATH${domain}.conf
 		fi
 		[[ -f ~/.acme.sh/acme.sh ]] && ~/.acme.sh/acme.sh --uninstall
-		colorEcho $GREEN " Xray卸载成功"
+		colorEcho $GREEN " V2ray卸载成功"
 	fi
 }
 
 start() {
 	res=$(status)
 	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
+		colorEcho $RED " V2ray未安装，请先安装！"
 		return
 	fi
 	stopNginx
 	startNginx
-	systemctl restart xray
+	systemctl restart v2ray
 	sleep 2
 	port=$(grep port $CONFIG_FILE | head -n 1 | cut -d: -f2 | tr -d \",' ')
-	res=$(ss -nutlp | grep ${port} | grep -i xray)
+	res=$(ss -nutlp | grep ${port} | grep -i v2ray)
 	if [[ "$res" == "" ]]; then
-		colorEcho $RED " Xray启动失败，请检查日志或查看端口是否被占用！"
+		colorEcho $RED " v2ray启动失败，请检查日志或查看端口是否被占用！"
 	else
-		colorEcho $BLUE " Xray启动成功"
+		colorEcho $BLUE " v2ray启动成功"
 	fi
 }
 
 stop() {
 	stopNginx
-	systemctl stop xray
-	colorEcho $BLUE " Xray停止成功"
+	systemctl stop v2ray
+	colorEcho $BLUE " V2ray停止成功"
 }
 
 restart() {
 	res=$(status)
 	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
+		colorEcho $RED " V2ray未安装，请先安装！"
 		return
 	fi
+
 	stop
 	start
 }
@@ -1392,6 +1510,7 @@ getConfigFileInfo() {
 	trojan="false"
 	protocol="VMess"
 	kcp="false"
+
 	uid=$(grep id $CONFIG_FILE | head -n1 | cut -d: -f2 | tr -d \",' ')
 	alterid=$(grep alterId $CONFIG_FILE | cut -d: -f2 | tr -d \",' ')
 	network=$(grep network $CONFIG_FILE | tail -n1 | cut -d: -f2 | tr -d \",' ')
@@ -1418,6 +1537,7 @@ getConfigFileInfo() {
 		type=$(grep header -A 3 $CONFIG_FILE | grep 'type' | cut -d: -f2 | tr -d \",' ')
 		seed=$(grep seed $CONFIG_FILE | cut -d: -f2 | tr -d \",' ')
 	fi
+
 	vmess=$(grep vmess $CONFIG_FILE)
 	if [[ "$vmess" == "" ]]; then
 		trojan=$(grep trojan $CONFIG_FILE)
@@ -1464,6 +1584,7 @@ outputVmess() {
 	echo -e "   ${BLUE}额外id(alterid)：${PLAIN} ${RED}${alterid}${PLAIN}"
 	echo -e "   ${BLUE}加密方式(security)：${PLAIN} ${RED}auto${PLAIN}"
 	echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
+	echo
 	echo -e "   ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
 }
 
@@ -1520,6 +1641,7 @@ outputVmessTLS() {
 	echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
 	echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
 	echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
+	echo
 	echo -e "   ${BLUE}vmess链接: ${PLAIN}$RED$link$PLAIN"
 }
 
@@ -1550,21 +1672,22 @@ outputVmessWS() {
 	echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
 	echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
 	echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
+	echo
 	echo -e "   ${BLUE}vmess链接:${PLAIN} $RED$link$PLAIN"
 }
 
 showInfo() {
 	res=$(status)
 	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
+		colorEcho $RED " V2ray未安装，请先安装！"
 		return
 	fi
 
 	echo ""
-	echo -n -e " ${BLUE}Xray运行状态：${PLAIN}"
+	echo -n -e " ${BLUE}V2ray运行状态：${PLAIN}"
 	statusText
-	echo -e " ${BLUE}Xray配置文件: ${PLAIN} ${RED}${CONFIG_FILE}${PLAIN}"
-	colorEcho $BLUE " Xray配置信息："
+	echo -e " ${BLUE}V2ray配置文件: ${PLAIN} ${RED}${CONFIG_FILE}${PLAIN}"
+	colorEcho $BLUE " V2ray配置信息："
 
 	getConfigFileInfo
 
@@ -1597,74 +1720,81 @@ showInfo() {
 			return 0
 		fi
 		if [[ "$xtls" == "true" ]]; then
-			echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
-			echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-			echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
-			echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
-			echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
-			echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
-			echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
-			echo -e " ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
-			echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
+			echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
+			echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+			echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+			echo -e "   ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
+			echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+			echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
+			echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
+			echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
+			echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
 		elif [[ "$ws" == "false" ]]; then
-			echo -e " ${BLUE}IP(address):  ${PLAIN}${RED}${IP}${PLAIN}"
-			echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-			echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
-			echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
-			echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
-			echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
-			echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
-			echo -e " ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
-			echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
+			echo -e "   ${BLUE}IP(address):  ${PLAIN}${RED}${IP}${PLAIN}"
+			echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+			echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+			echo -e "   ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
+			echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+			echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
+			echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
+			echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
+			echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
 		else
-			echo -e " ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
-			echo -e " ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
-			echo -e " ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
-			echo -e " ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
-			echo -e " ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
-			echo -e " ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
-			echo -e " ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
-			echo -e " ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
-			echo -e " ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
-			echo -e " ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
+			echo -e "   ${BLUE}IP(address): ${PLAIN} ${RED}${IP}${PLAIN}"
+			echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
+			echo -e "   ${BLUE}id(uuid)：${PLAIN}${RED}${uid}${PLAIN}"
+			echo -e "   ${BLUE}流控(flow)：${PLAIN}$RED$flow${PLAIN}"
+			echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
+			echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
+			echo -e "   ${BLUE}伪装类型(type)：${PLAIN}${RED}none$PLAIN"
+			echo -e "   ${BLUE}伪装域名/主机名(host)/SNI/peer名称：${PLAIN}${RED}${domain}${PLAIN}"
+			echo -e "   ${BLUE}路径(path)：${PLAIN}${RED}${wspath}${PLAIN}"
+			echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}TLS${PLAIN}"
 		fi
 	fi
 }
 
 showLog() {
 	res=$(status)
-	[[ $res -lt 2 ]] && colorEcho $RED " Xray未安装，请先安装！" && return
-	journalctl -xen -u xray --no-pager
+	if [[ $res -lt 2 ]]; then
+		colorEcho $RED " V2ray未安装，请先安装！"
+		return
+	fi
+
+	journalctl -xen -u v2ray --no-pager
 }
 
 menu() {
 	clear
 	echo "#############################################################"
-	echo -e "#                     ${RED}Xray一键安装脚本${PLAIN}                      #"
-	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk) & MisakaNo                           #"
-	echo -e "# ${GREEN}博客${PLAIN}: https://owo.misaka.rest                             #"
-	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
+	echo -e "#                   ${RED}v2ray一键安装脚本${PLAIN}                      #"
+	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+	echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
+	echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
+	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
+	echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
 	echo "#############################################################"
-	echo -e "  ${GREEN}1.${PLAIN}   安装Xray-VMESS"
-	echo -e "  ${GREEN}2.${PLAIN}   安装Xray-${BLUE}VMESS+mKCP${PLAIN}"
-	echo -e "  ${GREEN}3.${PLAIN}   安装Xray-VMESS+TCP+TLS"
-	echo -e "  ${GREEN}4.${PLAIN}   安装Xray-${BLUE}VMESS+WS+TLS${PLAIN}${RED}(推荐)${PLAIN}"
-	echo -e "  ${GREEN}5.${PLAIN}   安装Xray-${BLUE}VLESS+mKCP${PLAIN}"
-	echo -e "  ${GREEN}6.${PLAIN}   安装Xray-VLESS+TCP+TLS"
-	echo -e "  ${GREEN}7.${PLAIN}   安装Xray-${BLUE}VLESS+WS+TLS${PLAIN}${RED}(可过cdn)${PLAIN}"
-	echo -e "  ${GREEN}8.${PLAIN}   安装Xray-${BLUE}VLESS+TCP+XTLS${PLAIN}${RED}(推荐)${PLAIN}"
-	echo -e "  ${GREEN}9.${PLAIN}   安装${BLUE}Trojan${PLAIN}${RED}(推荐)${PLAIN}"
-	echo -e "  ${GREEN}10.${PLAIN}  安装${BLUE}Trojan+XTLS${PLAIN}${RED}(推荐)${PLAIN}"
+
+	echo -e "  ${GREEN}1.${PLAIN}   安装V2ray-VMESS"
+	echo -e "  ${GREEN}2.${PLAIN}   安装V2ray-${BLUE}VMESS+mKCP${PLAIN}"
+	echo -e "  ${GREEN}3.${PLAIN}   安装V2ray-VMESS+TCP+TLS"
+	echo -e "  ${GREEN}4.${PLAIN}   安装V2ray-${BLUE}VMESS+WS+TLS${PLAIN}${RED}(推荐)${PLAIN}"
+	echo -e "  ${GREEN}5.${PLAIN}   安装V2ray-${BLUE}VLESS+mKCP${PLAIN}"
+	echo -e "  ${GREEN}6.${PLAIN}   安装V2ray-VLESS+TCP+TLS"
+	echo -e "  ${GREEN}7.${PLAIN}   安装V2ray-${BLUE}VLESS+WS+TLS${PLAIN}${RED}(可过cdn)${PLAIN}"
+	echo -e "  ${GREEN}8.${PLAIN}   安装V2ray-${BLUE}VLESS+TCP+XTLS${PLAIN}${RED}(推荐)${PLAIN}"
+	echo -e "  ${GREEN}9.${PLAIN}   安装${BLUE}trojan${PLAIN}${RED}(推荐)${PLAIN}"
+	echo -e "  ${GREEN}10.${PLAIN}  安装${BLUE}trojan+XTLS${PLAIN}${RED}(推荐)${PLAIN}"
 	echo " -------------"
-	echo -e "  ${GREEN}11.${PLAIN}  更新Xray"
-	echo -e "  ${GREEN}12.  ${RED}卸载Xray${PLAIN}"
+	echo -e "  ${GREEN}11.${PLAIN}  更新V2ray"
+	echo -e "  ${GREEN}12.  ${RED}卸载V2ray${PLAIN}"
 	echo " -------------"
-	echo -e "  ${GREEN}13.${PLAIN}  启动Xray"
-	echo -e "  ${GREEN}14.${PLAIN}  重启Xray"
-	echo -e "  ${GREEN}15.${PLAIN}  停止Xray"
+	echo -e "  ${GREEN}13.${PLAIN}  启动V2ray"
+	echo -e "  ${GREEN}14.${PLAIN}  重启V2ray"
+	echo -e "  ${GREEN}15.${PLAIN}  停止V2ray"
 	echo " -------------"
-	echo -e "  ${GREEN}16.${PLAIN}  查看Xray配置"
-	echo -e "  ${GREEN}17.${PLAIN}  查看Xray日志"
+	echo -e "  ${GREEN}16.${PLAIN}  查看V2ray配置"
+	echo -e "  ${GREEN}17.${PLAIN}  查看V2ray日志"
 	echo " -------------"
 	echo -e "  ${GREEN}0.${PLAIN}   退出"
 	echo -n " 当前状态："
@@ -1673,34 +1803,96 @@ menu() {
 
 	read -p " 请选择操作[0-17]：" answer
 	case $answer in
-		0) exit 1 ;;
-		1) install ;;
-		2) KCP="true" && install ;;
-		3) TLS="true" && install ;;
-		4) TLS="true" && WS="true" && install ;;
-		5) VLESS="true" && KCP="true" && install ;;
-		6) VLESS="true" && TLS="true" && install ;;
-		7) VLESS="true" && TLS="true" && WS="true" && install ;;
-		8) VLESS="true" && TLS="true" && XTLS="true" && install ;;
-		9) TROJAN="true" && TLS="true" && install ;;
-		10) TROJAN="true" && TLS="true" && XTLS="true" && install ;;
-		11) update ;;
-		12) uninstall ;;
-		13) start ;;
-		14) restart ;;
-		15) stop ;;
-		16) showInfo ;;
-		17) showLog ;;
-		*) colorEcho $RED " 请选择正确的操作！" && exit 1 ;;
+	0)
+		exit 0
+		;;
+	1)
+		install
+		;;
+	2)
+		KCP="true"
+		install
+		;;
+	3)
+		TLS="true"
+		install
+		;;
+	4)
+		TLS="true"
+		WS="true"
+		install
+		;;
+	5)
+		VLESS="true"
+		KCP="true"
+		install
+		;;
+	6)
+		VLESS="true"
+		TLS="true"
+		install
+		;;
+	7)
+		VLESS="true"
+		TLS="true"
+		WS="true"
+		install
+		;;
+	8)
+		VLESS="true"
+		TLS="true"
+		XTLS="true"
+		install
+		;;
+	9)
+		TROJAN="true"
+		TLS="true"
+		install
+		;;
+	10)
+		TROJAN="true"
+		TLS="true"
+		XTLS="true"
+		install
+		;;
+	11)
+		update
+		;;
+	12)
+		uninstall
+		;;
+	13)
+		start
+		;;
+	14)
+		restart
+		;;
+	15)
+		stop
+		;;
+	16)
+		showInfo
+		;;
+	17)
+		showLog
+		;;
+	*)
+		colorEcho $RED " 请选择正确的操作！"
+		exit 1
+		;;
 	esac
 }
 
 checkSystem
-checkwarp
 
 action=$1
 [[ -z $1 ]] && action=menu
 case "$action" in
-	menu | update | uninstall | start | restart | stop | showInfo | showLog) ${action} ;;
-	*) echo " 参数错误" && echo " 用法: $(basename $0) [menu|update|uninstall|start|restart|stop|showInfo|showLog]" ;;
+menu | update | uninstall | start | restart | stop | showInfo | showLog)
+	${action}
+	;;
+*)
+	echo " 参数错误"
+	echo " 用法: $(basename $0) [menu|update|uninstall|start|restart|stop|showInfo|showLog]"
+	;;
 esac
