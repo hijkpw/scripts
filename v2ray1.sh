@@ -1732,7 +1732,7 @@ menu() {
 	clear
 	echo "#############################################################"
 	echo -e "#                   ${RED}v2ray一键安装脚本${PLAIN}                      #"
-	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk)                                      #"
+	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk) & MisakaNo                           #"
 	echo -e "# ${GREEN}网址${PLAIN}: https://hijk.art                                    #"
 	echo -e "# ${GREEN}论坛${PLAIN}: https://hijk.club                                   #"
 	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/hijkclub                               #"
