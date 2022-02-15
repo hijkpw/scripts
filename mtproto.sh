@@ -359,7 +359,6 @@ menu() {
     echo -e "# ${GREEN}Youtube频道${PLAIN}: https://youtube.com/channel/UCYTB--VsObzepVJtc9yvUxQ #"
     echo "#############################################################"
     echo ""
-
     echo -e "  ${GREEN}1.${PLAIN} 安装MTProto代理"
     echo -e "  ${GREEN}2.${PLAIN} 更新MTProto代理"
     echo -e "  ${GREEN}3.${PLAIN} 卸载MTProto代理"
@@ -377,7 +376,6 @@ menu() {
     echo -n " 当前状态："
     statusText
     echo 
-
     read -p " 请选择操作[0-9]：" answer
     case $answer in
         0)
@@ -418,5 +416,4 @@ menu() {
 }
 
 checkSystem
-
 menu
