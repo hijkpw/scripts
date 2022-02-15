@@ -420,7 +420,6 @@ getCert() {
 			echo ${res}
 			exit 1
 		fi
-
 		$CMD_INSTALL socat openssl
 		if [[ "$PMT" == "yum" ]]; then
 			$CMD_INSTALL cronie
