@@ -185,46 +185,22 @@ getVersion() {
 
 archAffix() {
 	case "$(uname -m)" in
-        i686 | i386)
-            echo '32'
-            ;;
-        x86_64 | amd64)
-            echo '64'
-            ;;
-        *armv7*)
-            echo 'arm32-v7a'
-            ;;
-        armv6*)
-            echo 'arm32-v6a'
-            ;;
-        *armv8* | aarch64)
-            echo 'arm64-v8a'
-            ;;
-        *mips64le*)
-            echo 'mips64le'
-            ;;
-        *mips64*)
-            echo 'mips64'
-            ;;
-        *mipsle*)
-            echo 'mipsle'
-            ;;
-        *mips*)
-            echo 'mips'
-            ;;
-        *s390x*)
-            echo 's390x'
-            ;;
-        ppc64le)
-            echo 'ppc64le'
-            ;;
-        ppc64)
-            echo 'ppc64'
-            ;;
-        *)
-            colorEcho $RED " 不支持的CPU架构！"
-            exit 1
-            ;;
+        i686 | i386) echo '32' ;;
+		x86_64 | amd64) echo '64' ;;
+		armv5tel) echo 'arm32-v5' ;;
+		armv6l) echo 'arm32-v6' ;;
+		armv7 | armv7l) echo 'arm32-v7a' ;;
+		armv8 | aarch64) echo 'arm64-v8a' ;;
+		mips64le) echo 'mips64le' ;;
+		mips64) echo 'mips64' ;;
+		mipsle) echo 'mips32le' ;;
+		mips) echo 'mips32' ;;
+		ppc64le) echo 'ppc64le' ;;
+		ppc64) echo 'ppc64' ;;
+		ppc64le) echo 'ppc64le' ;;
+		riscv64) echo 'riscv64' ;;
+		s390x) echo 's390x' ;;
+		*) colorEcho $RED " 不支持的CPU架构！" && exit 1;;
 	esac
 
 	return 0
@@ -260,7 +236,7 @@ getData() {
 			CERT_FILE="/etc/v2ray/${DOMAIN}.pem"
 			KEY_FILE="/etc/v2ray/${DOMAIN}.key"
 		else
-			resolve=$(curl -sL https://hijk.art/hostip.php?d=${DOMAIN})
+			resolve=$(curl -sm8 https://ipget.net/?ip=${DOMAIN})
 			res=$(echo -n ${resolve} | grep ${IP})
 			if [[ -z "${res}" ]]; then
 				colorEcho ${BLUE} "${DOMAIN} 解析结果：${resolve}"
@@ -383,52 +359,41 @@ getData() {
 		colorEcho $BLUE " 请选择伪装站类型:"
 		echo "   1) 静态网站(位于/usr/share/nginx/html)"
 		echo "   2) 小说站(随机选择)"
-		echo "   3) 美女站(https://imeizi.me)"
-		echo "   4) 高清壁纸站(https://bing.imeizi.me)"
-		echo "   5) 自定义反代站点(需以http或者https开头)"
+		echo "   3) 高清壁纸站(https://bing.ioliu.cn)"
+		echo "   4) 自定义反代站点(需以http或者https开头)"
 		read -p "  请选择伪装网站类型[默认:高清壁纸站]" answer
 		if [[ -z "$answer" ]]; then
-			PROXY_URL="https://bing.imeizi.me"
+			PROXY_URL="https://bing.ioliu.cn"
 		else
 			case $answer in
-                1)
-                    PROXY_URL=""
-                    ;;
-                2)
-                    len=${#SITES[@]}
-                    ((len--))
-                    while true; do
-                        index=$(shuf -i0-${len} -n1)
-                        PROXY_URL=${SITES[$index]}
-                        host=$(echo ${PROXY_URL} | cut -d/ -f3)
-                        ip=$(curl -sL https://hijk.art/hostip.php?d=${host})
-                        res=$(echo -n ${ip} | grep ${host})
-                        if [[ "${res}" == "" ]]; then
-                            echo "$ip $host" >>/etc/hosts
-                            break
-                        fi
-                    done
-                    ;;
-                3)
-                    PROXY_URL="https://imeizi.me"
-                    ;;
-                4)
-                    PROXY_URL="https://bing.imeizi.me"
-                    ;;
-                5)
-                    read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
-                    if [[ -z "$PROXY_URL" ]]; then
-                        colorEcho $RED " 请输入反代网站！"
-                        exit 1
-                    elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
-                        colorEcho $RED " 反代网站必须以http或https开头！"
-                        exit 1
-                    fi
-                    ;;
-                *)
-                    colorEcho $RED " 请输入正确的选项！"
-                    exit 1
-                    ;;
+				1) PROXY_URL="" ;;
+				2)
+					len=${#SITES[@]}
+					((len--))
+					while true; do
+						index=$(shuf -i0-${len} -n1)
+						PROXY_URL=${SITES[$index]}
+						host=$(echo ${PROXY_URL} | cut -d/ -f3)
+						ip=$(curl -sm8 ipget.net/?ip=${host})
+						res=$(echo -n ${ip} | grep ${host})
+						if [[ "${res}" == "" ]]; then
+							echo "$ip $host" >>/etc/hosts
+							break
+						fi
+					done
+					;;
+				3) PROXY_URL="https://bing.ioliu.cn" ;;
+				4)
+					read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
+					if [[ -z "$PROXY_URL" ]]; then
+						colorEcho $RED " 请输入反代网站！"
+						exit 1
+					elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+						colorEcho $RED " 反代网站必须以http或https开头！"
+						exit 1
+					fi
+					;;
+				*) colorEcho $RED " 请输入正确的选项！" && exit 1 ;;
 			esac
 		fi
 		REMOTE_HOST=$(echo ${PROXY_URL} | cut -d/ -f3)
