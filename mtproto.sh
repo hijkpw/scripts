@@ -23,6 +23,10 @@ colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
 }
 
+checkwarp(){
+	[[ -n $(wg 2>/dev/null) ]] && colorEcho $RED " 检测到WARP已打开，脚本中断运行" && colorEcho $YELLOW " 请关闭WARP之后再运行本脚本" && exit 1
+}
+
 checkSystem() {
     result=$(id | awk '{print $1}')
     if [[ $result != "uid=0(root)" ]]; then
