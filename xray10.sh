@@ -184,7 +184,6 @@ getData() {
 		echo " "
 		read -p " 确认满足按y，按其他退出脚本：" answer
 		[[ "${answer,,}" != "y" ]] && exit 1
-
 		echo ""
 		while true; do
 			read -p " 请输入伪装域名：" DOMAIN
@@ -196,7 +195,6 @@ getData() {
 		done
 		DOMAIN=${DOMAIN,,}
 		colorEcho ${BLUE} " 伪装域名(host)：$DOMAIN"
-
 		echo ""
 		if [[ -f ~/xray.pem && -f ~/xray.key ]]; then
 			colorEcho ${BLUE} " 检测到自有证书，将使用其部署"
@@ -212,7 +210,6 @@ getData() {
 			fi
 		fi
 	fi
-
 	echo ""
 	if [[ "$(needNginx)" == "no" ]]; then
 		if [[ "$TLS" == "true" ]]; then
@@ -234,7 +231,6 @@ getData() {
 		colorEcho ${BLUE} " Nginx端口：$PORT"
 		XPORT=$(shuf -i10000-65000 -n1)
 	fi
-
 	if [[ "$KCP" == "true" ]]; then
 		echo ""
 		colorEcho $BLUE " 请选择伪装类型："
@@ -256,14 +252,12 @@ getData() {
 		colorEcho $BLUE " 伪装类型：$HEADER_TYPE"
 		SEED=$(cat /proc/sys/kernel/random/uuid)
 	fi
-
 	if [[ "$TROJAN" == "true" ]]; then
 		echo ""
 		read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
 		[[ -z "$PASSWORD" ]] && PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
 		colorEcho $BLUE " trojan密码：$PASSWORD"
 	fi
-
 	if [[ "$XTLS" == "true" ]]; then
 		echo ""
 		colorEcho $BLUE " 请选择流控模式:"
@@ -278,7 +272,6 @@ getData() {
 		esac
 		colorEcho $BLUE " 流控模式：$FLOW"
 	fi
-
 	if [[ "${WS}" == "true" ]]; then
 		echo ""
 		while true; do
@@ -298,7 +291,6 @@ getData() {
 		done
 		colorEcho ${BLUE} " ws路径：$WSPATH"
 	fi
-
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		echo ""
 		colorEcho $BLUE " 请选择伪装站类型:"
@@ -343,7 +335,6 @@ getData() {
 		fi
 		REMOTE_HOST=$(echo ${PROXY_URL} | cut -d/ -f3)
 		colorEcho $BLUE " 伪装网站：$PROXY_URL"
-
 		echo ""
 		colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
 		echo "    y)允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
@@ -358,7 +349,6 @@ getData() {
 		fi
 		colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
 	fi
-
 	echo ""
 	read -p " 是否安装BBR(默认安装)?[y/n]:" NEED_BBR
 	[[ -z "$NEED_BBR" ]] && NEED_BBR=y
