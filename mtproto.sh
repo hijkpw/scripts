@@ -17,7 +17,7 @@ export MTG_IMAGENAME="${MTG_IMAGENAME:-nineseconds/mtg:1}"
 DOCKER_CMD="$(command -v docker)"
 OSNAME=`hostnamectl | grep -i system | cut -d: -f2`
 
-IP=`curl -sL -4 ip.sb`
+IP=`curl -s4m8 ip.gs`
 
 colorEcho() {
     echo -e "${1}${@:2}${PLAIN}"
