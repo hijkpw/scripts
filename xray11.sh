@@ -1257,14 +1257,12 @@ install() {
 		colorEcho $RED " unzip安装失败，请检查网络"
 		exit 1
 	fi
-
 	installNginx
 	setFirewall
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		getCert
 	fi
 	configNginx
-
 	colorEcho $BLUE " 安装Xray..."
 	getVersion
 	RETVAL="$?"
@@ -1276,15 +1274,11 @@ install() {
 		colorEcho $BLUE " 安装Xray ${NEW_VER} ，架构$(archAffix)"
 		installXray
 	fi
-
 	configXray
-
 	setSelinux
 	installBBR
-
 	start
 	showInfo
-
 	bbrReboot
 }
 
@@ -1323,7 +1317,6 @@ uninstall() {
 		colorEcho $RED " Xray未安装，请先安装！"
 		return
 	fi
-
 	echo ""
 	read -p " 确定卸载Xray？[y/n]：" answer
 	if [[ "${answer,,}" == "y" ]]; then
@@ -1331,13 +1324,11 @@ uninstall() {
 		if [[ "$domain" == "" ]]; then
 			domain=$(grep serverName $CONFIG_FILE | cut -d: -f2 | tr -d \",' ')
 		fi
-
 		stop
 		systemctl disable xray
 		rm -rf /etc/systemd/system/xray.service
 		rm -rf /usr/local/bin/xray
 		rm -rf /usr/local/etc/xray
-
 		if [[ "$BT" == "false" ]]; then
 			systemctl disable nginx
 			$CMD_REMOVE nginx
@@ -1367,7 +1358,6 @@ start() {
 	startNginx
 	systemctl restart xray
 	sleep 2
-
 	port=$(grep port $CONFIG_FILE | head -n 1 | cut -d: -f2 | tr -d \",' ')
 	res=$(ss -nutlp | grep ${port} | grep -i xray)
 	if [[ "$res" == "" ]]; then
@@ -1389,7 +1379,6 @@ restart() {
 		colorEcho $RED " Xray未安装，请先安装！"
 		return
 	fi
-
 	stop
 	start
 }
@@ -1402,7 +1391,6 @@ getConfigFileInfo() {
 	trojan="false"
 	protocol="VMess"
 	kcp="false"
-
 	uid=$(grep id $CONFIG_FILE | head -n1 | cut -d: -f2 | tr -d \",' ')
 	alterid=$(grep alterId $CONFIG_FILE | cut -d: -f2 | tr -d \",' ')
 	network=$(grep network $CONFIG_FILE | tail -n1 | cut -d: -f2 | tr -d \",' ')
@@ -1429,7 +1417,6 @@ getConfigFileInfo() {
 		type=$(grep header -A 3 $CONFIG_FILE | grep 'type' | cut -d: -f2 | tr -d \",' ')
 		seed=$(grep seed $CONFIG_FILE | cut -d: -f2 | tr -d \",' ')
 	fi
-
 	vmess=$(grep vmess $CONFIG_FILE)
 	if [[ "$vmess" == "" ]]; then
 		trojan=$(grep trojan $CONFIG_FILE)
