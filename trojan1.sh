@@ -255,9 +255,8 @@ function installTrojan() {
 	colorEcho $BLUE " 安装最新版trojan..."
 	rm -rf $CONFIG_FILE
 	rm -rf /etc/systemd/system/trojan.service
-
 	NAME=trojan
-	VERSION=$(curl -fsSL ${V6_PROXY}https://api.github.com/repos/trojan-gfw/trojan/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')
+	VERSION=$(curl -sm8 https://api.github.com/repos/trojan-gfw/trojan/releases/latest | grep tag_name | sed -E 's/.*"v(.*)".*/\1/')
 	TARBALL="$NAME-$VERSION-linux-amd64.tar.xz"
 	DOWNLOADURL="${V6_PROXY}https://github.com/trojan-gfw/$NAME/releases/download/v$VERSION/$TARBALL"
 	TMPDIR="$(mktemp -d)"
