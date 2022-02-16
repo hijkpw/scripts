@@ -1643,6 +1643,7 @@ menu() {
 	echo -e "# ${GREEN}博客${PLAIN}: https://owo.misaka.rest                             #"
 	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
 	echo "#############################################################"
+	echo -e "  "
 	echo -e "  ${GREEN}1.${PLAIN}   安装Xray-VMESS"
 	echo -e "  ${GREEN}2.${PLAIN}   安装Xray-${BLUE}VMESS+mKCP${PLAIN}"
 	echo -e "  ${GREEN}3.${PLAIN}   安装Xray-VMESS+TCP+TLS"
