@@ -119,7 +119,7 @@ function getData() {
 	echo " "
 	read -p " 确认满足按y，按其他退出脚本：" answer
 	if [ "${answer}" != "y" ] && [ "${answer}" != "Y" ]; then
-		exit 0
+		exit 1
 	fi
 
 	echo ""
@@ -874,7 +874,7 @@ menu() {
 	read -p " 请选择操作[0-10]：" answer
 	case $answer in
         0)
-            exit 0
+            exit 1
             ;;
         1)
             install
