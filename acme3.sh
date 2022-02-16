@@ -165,7 +165,7 @@ menu() {
 		1) acme ;;
 		2) certificate ;;
 		3) acmerenew ;;
-		4 ) uninstall ;;
+		4) uninstall ;;
 		5) upgrade ;;
 		0) exit 1 ;;
 	esac
