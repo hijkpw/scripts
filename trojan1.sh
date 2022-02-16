@@ -98,15 +98,15 @@ status() {
 statusText() {
 	res=$(status)
 	case $res in
-	2)
-		echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN}
-		;;
-	3)
-		echo -e ${GREEN}已安装${PLAIN} ${GREEN}正在运行${PLAIN}
-		;;
-	*)
-		echo -e ${RED}未安装${PLAIN}
-		;;
+		2)
+			echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN}
+			;;
+		3)
+			echo -e ${GREEN}已安装${PLAIN} ${GREEN}正在运行${PLAIN}
+			;;
+		*)
+			echo -e ${RED}未安装${PLAIN}
+			;;
 	esac
 }
 
