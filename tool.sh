@@ -187,7 +187,7 @@ cyberpanel(){
 }
 
 qlPanel(){
-    [[ -z $(docker -v) ]] && curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+    [[ -z $(docker -v 2>/dev/null) ]] && curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
     read -p "请输入将要安装的青龙面板容器名称：" qlPanelName
     read -p "请输入外网访问端口：" qlHTTPPort
     docker run -dit --name $qlPanelName --hostname $qlPanelName --restart always -p $qlHTTPPort:5700 -v $PWD/QL/config:/ql/config -v $PWD/QL/log:/ql/log -v $PWD/QL/db:/ql/db -v $PWD/QL/scripts:/ql/scripts -v $PWD/QL/jbot:/ql/jbot whyour/qinglong:latest
