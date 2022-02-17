@@ -92,7 +92,7 @@ tunnelFile(){
     read -p "请输入隧道名称：" tunnelName
     read -p "请输入隧道UUID：" tunnelUUID
     read -p "请输入传输协议（默认http）：" tunnelProtocol
-    [ -z $tunnelProtocol ] &&tunnelProtocol="http"
+    [ -z $tunnelProtocol ] && tunnelProtocol="http"
     read -p "请输入域名：" tunnelDomain
     read -p "请输入反代端口：" tunnelPort
     read -p "请输入配置文件名：" tunnelFileName
