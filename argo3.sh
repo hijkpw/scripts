@@ -44,6 +44,14 @@ COUNT=$(curl -sm1 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=http
 TODAY=$(expr "$COUNT" : '.*\s\([0-9]\{1,\}\)\s/.*')
 TOTAL=$(expr "$COUNT" : '.*/\s\([0-9]\{1,\}\)\s.*')
 
+back2menu(){
+    green "所选操作执行完成"
+    read -p "请输入“y”回到主菜单，或按任意键退出脚本：" back2menuInput
+    case "$back2menuInput" in
+        y ) menu
+    esac
+}
+
 install(){
     [[ -n $(cloudflared -help) ]] && red "检测到已安装CloudFlare Argo Tunnel，无需重复安装！！" && exit 1
     ${PACKAGE_UPDATE[int]}
@@ -54,6 +62,7 @@ install(){
         wget -N https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${ARCH}.deb
         dpkg -i cloudflared-linux-${ARCH}.deb
     fi
+    back2menu
 }
 
 tryHTTPTunnel(){
@@ -76,16 +85,19 @@ cfargoLogin(){
     green "请访问下方提示的网址，登录自己的CloudFlare账号"
     green "然后授权自己的域名给CloudFlare Argo Tunnel即可"
     cloudflared tunnel login
+    back2menu
 }
 
 createTunnel(){
     read -p "请输入需要创建的隧道名称：" tunnelName
     cloudflared tunnel create $tunnelName
+    back2menu
 }
 
 deleteTunnel(){
     read -p "请输入需要删除的隧道名称：" tunnelName
     cloudflared tunnel delete $tunnelName
+    back2menu
 }
 
 tunnelFile(){
@@ -108,12 +120,14 @@ ingress:
     service: $tunnelProtocol://localhost:$tunnelPort
   - service: http_status:404
 EOF
+    back2menu
 }
 
 tunnelConfig(){
     read -p "请输入需要配置的隧道名称：" tunnelName
     read -p "请输入需要配置的域名：" tunnelDomain
     cloudflared tunnel route dns $tunnelName $tunnelDomain
+    back2menu
 }
 
 tunnelSelection(){
@@ -130,7 +144,7 @@ tunnelSelection(){
         2 ) deleteTunnel ;;
         3 ) tunnelConfig ;;
         4 ) tunnelFile ;;
-        5 ) cloudflared tunnel list ;;
+        5 ) cloudflared tunnel list && back2menu;;
         0 ) exit 1
     esac
 }
