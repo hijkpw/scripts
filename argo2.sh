@@ -44,11 +44,6 @@ COUNT=$(curl -sm1 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=http
 TODAY=$(expr "$COUNT" : '.*\s\([0-9]\{1,\}\)\s/.*')
 TOTAL=$(expr "$COUNT" : '.*/\s\([0-9]\{1,\}\)\s.*')
 
-checkLoginStatus(){
-    [[ -f /root/.cloudflared/cert.pem ]] && red "已登录CloudFlare Argo Tunnel客户端！！！" && exit 1
-    [ ! -f /root/.cloudflared/cert.pem ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
-}
-
 install(){
     [[ -n $(cloudflared -help) ]] && red "检测到已安装CloudFlare Argo Tunnel，无需重复安装！！" && exit 1
     ${PACKAGE_UPDATE[int]}
@@ -77,11 +72,10 @@ tryTCPTunnel(){
 
 cfargoLogin(){
     [[ -z $(cloudflared -help) ]] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
-    checkLoginStatus
+    [[ -f /root/.cloudflared/cert.pem ]] && red "已登录CloudFlare Argo Tunnel客户端，无需重复登录！！！" && exit 1
     green "请访问下方提示的网址，登录自己的CloudFlare账号"
     green "然后授权自己的域名给CloudFlare Argo Tunnel即可"
     cloudflared tunnel login
-    checkLoginStatus
 }
 
 createTunnel(){
@@ -124,7 +118,7 @@ tunnelConfig(){
 
 tunnelSelection(){
     [[ -z $(cloudflared -help) ]] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
-    
+    [ ! -f /root/.cloudflared/cert.pem ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
     echo "1. 创建隧道"
     echo "2. 删除隧道"
     echo "3. 配置隧道"
@@ -143,7 +137,7 @@ tunnelSelection(){
 
 runHTTPTunnel(){
     [[ -z $(cloudflared -help) ]] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
-    checkLoginStatus
+    [ ! -f /root/.cloudflared/cert.pem ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
     read -p "请输入需要运行的隧道名称：" tunnelName
     read -p "请输入你需要穿透的http端口号（默认80）：" httpPort
     [ -z $httpPort ] && httpPort=80
@@ -152,7 +146,7 @@ runHTTPTunnel(){
 
 runTCPTunnel(){
     [[ -z $(cloudflared -help) ]] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
-    checkLoginStatus
+    [ ! -f /root/.cloudflared/cert.pem ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
     read -p "请输入需要运行的隧道名称：" tunnelName
     read -p "请输入你需要穿透的tcp端口号（默认80）：" tcpPort
     [ -z $tcpPort ] && tcpPort=80
@@ -161,7 +155,7 @@ runTCPTunnel(){
 
 runTunnelUseYml(){
     [[ -z $(cloudflared -help) ]] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
-    checkLoginStatus
+    [ ! -f /root/.cloudflared/cert.pem ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
     read -p "请复制粘贴配置文件的位置（例：/root/tunnel.yml）：" ymlLocation
     cloudflared tunnel --config $ymlLocation run
 }
