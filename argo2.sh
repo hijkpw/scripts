@@ -90,8 +90,8 @@ deleteTunnel(){
 
 tunnelFile(){
     cloudflared tunnel list
-    read -p "请输入隧道名称：" tunnelName
-    read -p "请输入隧道UUID：" tunnelUUID
+    read -p "请输入隧道名称（复制NAME里面的内容）：" tunnelName
+    read -p "请输入隧道UUID（复制ID里面的内容）：" tunnelUUID
     read -p "请输入传输协议（默认http）：" tunnelProtocol
     [ -z $tunnelProtocol ] && tunnelProtocol="http"
     read -p "请输入域名：" tunnelDomain
