@@ -1478,6 +1478,7 @@ outputVmessKCP() {
 
 outputTrojan() {
 	if [[ "$xtls" == "true" ]]; then
+		link="trojan://${password}@${domain}:${port}#"
 		echo -e "   ${BLUE}IP/域名(address): ${PLAIN} ${RED}${domain}${PLAIN}"
 		echo -e "   ${BLUE}端口(port)：${PLAIN}${RED}${port}${PLAIN}"
 		echo -e "   ${BLUE}密码(password)：${PLAIN}${RED}${password}${PLAIN}"
@@ -1485,6 +1486,7 @@ outputTrojan() {
 		echo -e "   ${BLUE}加密(encryption)：${PLAIN} ${RED}none${PLAIN}"
 		echo -e "   ${BLUE}传输协议(network)：${PLAIN} ${RED}${network}${PLAIN}"
 		echo -e "   ${BLUE}底层安全传输(tls)：${PLAIN}${RED}XTLS${PLAIN}"
+		echo -e "   ${BLUE}Trojan链接:${PLAIN} $RED$link$PLAIN"
 	else
 		link="trojan://${password}@${domain}:${port}#"
 		echo -e "   ${BLUE}IP/域名(address): ${PLAIN} ${RED}${domain}${PLAIN}"
