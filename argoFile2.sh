@@ -6,7 +6,7 @@ if [ -z $tunnelProtocol ]; then
 fi
 read -p "请输入域名：" tunnelDomain
 read -p "请输入反代端口：" tunnelPort
-read -p "请输入配置文件名："tunnelFileName
+read -p "请输入配置文件名：" tunnelFileName
 cat <<EOF > ~/$tunnelFileName.yml
 tunnel: $tunnelName
 credentials-file: /root/.cloudflared/$tunnelUUID.json

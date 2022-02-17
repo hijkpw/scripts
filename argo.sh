@@ -88,6 +88,10 @@ deleteTunnel(){
     cloudflared tunnel delete $tunnelName
 }
 
+tunnelFile(){
+    
+}
+
 tunnelConfig(){
     read -p "请输入需要配置的隧道名称：" tunnelName
     read -p "请输入需要配置的域名：" tunnelDomain
@@ -100,13 +104,15 @@ tunnelSelection(){
     echo "1. 创建隧道"
     echo "2. 删除隧道"
     echo "3. 配置隧道"
-    echo "4. 列出隧道"
+    echo "4. 创建隧道配置yml文件"
+    echo "5. 列出隧道"
     read -p "请输入选项:" tunnelNumberInput
     case "$tunnelNumberInput" in
         1 ) createTunnel ;;
         2 ) deleteTunnel ;;
         3 ) tunnelConfig ;;
-        4 ) cloudflared tunnel list ;;
+        4 ) tunnelFile ;;
+        5 ) cloudflared tunnel list ;;
         0 ) exit 1
     esac
 }
