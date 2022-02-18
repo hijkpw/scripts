@@ -155,7 +155,8 @@ runHTTPTunnel(){
     read -p "请输入需要运行的隧道名称：" tunnelName
     read -p "请输入你需要穿透的http端口号（默认80）：" httpPort
     [ -z $httpPort ] && httpPort=80
-    cloudflared tunnel run --url http://127.0.0.1:$httpPort $tunnelName
+    read -p "请选择http / https协议（默认http）：" httpHttps
+    cloudflared tunnel run --url $httpHttps://127.0.0.1:$httpPort $tunnelName
 }
 
 runTCPTunnel(){
