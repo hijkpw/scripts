@@ -56,7 +56,10 @@ archAffix() {
 }
 
 checkStatus(){
-
+	[[ -z $(cloudflared -help 2>/dev/null) ]] && cloudflaredStatus="未安装"
+	[[ -n $(cloudflared -help 2>/dev/null) ]] && cloudflaredStatus="已安装"
+	[[ -f /root/.cloudflared/cert.pem ]] && loginStatus="已登录"
+	[[ ! -f /root/.cloudflared/cert.pem ]] && loginStatus="未登录"
 }
 
 installCloudFlared(){
