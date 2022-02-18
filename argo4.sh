@@ -17,11 +17,12 @@ yellow(){
 REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'")
 RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS" "Alpine")
 PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update")
-PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update")
 PACKAGE_REMOVE=("apt -y remove" "apt -y remove" "yum -y remove" "yum -y remove")
 
 # 判断系统CPU架构
 cpuArch=`uname -m`
+cloudflaredStatus="未安装"
+loginStatus="未登录"
 
 # 判断是否为root用户
 [[ $EUID -ne 0 ]] && yellow "请在root用户下运行脚本" && exit 1
@@ -54,6 +55,21 @@ archAffix() {
 	esac
 }
 
-downloadCloudFlared(){
+checkStatus(){
+
+}
+
+installCloudFlared(){
+	if [ $RELEASE = "CentOS" ]; then
+		wget -N https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$cpuArch.rpm
+		rpm -i cloudflared-linux-$cpuArch.rpm
+	else
+		[ $cpuArch == "aarch64" ] && cpuArch="arm64"
+		wget -N https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$cpuArch.deb
+		dpkg -i cloudflared-linux-$cpuArch.deb
+	fi
+}
+
+loginCloudFlared(){
 
 }
