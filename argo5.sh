@@ -132,4 +132,6 @@ menu(){
     esac
 }
 
+archAffix
+checkStatus
 menu
