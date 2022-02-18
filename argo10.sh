@@ -172,6 +172,7 @@ menu(){
     echo "6. 卸载CloudFlared客户端"
     echo "9. 更新脚本"
     echo "0. 退出脚本"
+    echo "          "
     read -p "请输入选项:" menuNumberInput
     case "$menuNumberInput" in
         1 ) installCloudFlared ;;
