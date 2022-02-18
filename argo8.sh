@@ -72,7 +72,7 @@ checkStatus(){
 }
 
 installCloudFlared(){
-    [ $loginStatus == "未安装" ] && red "已登录CloudFlare Argo Tunnel客户端，无需重复登录！！！" && exit 1
+    [ $cloudflaredStatus == "已安装" ] && red "检测到已安装CloudFlare Argo Tunnel，无需重复安装！！" && exit 1
 	if [ $RELEASE == "CentOS" ]; then
 		wget -N https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$cpuArch.rpm
 		rpm -i cloudflared-linux-$cpuArch.rpm
@@ -84,6 +84,13 @@ installCloudFlared(){
     back2menu
 }
 
+uninstallCloudFlared(){
+    [ $cloudflaredStatus == "未安装" ] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
+    ${PACKAGE_REMOVE[int]} cloudflared
+    rm -rf /root/.cloudflared
+    yellow "CloudFlared 客户端已卸载成功"
+}
+
 loginCloudFlared(){
 	[ $loginStatus == "已登录" ] && red "已登录CloudFlare Argo Tunnel客户端，无需重复登录！！！" && exit 1
 	green "请访问下方提示的网址，登录自己的CloudFlare账号"
@@ -92,8 +99,55 @@ loginCloudFlared(){
     back2menu
 }
 
+makeTunnel(){
+    read -p "请输入需要创建的隧道名称：" tunnelName
+    cloudflared tunnel create $tunnelName
+    cloudflared tunnel list
+    read -p "请输入隧道UUID（复制ID里面的内容）：" tunnelUUID
+    read -p "请输入传输协议（默认http）：" tunnelProtocol
+    [ -z $tunnelProtocol ] && tunnelProtocol="http"
+    read -p "请输入域名：" tunnelDomain
+    read -p "请输入反代端口：" tunnelPort
+    read -p "请输入将要保存的配置文件名：" tunnelFileName
+    cat <<EOF > ~/$tunnelFileName.yml
+tunnel: $tunnelName
+credentials-file: /root/.cloudflared/$tunnelUUID.json
+originRequest:
+  connectTimeout: 30s
+  noTLSVerify: true
+ingress:
+  - hostname: $tunnelDomain
+    service: $tunnelProtocol://localhost:$tunnelPort
+  - service: http_status:404
+EOF
+    back2menu
+}
+
+listTunnel(){
+    [ $cloudflaredStatus == "未安装" ] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
+    [ $loginStatus == "未登录" ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
+    cloudflared tunnel list
+    back2menu
+}
+
+runTunnel(){
+    [ $cloudflaredStatus == "未安装" ] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
+    [ $loginStatus == "未登录" ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
+    read -p "请复制粘贴配置文件的位置（例：/root/tunnel.yml）：" ymlLocation
+    cloudflared tunnel --config $ymlLocation run
+}
+
+deleteTunnel(){
+    [ $cloudflaredStatus == "未安装" ] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
+    [ $loginStatus == "未登录" ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
+    read -p "请输入需要删除的隧道名称：" tunnelName
+    cloudflared tunnel delete $tunnelName
+    back2menu
+}
+
 menu(){
     clear
+    checkStatus
     red "=================================="
     echo "                           "
     red "  CloudFlare Argo Tunnel一键脚本   "
@@ -110,14 +164,21 @@ menu(){
     echo "            "
     echo "1. 安装CloudFlared客户端"
     echo "2. 登录CloudFlared客户端"
+    echo "3. 配置Argo Tunnel隧道"
+    echo "4. 列出Argo Tunnel隧道"
+    echo "5. 运行Argo Tunnel隧道"
+    echo "6. 卸载CloudFlared客户端"
     read -p "请输入选项:" menuNumberInput
     case "$menuNumberInput" in
         1 ) installCloudFlared ;;
         2 ) loginCloudFlared ;;
+        3 ) makeTunnel ;;
+        4 ) listTunnel ;;
+        5 ) runTunnel ;;
+        6 ) uninstallCloudFlared ;;
         0 ) exit 1 ;;
     esac
 }
 
 archAffix
-checkStatus
 menu
