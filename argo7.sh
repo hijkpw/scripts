@@ -57,9 +57,10 @@ archAffix() {
 
 back2menu(){
     green "所选操作执行完成"
-    read -p "请输入“y”回到主菜单，或按任意键退出脚本：" back2menuInput
+    read -p "请输入“y”退出，或按任意键回到主菜单：" back2menuInput
     case "$back2menuInput" in
-        y ) menu
+        y ) exit 1 ;;
+        * ) menu ;;
     esac
 }
 
@@ -71,6 +72,7 @@ checkStatus(){
 }
 
 installCloudFlared(){
+    [ $loginStatus == "未安装" ] && red "已登录CloudFlare Argo Tunnel客户端，无需重复登录！！！" && exit 1
 	if [ $RELEASE == "CentOS" ]; then
 		wget -N https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$cpuArch.rpm
 		rpm -i cloudflared-linux-$cpuArch.rpm
@@ -79,10 +81,11 @@ installCloudFlared(){
 		wget -N https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$cpuArch.deb
 		dpkg -i cloudflared-linux-$cpuArch.deb
 	fi
+    back2menu
 }
 
 loginCloudFlared(){
-	[ $loginStatus == "已登录" ] && red "已登录CloudFlare Argo Tunnel客户端，无需重复登录！！！" && exit 0
+	[ $loginStatus == "已登录" ] && red "已登录CloudFlare Argo Tunnel客户端，无需重复登录！！！" && exit 1
 	green "请访问下方提示的网址，登录自己的CloudFlare账号"
     green "然后授权自己的域名给CloudFlare Argo Tunnel即可"
     cloudflared tunnel login
@@ -105,30 +108,13 @@ menu(){
 	green "CloudFlared 客户端状态：$cloudflaredStatus"
 	green "账户登录状态：$loginStatus"
     echo "            "
-    echo "1. 安装CloudFlare Argo Tunnel客户端"
-    echo "2. 体验CloudFlare Argo Tunnel HTTP隧道"
-    echo "3. 体验CloudFlare Argo Tunnel TCP隧道"
-    echo "4. 登录CloudFlare Argo Tunnel客户端"
-    echo "5. 创建、删除、配置和列出隧道"
-    echo "6. 运行HTTP隧道"
-    echo "7. 运行TCP隧道"
-    echo "8. 运行任意隧道（使用yml配置文件）"
-    echo "9. 卸载CloudFlare Argo Tunnel客户端"
-    echo "10. 更新脚本"
-    echo "0. 退出脚本"
+    echo "1. 安装CloudFlared客户端"
+    echo "2. 登录CloudFlared客户端"
     read -p "请输入选项:" menuNumberInput
     case "$menuNumberInput" in
-        1 ) install ;;
-        2 ) tryHTTPTunnel ;;
-        3 ) tryTCPTunnel ;;
-        4 ) cfargoLogin ;;
-        5 ) tunnelSelection ;;
-        6 ) runHTTPTunnel ;;
-        7 ) runTCPTunnel ;;
-        8 ) runTunnelUseYml ;;
-        9 ) ${PACKAGE_REMOVE[int]} cloudflared ;;
-        10 ) wget -N https://raw.githubusercontents.com/Misaka-blog/argo-tunnel-script/master/argo.sh && bash argo.sh ;;
-        0 ) exit 1
+        1 ) installCloudFlared ;;
+        2 ) loginCloudFlared ;;
+        0 ) exit 1 ;;
     esac
 }
 
