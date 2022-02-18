@@ -102,11 +102,12 @@ loginCloudFlared(){
 makeTunnel(){
     read -p "请输入需要创建的隧道名称：" tunnelName
     cloudflared tunnel create $tunnelName
+    read -p "请输入域名：" tunnelDomain
+    cloudflared tunnel route dns $tunnelName $tunnelDomain
     cloudflared tunnel list
     read -p "请输入隧道UUID（复制ID里面的内容）：" tunnelUUID
     read -p "请输入传输协议（默认http）：" tunnelProtocol
     [ -z $tunnelProtocol ] && tunnelProtocol="http"
-    read -p "请输入域名：" tunnelDomain
     read -p "请输入反代端口：" tunnelPort
     read -p "请输入将要保存的配置文件名：" tunnelFileName
     cat <<EOF > ~/$tunnelFileName.yml
