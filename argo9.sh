@@ -73,7 +73,7 @@ checkStatus(){
 
 installCloudFlared(){
     [ $cloudflaredStatus == "已安装" ] && red "检测到已安装CloudFlare Argo Tunnel，无需重复安装！！" && exit 1
-	if [ $RELEASE == "CentOS" ]; then
+	if [ ${RELEASE[int]} == "CentOS" ]; then
 		wget -N https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$cpuArch.rpm
 		rpm -i cloudflared-linux-$cpuArch.rpm
 	else
