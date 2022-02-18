@@ -51,8 +51,16 @@ archAffix() {
 		x86_64 | amd64) cpuArch='amd64' ;;
 		armv5tel | arm6l | armv7 | armv7l ) cpuArch='arm' ;;
 		armv8 | aarch64) cpuArch='aarch64' ;;
-		*) colorEcho $RED " 不支持的CPU架构！" && exit 1;;
+		*) red "不支持的CPU架构！" && exit 1;;
 	esac
+}
+
+back2menu(){
+    green "所选操作执行完成"
+    read -p "请输入“y”回到主菜单，或按任意键退出脚本：" back2menuInput
+    case "$back2menuInput" in
+        y ) menu
+    esac
 }
 
 checkStatus(){
@@ -63,7 +71,7 @@ checkStatus(){
 }
 
 installCloudFlared(){
-	if [ $RELEASE = "CentOS" ]; then
+	if [ $RELEASE == "CentOS" ]; then
 		wget -N https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$cpuArch.rpm
 		rpm -i cloudflared-linux-$cpuArch.rpm
 	else
@@ -74,5 +82,54 @@ installCloudFlared(){
 }
 
 loginCloudFlared(){
-
+	[ $loginStatus == "已登录" ] && red "已登录CloudFlare Argo Tunnel客户端，无需重复登录！！！" && exit 0
+	green "请访问下方提示的网址，登录自己的CloudFlare账号"
+    green "然后授权自己的域名给CloudFlare Argo Tunnel即可"
+    cloudflared tunnel login
+    back2menu
 }
+
+menu(){
+    clear
+    red "=================================="
+    echo "                           "
+    red "  CloudFlare Argo Tunnel一键脚本   "
+    red "          by 小御坂的破站           "
+    echo "                           "
+    red "  Site: https://owo.misaka.rest  "
+    echo "                           "
+    red "=================================="
+    echo "            "
+    yellow "今日运行次数：$TODAY   总共运行次数：$TOTAL"
+	echo "            "
+	green "CloudFlared 客户端状态：$cloudflaredStatus"
+	green "账户登录状态：$loginStatus"
+    echo "            "
+    echo "1. 安装CloudFlare Argo Tunnel客户端"
+    echo "2. 体验CloudFlare Argo Tunnel HTTP隧道"
+    echo "3. 体验CloudFlare Argo Tunnel TCP隧道"
+    echo "4. 登录CloudFlare Argo Tunnel客户端"
+    echo "5. 创建、删除、配置和列出隧道"
+    echo "6. 运行HTTP隧道"
+    echo "7. 运行TCP隧道"
+    echo "8. 运行任意隧道（使用yml配置文件）"
+    echo "9. 卸载CloudFlare Argo Tunnel客户端"
+    echo "10. 更新脚本"
+    echo "0. 退出脚本"
+    read -p "请输入选项:" menuNumberInput
+    case "$menuNumberInput" in
+        1 ) install ;;
+        2 ) tryHTTPTunnel ;;
+        3 ) tryTCPTunnel ;;
+        4 ) cfargoLogin ;;
+        5 ) tunnelSelection ;;
+        6 ) runHTTPTunnel ;;
+        7 ) runTCPTunnel ;;
+        8 ) runTunnelUseYml ;;
+        9 ) ${PACKAGE_REMOVE[int]} cloudflared ;;
+        10 ) wget -N https://raw.githubusercontents.com/Misaka-blog/argo-tunnel-script/master/argo.sh && bash argo.sh ;;
+        0 ) exit 1
+    esac
+}
+
+menu
