@@ -21,6 +21,8 @@ PACKAGE_REMOVE=("apt -y remove" "apt -y remove" "yum -y remove" "yum -y remove")
 
 # 判断系统CPU架构
 cpuArch=`uname -m`
+
+# 判断cloudflared状态
 cloudflaredStatus="未安装"
 loginStatus="未登录"
 
