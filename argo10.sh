@@ -169,7 +169,8 @@ menu(){
     echo "3. 配置Argo Tunnel隧道"
     echo "4. 列出Argo Tunnel隧道"
     echo "5. 运行Argo Tunnel隧道"
-    echo "6. 卸载CloudFlared客户端"
+    echo "6. 删除Argo Tunnel隧道"
+    echo "7. 卸载CloudFlared客户端"
     echo "9. 更新脚本"
     echo "0. 退出脚本"
     echo "          "
@@ -180,7 +181,8 @@ menu(){
         3 ) makeTunnel ;;
         4 ) listTunnel ;;
         5 ) runTunnel ;;
-        6 ) uninstallCloudFlared ;;
+        6 ) deleteTunnel ;;
+        7 ) uninstallCloudFlared ;;
         9 ) wget -N https://raw.githubusercontent.com/Misaka-blog/argo-tunnel-script/master/argo.sh && bash argo.sh ;;
         0 ) exit 1 ;;
     esac
