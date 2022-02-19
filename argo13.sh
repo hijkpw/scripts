@@ -125,6 +125,7 @@ ingress:
     service: $tunnelProtocol://localhost:$tunnelPort
   - service: http_status:404
 EOF
+    green "配置文件生成成功，已保存到 /root/$tunnelFileName.yml 下"
     back2menu
 }
 
@@ -140,7 +141,7 @@ runTunnel(){
     [ $loginStatus == "未登录" ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
     [[ -z $(screen -help 2>/dev/null) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} screen
     read -p "请复制粘贴配置文件的位置（例：/root/tunnel.yml）：" ymlLocation
-    read -p "请输入创建Screen会话的名字" screenName
+    read -p "请输入创建Screen会话的名字：" screenName
     screen -USdm $screenName cloudflared tunnel --config $ymlLocation run
     green "隧道已运行成功，请等待1-3分钟启动并解析完毕"
     back2menu
