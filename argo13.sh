@@ -112,7 +112,8 @@ makeTunnel(){
     read -p "请输入隧道UUID（复制ID里面的内容）：" tunnelUUID
     read -p "请输入传输协议（默认http）：" tunnelProtocol
     [ -z $tunnelProtocol ] && tunnelProtocol="http"
-    read -p "请输入反代端口：" tunnelPort
+    read -p "请输入反代端口（默认80）：" tunnelPort
+    [ -z $tunnelPort ] && tunnelPort=80
     read -p "请输入将要保存的配置文件名：" tunnelFileName
     cat <<EOF > ~/$tunnelFileName.yml
 tunnel: $tunnelName
