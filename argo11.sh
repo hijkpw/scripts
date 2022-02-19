@@ -138,10 +138,21 @@ listTunnel(){
 runTunnel(){
     [ $cloudflaredStatus == "未安装" ] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
     [ $loginStatus == "未登录" ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
+    [[ -z $(screen -help 2>/dev/null) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} screen
     read -p "请复制粘贴配置文件的位置（例：/root/tunnel.yml）：" ymlLocation
     read -p "请输入创建Screen会话的名字" screenName
     screen -USdm $screenName cloudflared tunnel --config $ymlLocation run
     green "隧道已运行成功，请等待1-3分钟启动并解析完毕"
+    back2menu
+}
+
+killTunnel(){
+    [ $cloudflaredStatus == "未安装" ] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
+    [ $loginStatus == "未登录" ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
+    [[ -z $(screen -help 2>/dev/null) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} screen
+    read -p "请输入需要删除的Screen会话名字：" screenName
+    screen -S $screenName -X quit
+    green "Screen会话停止成功！"
     back2menu
 }
 
@@ -175,8 +186,9 @@ menu(){
     echo "3. 配置Argo Tunnel隧道"
     echo "4. 列出Argo Tunnel隧道"
     echo "5. 运行Argo Tunnel隧道"
-    echo "6. 删除Argo Tunnel隧道"
-    echo "7. 卸载CloudFlared客户端"
+    echo "6. 停止Argo Tunnel隧道"
+    echo "7. 删除Argo Tunnel隧道"
+    echo "8. 卸载CloudFlared客户端"
     echo "9. 更新脚本"
     echo "0. 退出脚本"
     echo "          "
@@ -187,10 +199,11 @@ menu(){
         3 ) makeTunnel ;;
         4 ) listTunnel ;;
         5 ) runTunnel ;;
-        6 ) deleteTunnel ;;
-        7 ) uninstallCloudFlared ;;
+        6 ) killTunnel ;;
+        7 ) deleteTunnel ;;
+        8 ) uninstallCloudFlared ;;
         9 ) wget -N https://raw.githubusercontent.com/Misaka-blog/argo-tunnel-script/master/argo.sh && bash argo.sh ;;
-        0 ) exit 1 ;;
+        * ) exit 1 ;;
     esac
 }
 
