@@ -125,7 +125,7 @@ ingress:
     service: $tunnelProtocol://localhost:$tunnelPort
   - service: http_status:404
 EOF
-    green "配置文件生成成功，已保存到 /root/$tunnelFileName.yml 下"
+    green "配置文件生成成功，已保存为 /root/$tunnelFileName.yml"
     back2menu
 }
 
