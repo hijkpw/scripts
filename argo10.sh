@@ -138,7 +138,10 @@ runTunnel(){
     [ $cloudflaredStatus == "未安装" ] && red "检测到未安装CloudFlare Argo Tunnel客户端，无法执行操作！！！" && exit 1
     [ $loginStatus == "未登录" ] && red "请登录CloudFlare Argo Tunnel客户端后再执行操作！！！" && exit 1
     read -p "请复制粘贴配置文件的位置（例：/root/tunnel.yml）：" ymlLocation
-    cloudflared tunnel --config $ymlLocation run
+    read -p "请输入创建Screen会话的名字" screenName
+    screen -USdm $screenName cloudflared tunnel --config $ymlLocation run
+    green "隧道已运行成功，请等待1-3分钟启动并解析完毕"
+    back2menu
 }
 
 deleteTunnel(){
