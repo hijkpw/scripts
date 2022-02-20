@@ -39,8 +39,7 @@ cat>v2ray/config.json<<EOF
 EOF
 kill -9 $(ps -ef | grep v2ray | grep -v grep | awk '{print $2}')
 kill -9 $(ps -ef | grep cloudflared-linux-amd64 | grep -v grep | awk '{print $2}')
-./v2ray/v2ray &&
-./cloudflared-linux-amd64 tunnel --url http://localhost:8888 >argo.log 2>&1 &
+./v2ray/v2ray && ./cloudflared-linux-amd64 tunnel --url http://localhost:8888 >argo.log 2>&1 &
 sleep 2
 clear
 echo 等到cloudflare argo生成地址
