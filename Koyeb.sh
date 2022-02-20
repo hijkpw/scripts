@@ -1,5 +1,5 @@
 #!/bin/bash
-# one key v2ray
+
 rm -rf v2ray cloudflared-linux-amd64 v2ray-linux-64.zip
 wget https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip
 wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
