@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# 控制台字体
+red(){
+    echo -e "\033[31m\033[01m$1\033[0m";
+}
+
+green(){
+    echo -e "\033[32m\033[01m$1\033[0m";
+}
+
+yellow(){
+    echo -e "\033[33m\033[01m$1\033[0m";
+}
+
 REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'" "alpine")
 RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS" "Alpine")
 PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update" "apk update -f")
@@ -31,6 +44,22 @@ archAffix() {
 	esac
 }
 
-download_ngrok(){
+back2menu(){
+    green "所选操作执行完成"
+    read -p "请输入“y”退出，或按任意键回到主菜单：" back2menuInput
+    case "$back2menuInput" in
+        y ) exit 1 ;;
+        * ) menu ;;
+    esac
+}
 
+download_ngrok(){
+    wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-$cpuArch.tgz
+    tar -xzvf ~/ngrok-stable-linux-$cpuArch.tgz
+    back2menu
+}
+
+ngrok_authtoken(){
+    read -p "请输入Ngrok官方网站的Authtoken：" authtoken
+    ~/ngrok authtoken $authtoken
 }
