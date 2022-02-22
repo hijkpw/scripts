@@ -79,7 +79,11 @@ select_region(){
     esac
 }
 
-menu() {
+runTunnel(){
+    select_region
+}
+
+menu(){
 	clear
 	red "=================================="
 	echo "                           "
