@@ -62,4 +62,5 @@ download_ngrok(){
 ngrok_authtoken(){
     read -p "请输入Ngrok官方网站的Authtoken：" authtoken
     ~/ngrok authtoken $authtoken
+    back2menu
 }
