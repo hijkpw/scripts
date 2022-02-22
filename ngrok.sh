@@ -33,6 +33,7 @@ done
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流操作系统" && exit 1
 
 cpuArch=`uname -m`
+region="us"
 
 archAffix() {
 	case "$cpuArch" in
@@ -78,8 +79,8 @@ menu() {
 	echo "                           "
 	green "1. 下载Ngrok程序包"
 	green "2. 授权Ngrok账号"
-	green "3. 手动续期域名证书"
-	green "4. 卸载Acme.sh"
+	green "3. 启用隧道"
+	green "4. 卸载Ngrok程序包"
 	green "5. 更新脚本"
 	green "0. 退出"
 	echo "         "
@@ -90,7 +91,7 @@ menu() {
 		3) acmerenew ;;
 		4) uninstall ;;
 		5) upgrade ;;
-		0) exit 1 ;;
+		*) exit 1 ;;
 	esac
 }
 
