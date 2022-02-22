@@ -18,3 +18,19 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流操作系统" && exit 1
+
+cpuArch=`uname -m`
+
+archAffix() {
+	case "$cpuArch" in
+		i686 | i386) cpuArch='386' ;;
+		x86_64 | amd64) cpuArch='amd64' ;;
+		armv5tel | arm6l | armv7 | armv7l ) cpuArch='arm' ;;
+		armv8 | aarch64) cpuArch='arm64' ;;
+		*) red "不支持的CPU架构！" && exit 1;;
+	esac
+}
+
+download_ngrok(){
+
+}
