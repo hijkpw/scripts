@@ -33,7 +33,6 @@ done
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流操作系统" && exit 1
 
 cpuArch=`uname -m`
-region="us"
 
 archAffix() {
 	case "$cpuArch" in
@@ -64,6 +63,16 @@ ngrok_authtoken(){
     read -p "请输入Ngrok官方网站的Authtoken：" authtoken
     ~/ngrok authtoken $authtoken
     back2menu
+}
+
+select_region(){
+    echo "(us)"
+    echo "(eu)"
+    echo "(ap)"
+    echo "(au)"
+    echo "(sa)"
+    echo "(jp)"
+    echo "(in)"
 }
 
 menu() {
