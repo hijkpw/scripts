@@ -69,10 +69,14 @@ select_region(){
     echo "(us) 美国"
     echo "(eu) 德国"
     echo "(ap) 新加坡"
-    echo "(au) 澳大利亚悉尼"
+    echo "(au) 澳大利亚"
     echo "(sa) 南美洲"
-    echo "(jp) 日本东京"
-    echo "(in) 印度孟买"
+    echo "(jp) 日本"
+    echo "(in) 印度"
+    read -p "请选择Ngrok服务器区域：" ngrok_region
+    case "$ngrok_region" in
+    
+    esac
 }
 
 menu() {
