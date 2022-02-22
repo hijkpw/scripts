@@ -66,13 +66,13 @@ ngrok_authtoken(){
 }
 
 select_region(){
-    echo "(us)"
-    echo "(eu)"
-    echo "(ap)"
-    echo "(au)"
-    echo "(sa)"
-    echo "(jp)"
-    echo "(in)"
+    echo "(us) 美国"
+    echo "(eu) 德国"
+    echo "(ap) 新加坡"
+    echo "(au) 澳大利亚悉尼"
+    echo "(sa) 南美洲"
+    echo "(jp) 日本东京"
+    echo "(in) 印度孟买"
 }
 
 menu() {
