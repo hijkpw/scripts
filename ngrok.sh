@@ -85,8 +85,8 @@ menu() {
 	echo "         "
 	read -p "请输入数字:" NumberInput
 	case "$NumberInput" in
-		1) acme ;;
-		2) certificate ;;
+		1) download_ngrok ;;
+		2) ngrok_authtoken ;;
 		3) acmerenew ;;
 		4) uninstall ;;
 		5) upgrade ;;
