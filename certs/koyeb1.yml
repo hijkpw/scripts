@@ -1,0 +1,9 @@
+tunnel: koyeb1
+credentials-file: /root/.cloudflared/4400bcd9-43b4-4291-8187-422f2d0a4a3d.json
+originRequest:
+  connectTimeout: 30s
+  noTLSVerify: true
+ingress:
+  - hostname: koyeb1.zzysite-tempmail.tk
+    service: http://localhost:8888
+  - service: http_status:404
