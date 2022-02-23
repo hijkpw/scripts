@@ -87,6 +87,8 @@ select_region(){
 
 runTunnel(){
     select_region
+    read -p "请输入你所使用的协议（默认HTTP）：" httptcp
+    
 }
 
 menu(){
