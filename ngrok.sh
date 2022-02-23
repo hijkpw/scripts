@@ -75,7 +75,13 @@ select_region(){
     echo "(in) 印度"
     read -p "请选择Ngrok服务器区域：" ngrok_region
     case "$ngrok_region" in
-    
+        eu ) ngrok_region="eu"
+        ap ) ngrok_region="ap"
+        au ) ngrok_region="au"
+        sa ) ngrok_region="sa"
+        jp ) ngrok_region="jp"
+        in ) ngrok_region="in"
+        * ) ngrok_region="us"
     esac
 }
 
