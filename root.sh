@@ -44,7 +44,7 @@ echo "                           "
 red "=================================="
 echo "                           "
 read -p "设置root密码:" password
-[ -z $password ] && red "未设置密码！" && exit 1
+[ -z $password ] && red "未设置密码，脚本即将退出！" && exit 1
 echo root:$password | sudo chpasswd root
 sudo sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config;
 sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config;
