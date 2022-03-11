@@ -846,7 +846,7 @@ trojanXTLSConfig() {
 
 vmessConfig() {
 	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
-	local alterid=$(shuf -i50-80 -n1)
+	# local alterid=$(shuf -i50-80 -n1)
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -857,7 +857,7 @@ vmessConfig() {
 		        {
 		          "id": "$uuid",
 		          "level": 1,
-		          "alterId": $alterid
+		          "alterId": 0
 		        }
 		      ]
 		    }
@@ -876,7 +876,7 @@ vmessConfig() {
 
 vmessKCPConfig() {
 	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
-	local alterid=$(shuf -i50-80 -n1)
+	# local alterid=$(shuf -i50-80 -n1)
 	cat >$CONFIG_FILE <<-EOF
 		{
 		  "inbounds": [{
@@ -887,7 +887,7 @@ vmessKCPConfig() {
 		        {
 		          "id": "$uuid",
 		          "level": 1,
-		          "alterId": $alterid
+		          "alterId": 0
 		        }
 		      ]
 		    },
