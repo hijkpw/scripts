@@ -110,14 +110,7 @@ euservDig9() {
 }
 
 rootLogin() {
-	read -p "请输入需要设置的root密码:" password
-	echo root:$password | sudo chpasswd root
-	sudo sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
-	sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-	sudo service sshd restart
-	green "用户名：root"
-	green "密码：$password"
-	yellow "请妥善保管好登录信息！然后重启VPS确保设置已保存！"
+	wget -N https://raw.githubusercontents.com/Misaka-blog/rootLogin/master/root.sh && bash root.sh
 }
 
 screenManager() {
@@ -129,6 +122,9 @@ bbr() {
 		wget -N --no-check-certificate "https://raw.githubusercontents.com/chiakge/Linux-NetSpeed/master/tcp.sh" && chmod +x tcp.sh && ./tcp.sh
 	fi
 	if [ ${virt} == "zvm" ]; then
+		wget -N --no-check-certificate "https://raw.githubusercontents.com/chiakge/Linux-NetSpeed/master/tcp.sh" && chmod +x tcp.sh && ./tcp.sh
+	fi
+	if [ ${virt} == "microsoft" ]; then
 		wget -N --no-check-certificate "https://raw.githubusercontents.com/chiakge/Linux-NetSpeed/master/tcp.sh" && chmod +x tcp.sh && ./tcp.sh
 	fi
 	if [ ${virt} == "openvz" ]; then
@@ -250,8 +246,8 @@ vpsBench() {
 	echo "                            "
 	echo "1. 使用misakabench"
 	echo "2. 使用bench.sh"
-	echo "3. 使用superbench"
-	echo "4. 使用lemonbench"
+	echo "2. 使用superbench"
+	echo "3. 使用lemonbench"
 	echo "                            "
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page3NumberInput
@@ -350,7 +346,7 @@ page1() {
 	green "请选择你接下来的操作"
 	echo "                            "
 	echo "1. Oracle Cloud原生系统关闭防火墙"
-	echo "2. 开启VPS中所有的网络端口"
+        echo "2. 开启VPS中所有的网络端口"
 	echo "3. 德鸡DiG9正常访问网络解决方案"
 	echo "4. 修改登录方式为 root + 密码 登录"
 	echo "5. Screen 后台任务管理"
