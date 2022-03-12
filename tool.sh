@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 全局变量
-ver="2.1.5"
-changeLog="新增放开VPS所有网络端口选项"
+ver="2.1.6"
+changeLog="新增Ngrok脚本"
 arch=$(uname -m)
 virt=$(systemd-detect-virt)
 kernelVer=$(uname -r)
@@ -173,6 +173,10 @@ dns64server() {
 
 cfArgoTunnel() {
 	wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/argo-tunnel-script@master/argo.sh && bash argo.sh
+}
+
+ngrokScript() {
+	wget -N https://raw.githubusercontents.com/Misaka-blog/Ngrok-1key/master/ngrok.sh && bash ngrok.sh
 }
 
 # 第二页
@@ -356,6 +360,7 @@ page1() {
 	echo "9. 安装docker"
 	echo "10. Acme.sh 证书申请脚本"
 	echo "11. CloudFlare Argo Tunnel一键脚本"
+	echo "12. Ngrok 内网穿透一键脚本"
 	echo "                            "
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page1NumberInput
@@ -371,6 +376,7 @@ page1() {
         9) dockerInstall ;;
         10) acmesh ;;
         11) cfArgoTunnel ;;
+		12) ngrokScript ;;
         0) menu ;;
 	esac
 }
