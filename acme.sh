@@ -43,6 +43,7 @@ checktls() {
 			green "证书申请成功！证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
 			yellow "证书crt路径如下：/root/cert.crt"
 			yellow "私钥key路径如下：/root/private.key"
+			green "请妥善保存证书文件，以备下次使用"
 			exit 1
 		else
 			red "抱歉，证书申请失败"
@@ -62,9 +63,13 @@ acme() {
 	v6=$(curl -s6m8 https://ip.gs 2>/dev/null)
 	v4=$(curl -s4m8 https://ip.gs 2>/dev/null)
 	[[ -z $v4 ]] && echo -e nameserver 2a01:4f8:c2c:123f::1 >/etc/resolv.conf
-	read -p "请输入注册邮箱（例：admin@misaka.rest，或留空自动生成）：" acmeEmail
-	[ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
-	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && curl https://get.acme.sh | sh -s email=$acmeEmail && source ~/.bashrc && bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+	if [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]]; then
+		read -p "请输入注册邮箱（例：admin@misaka.rest，或留空自动生成）：" acmeEmail
+		[ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
+		curl https://get.acme.sh | sh -s email=$acmeEmail
+		source ~/.bashrc
+		bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+	fi
 	read -p "请输入解析完成的域名:" domain
 	[ -z $domain ] && red "检测到未输入域名，脚本将自动退出" && exit 1
 	green "已输入的域名: $domain" && sleep 1
@@ -83,6 +88,7 @@ acme() {
 			exit 1
 		elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
 			if [[ $domainIP != $v4 ]] && [[ $domainIP != $v6 ]]; then
+				green "当前域名解析IP：$domainIP"
 				red "当前域名解析的IP与VPS的IP不匹配"
 				green "排查建议如下："
 				yellow "1、请确保Cloudflare小云朵为关闭状态(仅限DNS)"
