@@ -30,12 +30,6 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
-[[ -z $(type -P curl) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} curl
-
-# 统计脚本运行次数
-COUNT=$(curl -sm1 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgitlab.com%2Fmisakano7545%2Facme-1key%2F-%2Fraw%2Fmaster%2Facme1key.sh&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false" 2>&1) &&
-TODAY=$(expr "$COUNT" : '.*\s\([0-9]\{1,\}\)\s/.*')
-TOTAL=$(expr "$COUNT" : '.*/\s\([0-9]\{1,\}\)\s.*')
 
 checktls() {
 	if [[ -f /root/cert.crt && -f /root/private.key ]]; then
@@ -43,35 +37,31 @@ checktls() {
 			green "证书申请成功！证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
 			yellow "证书crt路径如下：/root/cert.crt"
 			yellow "私钥key路径如下：/root/private.key"
-			green "请妥善保存证书文件，以备下次使用"
 			exit 1
 		else
 			red "抱歉，证书申请失败"
-			green "排查建议如下："
+			green "建议如下："
 			yellow "1. 检测防火墙是否打开，如打开请关闭防火墙或放行80端口"
 			yellow "2. 检查80端口是否开放或占用"
 			yellow "3. 域名触发Acme.sh官方风控，更换域名或等待7天后再尝试执行脚本"
-			yellow "4. 脚本可能出现了一些问题，建议截图发布到TG群或GitHub Issues询问"
+			yellow "4. 脚本可能跟不上时代，建议截图发布到TG群询问"
 			exit 1
 		fi
 	fi
 }
 
 acme() {
+	[[ -z $(type -P curl) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} curl
+	[[ -z $(type -P wget) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} wget
 	[[ -z $(type -P socat) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} socat
 	[[ -n $(wg 2>/dev/null) ]] && wg-quick down wgcf && yellow "已检测WARP状态打开，为你自动关闭WARP以保证证书申请"
-	v6=$(curl -s6m8 https://ip.gs 2>/dev/null)
-	v4=$(curl -s4m8 https://ip.gs 2>/dev/null)
-	[[ -z $v4 ]] && echo -e nameserver 2a01:4f8:c2c:123f::1 >/etc/resolv.conf
-	if [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]]; then
-		read -p "请输入注册邮箱（例：admin@misaka.rest，或留空自动生成）：" acmeEmail
-		[ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
-		curl https://get.acme.sh | sh -s email=$acmeEmail
-		source ~/.bashrc
-		bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
-	fi
+	v6=$(curl -s6m8 https://ip.gs)
+	v4=$(curl -s4m8 https://ip.gs)
+	[[ -z $v4 ]] && echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
+	read -p "请输入注册邮箱（例：admin@misaka.rest，或留空自动生成）：" acmeEmail
+	[ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
+	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && curl https://get.acme.sh | sh -s email=$acmeEmail && source ~/.bashrc && bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
 	read -p "请输入解析完成的域名:" domain
-	[ -z $domain ] && red "检测到未输入域名，脚本将自动退出" && exit 1
 	green "已输入的域名: $domain" && sleep 1
 	domainIP=$(curl -sm8 ipget.net/?ip="cloudflare.1.1.1.1.$domain")
 	if [[ -n $(echo $domainIP | grep nginx) ]]; then
@@ -88,11 +78,10 @@ acme() {
 			exit 1
 		elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
 			if [[ $domainIP != $v4 ]] && [[ $domainIP != $v6 ]]; then
-				green "当前域名解析IP：$domainIP"
 				red "当前域名解析的IP与VPS的IP不匹配"
-				green "排查建议如下："
+				green "建议如下："
 				yellow "1、请确保Cloudflare小云朵为关闭状态(仅限DNS)"
-				yellow "2、请检查DNS解析设置的IP是否为VPS本地IP"
+				yellow "2、请检查DNS解析设置的IP是否为VPS的IP"
 				exit 1
 			fi
 		fi
@@ -119,7 +108,6 @@ certificate() {
 	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
 	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
-	[ -z $domain ] && red "检测到未输入域名，脚本将自动退出" && exit 1
 	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
 		bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
 		bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
@@ -135,9 +123,8 @@ acmerenew() {
 	[[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
 	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
-	[ -z $domain ] && red "检测到未输入域名，脚本将自动退出" && exit 1
 	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
-		[[ -n $(wg) ]] && wg-quick down wgcf && yellow "已检测WARP状态打开，为你自动关闭WARP以保证证书申请"
+		[[ -n $(wg) ]] && wg-quick down wgcf
 		bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
 		checktls
 		exit 1
@@ -155,22 +142,20 @@ uninstall() {
 }
 
 upgrade() {
-	wget -N https://gitlab.com/misakano7545/acme-1key/-/raw/master/acme1key.sh && chmod -R 777 acme1key.sh && bash acme1key.sh
+	wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/acme-1key@master/acme1key.sh && chmod -R 777 acme1key.sh && bash acme1key.sh
 }
 
 menu() {
 	clear
-	red "===================================================="
-	red "  __  __ _           _                         _    "
-	red " |  \/  (_)___  __ _| | ____ _   _ __ ___  ___| |_  "
-	red " | |\/| | / __|/ _  | |/ / _  | |  __/ _ \/ __| __| "
-	red " | |  | | \__ \ (_| |   < (_| |_| | |  __/\__ \ |_  "
-	red " |_|  |_|_|___/\__,_|_|\_\__,_(_)_|  \___||___/\__| "
-	echo "                                                    "
-	red "===================================================="
-	echo "                                                    "
-	yellow "今日运行次数：$TODAY     总共运行次数：$TOTAL"
-	echo "                                                    "
+	red "=================================="
+	echo "                           "
+	red "    Acme.sh 域名证书一键申请脚本     "
+	red "          by 小御坂的破站           "
+	echo "                           "
+	red "  Site: https://owo.misaka.rest  "
+	echo "                           "
+	red "=================================="
+	echo "                           "
 	green "1. 安装Acme.sh并申请证书"
 	green "2. 撤销并删除已申请的证书"
 	green "3. 手动续期域名证书"
