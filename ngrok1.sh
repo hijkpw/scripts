@@ -90,7 +90,7 @@ download_ngrok(){
 ngrok_authtoken(){
 	[ $ngrokStatus == "未安装" ] && red "检测到未安装Ngrok程序包，无法执行操作！！" && back2menu
 	[ $authStatus == "已授权" ] && red "已授权Ngrok程序包，无需重复授权！！！" && back2menu
-	read -p "请输入Ngrok官方网站的Authtoken：" authtoken
+	read -p "请输入Ngrok官方网站的Authtoken（可从 https://dashboard.ngrok.com/get-started/your-authtoken 内获取）：" authtoken
 	[ -z $authtoken ] && red "无输入Authtoken，授权过程中断！" && back2menu
 	ngrok authtoken $authtoken
 	green "Ngrok Authtoken授权成功"
