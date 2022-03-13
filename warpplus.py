@@ -6,8 +6,17 @@ import string
 import time
 import os
 import sys
+import telegram
 
 referrer = input("请输入WARP应用内的设备ID：")
+tg_bot = False
+tg_bot = input("是否启用Telegram bot推送，启用请输入y，不启用输入任意值：")
+if tg_bot == "y":
+	tg_bot = True
+chat_id = input("请输入你的Telegram ID（可在 @userinfobot 查看）：")
+tg_bot_token = input("请输入Telegram bot API Token （可在 @botfather 获取）")
+
+bot = telegram.Bot(token=tg_bot_token)
 
 def genString(stringLength):
 	try:
@@ -59,10 +68,10 @@ while True:
 			time.sleep(0.5)
 			sys.stdout.write("\r[+] 准备中... " + animation[i % len(animation)])
 			sys.stdout.flush()
-		print(f"\n[-] 脚本正在为 {referrer} ID增加流量")    
-		print(f"[:)] {g} GB流量已成功添加到你的账户！")
-		print(f"[#] {g} 次成功 {b} 次失败")
+		print(f"[:)] {g}GB流量已成功添加到你的账户！")
+		print(f"[#] {g}次成功 {b}次失败")
 		print("[*] 等待18秒，下一个请求即将发出")
+		bot.send_message(f"恭喜🎉 \n 1GB流量已成功添加到{referrer}账户！\n{g}次成功 {b}次失败\nScript by @ALIILAPRO modified by @Misaka-blog")
 		time.sleep(18)
 	else:
 		b = b + 1
