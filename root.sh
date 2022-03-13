@@ -19,7 +19,7 @@ yellow(){
 }
 
 for i in "${CMD[@]}"; do
-	SYS="$i" && [[ -n $SYS ]] && echo $SYS && break
+	SYS="$i" && [[ -n $SYS ]] && break
 done
 
 for ((int=0; int<${#REGEX[@]}; int++)); do
@@ -27,29 +27,31 @@ for ((int=0; int<${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流操作系统" && exit 1
+[[ ! -f /etc/ssh/sshd_config ]] && sudo ${PACKAGE_UPDATE[int]} && sudo ${PACKAGE_INSTALL[int]} openssh-server
+[[ -z $(type -P curl) ]] && sudo ${PACKAGE_UPDATE[int]} && sudo ${PACKAGE_INSTALL[int]} curl
+
+IP=$(curl -sm8 ip.sb)
 
 sudo lsattr /etc/passwd /etc/shadow >/dev/null 2>&1
 sudo chattr -i /etc/passwd /etc/shadow >/dev/null 2>&1
 sudo chattr -a /etc/passwd /etc/shadow >/dev/null 2>&1
 sudo lsattr /etc/passwd /etc/shadow >/dev/null 2>&1
 
-clear
-red "=================================="
-echo "                           "
-red "    VPS一键修改root密码登录脚本     "
-red "          by 小御坂的破站           "
-echo "                           "
-red "  Site: https://owo.misaka.rest  "
-echo "                           "
-red "=================================="
-echo "                           "
-read -p "设置root密码:" password
-[ -z $password ] && red "未设置密码，脚本即将退出！" && exit 1
+read -p "输入即将设置的SSH端口（如未输入，默认22）：" sshport
+[ -z $sshport ] && red "端口未设置，将使用默认22端口" && sshport=22
+read -p "输入即将设置的root密码：" password
+[ -z $password ] && red "未检测输入，脚本即将退出" && exit 1
 echo root:$password | sudo chpasswd root
+
+sudo sed -i "s/^#\?Port.*/Port $sshport/g" /etc/ssh/sshd_config;
 sudo sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config;
 sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config;
+
+sudo service ssh restart
 sudo service sshd restart
-green "VPS用户名：root"
-green "vps密码：$password"
-echo "请妥善保存好登录信息！然后重启VPS确保设置已保存！"
-exit 1
+
+yellow "VPS root登录信息设置完成！"
+green "VPS登录地址：$IP:$sshport"
+green "用户名：root"
+green "密码：$password"
+yellow "请妥善保存好登录信息！然后重启VPS确保设置已保存！"
