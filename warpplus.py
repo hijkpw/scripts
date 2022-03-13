@@ -9,10 +9,6 @@ import sys
 import telegram
 
 referrer = input("请输入WARP应用内的设备ID：")
-tg_bot = False
-tg_bot = input("是否启用Telegram bot推送，启用请输入y，不启用输入任意值：")
-if tg_bot == "y":
-	tg_bot = True
 chat_id = input("请输入你的Telegram ID（可在 @userinfobot 查看）：")
 tg_bot_token = input("请输入Telegram bot API Token （可在 @botfather 获取）")
 
