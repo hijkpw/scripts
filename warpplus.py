@@ -9,6 +9,7 @@ import sys
 
 os.system("title WARP-PLUS-CLOUDFLARE By ALIILAPRO")
 os.system('cls' if os.name == 'nt' else 'clear')
+
 referrer = input("请输入WARP应用内的设备ID：")
 
 def genString(stringLength):
