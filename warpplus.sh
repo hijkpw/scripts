@@ -37,5 +37,7 @@ done
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流的操作系统" && exit 1
 
 # 判断依赖是否安装，如未安装则自动安装
-[ -z $(type -P curl) ] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} curl
-[ -z $(type -P screen) ] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} screen
+[[ -z $(type -P curl) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} curl
+[[ -z $(type -P screen) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} screen
+[[ -z $(type -P python3) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} python3
+
