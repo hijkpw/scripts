@@ -6,9 +6,11 @@ import string
 import time
 import os
 import sys
+
 os.system("title WARP-PLUS-CLOUDFLARE By ALIILAPRO")
 os.system('cls' if os.name == 'nt' else 'clear')
 referrer = input("请输入WARP应用内的设备ID：")
+
 def genString(stringLength):
 	try:
 		letters = string.ascii_letters + string.digits
@@ -54,9 +56,6 @@ while True:
 	if result == 200:
 		g = g + 1
 		os.system('cls' if os.name == 'nt' else 'clear')
-		print("")
-		print("                  WARP-PLUS-CLOUDFLARE (script)" + " By ALIILAPRO")
-		print("")
 		animation = ["[■□□□□□□□□□] 10%","[■■□□□□□□□□] 20%", "[■■■□□□□□□□] 30%", "[■■■■□□□□□□] 40%", "[■■■■■□□□□□] 50%", "[■■■■■■□□□□] 60%", "[■■■■■■■□□□] 70%", "[■■■■■■■■□□] 80%", "[■■■■■■■■■□] 90%", "[■■■■■■■■■■] 100%"] 
 		for i in range(len(animation)):
 			time.sleep(0.5)
@@ -64,14 +63,11 @@ while True:
 			sys.stdout.flush()
 		print(f"\n[-] 正在为 {referrer} 账户工作")    
 		print(f"[:)] {g} GB流量已成功添加到你的账户！")
-		print(f"[#] Total: {g} Good {b} Bad")
+		print(f"[#] {g} 次成功 {b} 次失败")
 		print("[*] 等待18秒，下一个请求准备发出")
 		time.sleep(18)
 	else:
 		b = b + 1
 		os.system('cls' if os.name == 'nt' else 'clear')
-		print("")
-		print("                  WARP-PLUS-CLOUDFLARE (script)" + " By ALIILAPRO")
-		print("")
 		print("[:(] 我们无法连接到CloudFlare服务器，请稍后重试")
-		print(f"[#] Total: {g} Good {b} Bad")
+		print(f"[#] {g} 次成功 {b} 次失败")
