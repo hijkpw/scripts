@@ -66,12 +66,12 @@ while True:
 		animation = ["[■□□□□□□□□□] 10%","[■■□□□□□□□□] 20%", "[■■■□□□□□□□] 30%", "[■■■■□□□□□□] 40%", "[■■■■■□□□□□] 50%", "[■■■■■■□□□□] 60%", "[■■■■■■■□□□] 70%", "[■■■■■■■■□□] 80%", "[■■■■■■■■■□] 90%", "[■■■■■■■■■■] 100%"] 
 		for i in range(len(animation)):
 			time.sleep(0.5)
-			sys.stdout.write("\r[+] 准备中... " + animation[i % len(animation)])
+			sys.stdout.write("\r[+] 准备中... " + animation[i % len(animation)] + "\n")
 			sys.stdout.flush()
 		print(f"[:)] {g}GB流量已成功添加到你的账户！")
 		print(f"[#] {g}次成功 {b}次失败")
 		print("[*] 等待18秒，下一个请求即将发出")
-		bot.send_message(f"恭喜🎉 \n 1GB流量已成功添加到{referrer}账户！\n{g}次成功 {b}次失败\nScript by @ALIILAPRO modified by @Misaka-blog")
+		bot.send_message(chat_id=chat_id, text=f"恭喜🎉 \n1GB流量已成功添加到{referrer}账户！\n{g}次成功 {b}次失败\nScript by @ALIILAPRO modified by @Misaka-blog")
 		time.sleep(18)
 	else:
 		b = b + 1
