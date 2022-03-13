@@ -8,15 +8,7 @@ import os
 import sys
 os.system("title WARP-PLUS-CLOUDFLARE By ALIILAPRO")
 os.system('cls' if os.name == 'nt' else 'clear')
-print ("[+] ABOUT SCRIPT:")
-print ("[-] With this script, you can getting unlimited GB on Warp+.")
-print ("[-] Version: 4.0.0")
-print ("--------")
-print ("[+] THIS SCRIPT CODDED BY ALIILAPRO") 
-print ("[-] SITE: aliilapro.github.io") 
-print ("[-] TELEGRAM: aliilapro")
-print ("--------")
-referrer = input("[#] Enter the WARP+ ID:")
+referrer = input("请输入WARP应用内的设备ID：")
 def genString(stringLength):
 	try:
 		letters = string.ascii_letters + string.digits
@@ -81,5 +73,5 @@ while True:
 		print("")
 		print("                  WARP-PLUS-CLOUDFLARE (script)" + " By ALIILAPRO")
 		print("")
-		print("[:(] Error when connecting to server.")
+		print("[:(] 我们无法连接到CloudFlare服务器，请稍后重试")
 		print(f"[#] Total: {g} Good {b} Bad")
