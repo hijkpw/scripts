@@ -59,10 +59,10 @@ while True:
 			time.sleep(0.5)
 			sys.stdout.write("\r[+] 准备中... " + animation[i % len(animation)])
 			sys.stdout.flush()
-		print(f"\n[-] 正在为 {referrer} 账户工作")    
+		print(f"\n[-] 脚本正在为 {referrer} ID增加流量")    
 		print(f"[:)] {g} GB流量已成功添加到你的账户！")
 		print(f"[#] {g} 次成功 {b} 次失败")
-		print("[*] 等待18秒，下一个请求准备发出")
+		print("[*] 等待18秒，下一个请求即将发出")
 		time.sleep(18)
 	else:
 		b = b + 1
