@@ -41,3 +41,6 @@ done
 [[ -z $(type -P screen) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} screen
 [[ -z $(type -P python3) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} python3
 
+getData(){
+        read -p "请输入WARP的ID（26位字符）：" warpid
+}
