@@ -60,12 +60,12 @@ while True:
 		animation = ["[■□□□□□□□□□] 10%","[■■□□□□□□□□] 20%", "[■■■□□□□□□□] 30%", "[■■■■□□□□□□] 40%", "[■■■■■□□□□□] 50%", "[■■■■■■□□□□] 60%", "[■■■■■■■□□□] 70%", "[■■■■■■■■□□] 80%", "[■■■■■■■■■□] 90%", "[■■■■■■■■■■] 100%"] 
 		for i in range(len(animation)):
 			time.sleep(0.5)
-			sys.stdout.write("\r[+] Preparing... " + animation[i % len(animation)])
+			sys.stdout.write("\r[+] 准备中... " + animation[i % len(animation)])
 			sys.stdout.flush()
-		print(f"\n[-] WORK ON ID: {referrer}")    
-		print(f"[:)] {g} GB has been successfully added to your account.")
+		print(f"\n[-] 正在为 {referrer} 账户工作")    
+		print(f"[:)] {g} GB流量已成功添加到你的账户！")
 		print(f"[#] Total: {g} Good {b} Bad")
-		print("[*] After 18 seconds, a new request will be sent.")
+		print("[*] 等待18秒，下一个请求准备发出")
 		time.sleep(18)
 	else:
 		b = b + 1
