@@ -221,6 +221,10 @@ trojanpanel() {
 	source <(curl -sL https://git.io/trojan-install)
 }
 
+lxcovztun() {
+	wget -N https://raw.githubusercontents.com/Misaka-blog/tun-script/master/tun.sh && bash tun.sh
+}
+
 # 第三页
 macka() {
 	wget -P /root -N --no-check-certificate "https://raw.githubusercontents.com/mack-a/v2ray-agent/master/install.sh" && chmod 700 /root/install.sh && /root/install.sh
@@ -353,7 +357,7 @@ page1() {
 	green "请选择你接下来的操作"
 	echo "                            "
 	echo "1. Oracle Cloud原生系统关闭防火墙"
-        echo "2. 开启VPS中所有的网络端口"
+    echo "2. 开启VPS中所有的网络端口"
 	echo "3. 德鸡DiG9正常访问网络解决方案"
 	echo "4. 修改登录方式为 root + 密码 登录"
 	echo "5. Screen 后台任务管理"
@@ -364,6 +368,7 @@ page1() {
 	echo "10. Acme.sh 证书申请脚本"
 	echo "11. CloudFlare Argo Tunnel一键脚本"
 	echo "12. Ngrok 内网穿透一键脚本"
+	echo "13. LXC/OVZ VPS打开TUN模块"
 	echo "                            "
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page1NumberInput
