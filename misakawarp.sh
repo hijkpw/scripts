@@ -51,8 +51,7 @@ get_status(){
     [ -z $WARPIPv4Status ] && WARPIPv4Status="无法检测IPv4状态"
     [ -z $WARPIPv6Status ] && WARPIPv6Status="无法检测IPv6状态"
     [[ ! -f /usr/local/bin/wgcf ]] && WgcfStatus="未安装"
-    [[ -f /usr/local/bin/wgcf ]] && WgcfStatus="未启动"
-    [[ -n $(wg) ]] && WgcfStatus="已启动"
+    [[ -f /usr/local/bin/wgcf ]] && WgcfStatus="未启动" && [[ -n $(wg) ]] && WgcfStatus="已启动"
 }
 
 menu(){
