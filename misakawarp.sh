@@ -57,14 +57,14 @@ get_status(){
 menu(){
     clear
     get_status
-    echo "=========================="
-    echo "    Misaka WARP Script    "
-    echo "   Site: owo.misaka.rest  "
+    red "=========================="
+    red "    Misaka WARP Script    "
+    red "   Site: owo.misaka.rest  "
     echo "                          "
-    echo "VPS IPv4状态：$WARPIPv4Status"
-    echo "VPS IPv6状态：$WARPIPv6Status"
-    echo "Wireguard状态：$WireGuardStatus"
-    echo "=========================="
+    green "VPS IPv4状态：$WARPIPv4Status"
+    green "VPS IPv6状态：$WARPIPv6Status"
+    green "Wireguard状态：$WireGuardStatus"
+    red "=========================="
     echo "   "
 }
 
