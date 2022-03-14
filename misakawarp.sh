@@ -51,7 +51,7 @@ get_status(){
     [ -z $WARPIPv4Status ] && WARPIPv4Status="无法检测IPv4状态"
     [ -z $WARPIPv6Status ] && WARPIPv6Status="无法检测IPv6状态"
     [[ -n $(wg 2>/dev/null) ]] && WireGuardStatus="已启动"
-    [[ -z $(wg 2>/dev/null) ]] && WireGuardStatus="未安装/启动"
+    [[ -z $(wg 2>/dev/null) ]] && WireGuardStatus="未启动"
 }
 
 menu(){
