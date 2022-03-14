@@ -36,6 +36,16 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流的操作系统" && exit 1
 
+archAffix() {
+    case "$cpuArch" in
+        i686 | i386) cpuArch='386' ;;
+        x86_64 | amd64) cpuArch='amd64' ;;
+        armv8 | aarch64) cpuArch='aarch64' ;;
+        s390x) cpuArch='s390x' ;;
+        *) red "不支持的CPU架构！" && exit 1 ;;
+    esac
+}
+
 check_tun(){
     TUN=$(cat /dev/net/tun 2>&1 | tr '[:upper:]' '[:lower:]')
     [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]] && red "检测到未开启TUN模块，请到VPS控制面板处开启" && exit 1
