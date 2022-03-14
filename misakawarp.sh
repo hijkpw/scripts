@@ -43,11 +43,14 @@ get_ip_address(){
 
 menu(){
     clear
-    echo "========================="
-    echo "IPv4状态："
-    echo "IPv6状态："
+    echo "=========================="
+    echo "    Misaka WARP Script    "
+    echo "   Site: owo.misaka.rest  "
+    echo "                          "
+    echo "VPS IPv4状态："
+    echo "VPS IPv6状态："
     echo "Wireguard状态："
-    echo "========================="
+    echo "=========================="
 }
 
 menu
