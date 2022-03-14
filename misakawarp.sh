@@ -66,6 +66,9 @@ menu(){
     green "Wireguard状态：$WireGuardStatus"
     red "=========================="
     echo "   "
+    if [ $WARPIPv6Status == "无法检测IPv6状态" ]; then
+    
+    fi
 }
 
 check_tun
