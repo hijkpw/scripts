@@ -44,6 +44,10 @@ check_tun(){
 get_status(){
     WARPIPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPIPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    [ $WARPIPv4Status == "on" ] && WARPIPv4Status="WARP IPv4"
+    [ $WARPIPv4Status == "off" ] && WARPIPv4Status="WARP IPv4"
+    [ $WARPIPv6Status == "on" ] && WARPIPv6Status="WARP IPv6"
+    [ $WARPIPv6Status == "off" ] && WARPIPv6Status="WARP IPv6"
 }
 
 menu(){
