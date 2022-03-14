@@ -67,8 +67,8 @@ menu(){
     red "=========================="
     echo "   "
     if [ $WARPIPv6Status == "无法检测IPv6状态" ]; then
-        green "1. 安装Wgcf IPv4"
-        green "2. 安装Wgcf 双栈"
+        green "1. 安装Wgcf IPv4 WARP"
+        green "2. 安装Wgcf 双栈 WARP"
     fi
 }
 
