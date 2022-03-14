@@ -50,8 +50,9 @@ get_status(){
     [ $WARPIPv6Status == "off" ] && WARPIPv6Status="原生IPv6"
     [ -z $WARPIPv4Status ] && WARPIPv4Status="无法检测IPv4状态"
     [ -z $WARPIPv6Status ] && WARPIPv6Status="无法检测IPv6状态"
-    [[ -n $(wg 2>/dev/null) ]] && WireGuardStatus="已启动"
-    [[ -z $(wg 2>/dev/null) ]] && WireGuardStatus="未启动"
+    [[ ! -f /usr/local/bin/wgcf ]] && WgcfStatus="未安装"
+    [[ -f /usr/local/bin/wgcf ]] && WgcfStatus="未启动"
+    [[ -n $(wg) ]] && WgcfStatus="已启动"
 }
 
 menu(){
@@ -63,11 +64,12 @@ menu(){
     echo "                          "
     green "VPS IPv4状态：$WARPIPv4Status"
     green "VPS IPv6状态：$WARPIPv6Status"
-    green "Wireguard状态：$WireGuardStatus"
+    green "Wgcf状态：$WgcfStatus"
     red "=========================="
     echo "   "
     if [ $WARPIPv6Status == "无法检测IPv6状态" ]; then
-    
+        green "1. 安装Wgcf IPv4"
+        green "2. 安装Wgcf 双栈"
     fi
 }
 
