@@ -48,6 +48,8 @@ get_status(){
     [ $WARPIPv4Status == "off" ] && WARPIPv4Status="原生IPv4"
     [ $WARPIPv6Status == "on" ] && WARPIPv6Status="WARP IPv6"
     [ $WARPIPv6Status == "off" ] && WARPIPv6Status="原生IPv6"
+    [ -z $WARPIPv4Status ] && WARPIPv4Status="无法检测IPv4状态"
+    [ -z $WARPIPv6Status ] && WARPIPv6Status="无法检测IPv6状态"
 }
 
 menu(){
