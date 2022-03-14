@@ -87,4 +87,5 @@ menu(){
 }
 
 check_tun
+archAffix
 menu
