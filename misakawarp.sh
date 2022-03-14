@@ -36,9 +36,8 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流的操作系统" && exit 1
 
-get_ip_address(){
-    v4=$(curl -s4m8 ip.gs 2>/dev/null)
-    v6=$(curl -s4m8 ip.gs 2>/dev/null)
+get_status(){
+
 }
 
 menu(){
