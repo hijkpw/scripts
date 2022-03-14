@@ -50,18 +50,23 @@ get_status(){
     [ $WARPIPv6Status == "off" ] && WARPIPv6Status="原生IPv6"
     [ -z $WARPIPv4Status ] && WARPIPv4Status="无法检测IPv4状态"
     [ -z $WARPIPv6Status ] && WARPIPv6Status="无法检测IPv6状态"
+    [[ -n $(wg 2>/dev/null) ]] && WireGuardStatus="已启动"
+    [[ -z $(wg 2>/dev/null) ]] && WireGuardStatus="未安装/启动"
 }
 
 menu(){
     clear
+    get_status
     echo "=========================="
     echo "    Misaka WARP Script    "
     echo "   Site: owo.misaka.rest  "
     echo "                          "
     echo "VPS IPv4状态：$WARPIPv4Status"
     echo "VPS IPv6状态：$WARPIPv6Status"
-    echo "Wireguard状态："
+    echo "Wireguard状态：$WireGuardStatus"
     echo "=========================="
+    echo "   "
 }
 
+check_tun
 menu
