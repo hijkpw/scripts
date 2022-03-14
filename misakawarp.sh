@@ -58,8 +58,8 @@ menu(){
     echo "    Misaka WARP Script    "
     echo "   Site: owo.misaka.rest  "
     echo "                          "
-    echo "VPS IPv4状态："
-    echo "VPS IPv6状态："
+    echo "VPS IPv4状态：$WARPIPv4Status"
+    echo "VPS IPv6状态：$WARPIPv6Status"
     echo "Wireguard状态："
     echo "=========================="
 }
