@@ -74,6 +74,7 @@ menu(){
         green "1. 安装Wgcf IPv4 WARP"
         green "2. 安装Wgcf 双栈 WARP"
     fi
+    read -p "请输入选项：" menuNumberInput
 }
 
 check_tun
