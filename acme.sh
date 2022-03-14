@@ -55,8 +55,8 @@ acme() {
 	[[ -z $(type -P wget) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} wget
 	[[ -z $(type -P socat) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} socat
 	[[ -n $(wg 2>/dev/null) ]] && wg-quick down wgcf && yellow "已检测WARP状态打开，为你自动关闭WARP以保证证书申请"
-	v6=$(curl -s6m8 https://ip.gs)
-	v4=$(curl -s4m8 https://ip.gs)
+	v6=$(ip route get 1.0.0.1 2>/dev/null | grep -oP 'src \K\S+')
+	v4=$(ip route get 2606:4700:4700::1001 2>/dev/null | grep -oP 'src \K\S+')
 	[[ -z $v4 ]] && echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
 	read -p "请输入注册邮箱（例：admin@misaka.rest，或留空自动生成）：" acmeEmail
 	[ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
