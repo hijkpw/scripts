@@ -15,9 +15,9 @@ yellow() {
 
 # 判断系统及定义系统安装依赖方式
 REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'")
-RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS" "Alpine")
+RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS")
 PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update")
-PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install" "apk add -f")
+PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install")
 PACKAGE_REMOVE=("apt -y remove" "apt -y remove" "yum -y remove" "yum -y remove")
 
 # 判断是否为root用户
@@ -65,8 +65,9 @@ get_status(){
 
 install_wireguard(){
     ${PACKAGE_UPDATE[int]}
-    [ $RELEASE == "CentOS" ] && yum install epel-release -y
-    ${PACKAGE_INSTALL[int]} iproute iptables iproute2 openresolv wireguard-tools
+    [ $RELEASE == "CentOS" ] && ${PACKAGE_INSTALL[int]} epel-release && ${PACKAGE_INSTALL[int]} iproute iptables
+    [ $RELEASE == "Debian" || $RELEASE == "Ubuntu" ] && ${PACKAGE_INSTALL[int]} iproute2 openresolv
+    ${PACKAGE_INSTALL[int]} wireguard-tools
 }
 
 menu(){
