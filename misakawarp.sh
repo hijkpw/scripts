@@ -70,6 +70,11 @@ install_wireguard(){
     ${PACKAGE_INSTALL[int]} wireguard-tools
 }
 
+uninstall(){
+    [ $RELEASE == "CentOS" ] && ${PACKAGE_REMOVE[int]} iproute iptables
+    ${PACKAGE_REMOVE[int]} wireguard-tools
+}
+
 menu(){
     clear
     get_status
