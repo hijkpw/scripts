@@ -100,6 +100,7 @@ wgcf_register(){
 uninstall(){
     ${PACKAGE_UNINSTALL[int]} wireguard-tools wireguard-dkms ipset dnsmasq resolvconf mtr
     ${PACKAGE_UNINSTALL[int]} cloudflare-warp
+    green "CloudFlare WARP 已卸载成功！"
 }
 
 # 菜单
