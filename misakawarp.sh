@@ -84,9 +84,13 @@ menu(){
         green "2. 安装Wgcf 双栈 WARP"
     fi
     if [ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "原生IPv6" ]; then
-        green "1. 安装Wgcf 双栈 WARP"
+        green "1. 检测到双栈VPS、无法使用单栈WARP"
+        green "2. 安装Wgcf 双栈 WARP"
     fi
     read -p "请输入选项：" menuNumberInput
+    case "$menuNumberInput" in
+        * ) exit 1 ;;
+    esac
 }
 
 check_tun
