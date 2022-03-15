@@ -98,6 +98,16 @@ wgcf_register(){
 
 # 卸载WARP
 uninstall(){
+    wg-quick down wgcf >/dev/null 2>&1
+    systemctl disable --now wg-quick@wgcf >/dev/null 2>&1
+    rpm -e wireguard-tools 2>/dev/null
+    [[ $(systemctl is-active systemd-resolved) != active ]] && systemctl enable --now systemd-resolved >/dev/null 2>&1
+    rm -rf /usr/local/bin/wgcf /etc/wireguard /usr/bin/wireguard-go wgcf-account.toml wgcf-profile.conf /usr/bin/warp /etc/dnsmasq.d/warp.conf
+    [[ -e /etc/gai.conf ]] && sed -i '/^precedence \:\:ffff\:0\:0/d;/^label 2002\:\:\/16/d' /etc/gai.conf
+	sed -i "/250   warp/d" /etc/iproute2/rt_tables
+    warp-cli --accept-tos disconnect >/dev/null 2>&1
+    warp-cli --accept-tos disable-always-on >/dev/null 2>&1
+    warp-cli --accept-tos delete >/dev/null 2>&1
     ${PACKAGE_UNINSTALL[int]} wireguard-tools wireguard-dkms ipset dnsmasq resolvconf mtr
     ${PACKAGE_UNINSTALL[int]} cloudflare-warp
     green "CloudFlare WARP 已卸载成功！"
