@@ -37,7 +37,7 @@ done
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流的操作系统" && exit 1
 
 archAffix() {
-    case "$cpuArch" in
+    case "$(uname -m)" in
         x86_64 | amd64) cpuArch='amd64' ;;
         armv8 | aarch64) cpuArch='aarch64' ;;
         s390x) cpuArch='s390x' ;;
