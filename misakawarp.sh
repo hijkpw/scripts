@@ -71,10 +71,22 @@ get_status(){
 
 # 安装Wgcf组件之一——WireGuard
 install_wireguard(){
-    ${PACKAGE_UPDATE[int]}
-    [ $RELEASE == "CentOS" ] && ${PACKAGE_INSTALL[int]} epel-release && ${PACKAGE_INSTALL[int]} iproute iptables
-    [ $RELEASE == "Debian" || $RELEASE == "Ubuntu" ] && ${PACKAGE_INSTALL[int]} iproute2 openresolv
-    ${PACKAGE_INSTALL[int]} wireguard-tools
+    ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} curl wget sudo grep
+    if [ $RELEASE == "CentOS" ]; then
+        ${PACKAGE_INSTALL[int]} epel-release
+        ${PACKAGE_INSTALL[int]} wireguard-tools net-tools iptables wireguard-dkms
+    fi
+    if [ $RELEASE == "Debian" ]; then
+        ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} lsb-release
+        echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" > /etc/apt/sources.list.d/backports.list
+        ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
+    fi
+    if [ $RELEASE == "Ubuntu" ]; then
+        ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
+    fi
 }
 
 # 卸载WARP
