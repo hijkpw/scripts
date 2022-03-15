@@ -89,6 +89,7 @@ install_wireguard(){
     fi
 }
 
+# 注册WARP账号
 wgcf_register(){
     while [[ ! -f wgcf-account.toml ]]; do
         yes | wgcf register
