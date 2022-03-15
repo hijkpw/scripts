@@ -63,6 +63,11 @@ get_status(){
     [[ -f /usr/local/bin/wgcf ]] && WgcfStatus="未启动" && [[ -n $(wg) ]] && WgcfStatus="已启动"
 }
 
+install_wireguard(){
+    ${PACKAGE_UPDATE[int]}
+    [ $RELEASE == "CentOS" ] && yum install epel-release -y
+}
+
 menu(){
     clear
     get_status
