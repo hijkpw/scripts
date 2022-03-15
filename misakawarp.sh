@@ -83,6 +83,9 @@ menu(){
         green "1. 安装Wgcf IPv4 WARP"
         green "2. 安装Wgcf 双栈 WARP"
     fi
+    if [ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "原生IPv6" ]; then
+        green "1. 安装Wgcf 双栈 WARP"
+    fi
     read -p "请输入选项：" menuNumberInput
 }
 
