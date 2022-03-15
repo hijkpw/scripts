@@ -80,6 +80,7 @@ install_wireguard(){
 # 卸载WARP
 uninstall(){
     [ $RELEASE == "CentOS" ] && ${PACKAGE_REMOVE[int]} iproute iptables
+    [ $RELEASE == "Debian" || $RELEASE == "Ubuntu" ] && ${PACKAGE_REMOVE[int]} iproute2 openresolv
     ${PACKAGE_REMOVE[int]} wireguard-tools
 }
 
