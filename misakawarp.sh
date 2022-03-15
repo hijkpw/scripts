@@ -89,6 +89,13 @@ install_wireguard(){
     fi
 }
 
+wgcf_register(){
+    while [[ ! -f wgcf-account.toml ]]; do
+        yes | wgcf register
+        sleep 5
+	done
+}
+
 # 卸载WARP
 uninstall(){
     [ $RELEASE == "CentOS" ] && ${PACKAGE_REMOVE[int]} iproute iptables
