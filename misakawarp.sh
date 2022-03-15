@@ -36,7 +36,11 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流的操作系统" && exit 1
 
-archAffix() {
+# 判断VPS虚拟化架构
+VIRT=$(systemd-detect-virt)
+
+# 确定CPU架构
+arch_affix() {
     case "$(uname -m)" in
         x86_64 | amd64) cpuArch='amd64' ;;
         armv8 | aarch64) cpuArch='aarch64' ;;
@@ -45,11 +49,13 @@ archAffix() {
     esac
 }
 
+# 检查TUN模块状态
 check_tun(){
     TUN=$(cat /dev/net/tun 2>&1 | tr '[:upper:]' '[:lower:]')
     [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]] && red "检测到未开启TUN模块，请到VPS控制面板处开启" && exit 1
 }
 
+# 获取WARP状态
 get_status(){
     WARPIPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPIPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
@@ -63,6 +69,7 @@ get_status(){
     [[ -f /usr/local/bin/wgcf ]] && WgcfStatus="未启动" && [[ -n $(wg) ]] && WgcfStatus="已启动"
 }
 
+# 安装Wgcf组件之一——WireGuard
 install_wireguard(){
     ${PACKAGE_UPDATE[int]}
     [ $RELEASE == "CentOS" ] && ${PACKAGE_INSTALL[int]} epel-release && ${PACKAGE_INSTALL[int]} iproute iptables
@@ -70,11 +77,13 @@ install_wireguard(){
     ${PACKAGE_INSTALL[int]} wireguard-tools
 }
 
+# 卸载WARP
 uninstall(){
     [ $RELEASE == "CentOS" ] && ${PACKAGE_REMOVE[int]} iproute iptables
     ${PACKAGE_REMOVE[int]} wireguard-tools
 }
 
+# 菜单
 menu(){
     clear
     get_status
@@ -106,5 +115,5 @@ menu(){
 }
 
 check_tun
-archAffix
+arch_affix
 menu
