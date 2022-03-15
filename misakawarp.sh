@@ -18,7 +18,7 @@ REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazo
 RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS")
 PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update")
 PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install")
-PACKAGE_REMOVE=("apt -y remove" "apt -y remove" "yum -y remove" "yum -y remove")
+PACKAGE_UNINSTALL=("apt -y autoremove" "apt -y autoremove" "yum -y autoremove" "yum -y autoremove")
 
 # 判断是否为root用户
 [[ $EUID -ne 0 ]] && yellow "请在root用户下运行脚本" && exit 1
@@ -98,9 +98,8 @@ wgcf_register(){
 
 # 卸载WARP
 uninstall(){
-    [ $RELEASE == "CentOS" ] && ${PACKAGE_REMOVE[int]} iproute iptables
-    [ $RELEASE == "Debian" || $RELEASE == "Ubuntu" ] && ${PACKAGE_REMOVE[int]} iproute2 openresolv
-    ${PACKAGE_REMOVE[int]} wireguard-tools
+    ${PACKAGE_UNINSTALL[int]} wireguard-tools wireguard-dkms ipset dnsmasq resolvconf mtr
+    ${PACKAGE_UNINSTALL[int]} cloudflare-warp
 }
 
 # 菜单
