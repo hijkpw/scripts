@@ -66,6 +66,7 @@ get_status(){
 install_wireguard(){
     ${PACKAGE_UPDATE[int]}
     [ $RELEASE == "CentOS" ] && yum install epel-release -y
+    ${PACKAGE_INSTALL[int]} iproute iptables iproute2 openresolv wireguard-tools
 }
 
 menu(){
