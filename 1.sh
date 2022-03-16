@@ -204,6 +204,8 @@ onoff_wgcf_warp(){
 
 # 安装过程
 install(){
+    [ $WARPIPv4Status == "WARP IPv4"] && exit 1
+    [ $WARPIPv6Status == "WARP IPv6"] && exit 1
     if [ $WgcfWarpCli == 0 ]; then
         install_wireguard
         wgcf_install
