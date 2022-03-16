@@ -71,6 +71,7 @@ check_tun(){
 
 # 获取VPS IP特征及WARP状态
 get_status(){
+    [[ -z $(type -P curl) ]] && ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} curl
     WARPIPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPIPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     [[ $WARPIPv4Status == "on" ]] && WARPIPv4Status="WARP IPv4"
