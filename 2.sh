@@ -145,6 +145,30 @@ wgcf_generate(){
     while [[ ! -f wgcf-profile.conf ]]; do
         wgcf generate
     done
+    MTUy=1500
+    MTUc=10
+    if [[ $WARPIPv4Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]]; then
+        ping='ping6'
+        IP1='2606:4700:4700::1111'
+        IP2='2001:4860:4860::8888'
+    else
+        ping='ping'
+        IP1='1.1.1.1'
+        IP2='8.8.8.8'
+    fi
+    while true; do
+        if ${ping} -c1 -W1 -s$((${MTUy} - 28)) -Mdo ${IP1} >/dev/null 2>&1 || ${ping} -c1 -W1 -s$((${MTUy} - 28)) -Mdo ${IP2} >/dev/null 2>&1; then
+            MTUc=1
+            MTUy=$((${MTUy} + ${MTUc}))
+        else
+            MTUy=$((${MTUy} - ${MTUc}))
+            [[ ${MTUc} == 1 ]] && break
+        fi
+	[[ ${MTUy} -le 1360 ]] && MTUy='1360' && break
+    done
+    MTU=$((${MTUy} - 80))
+    green "MTU最佳网络吞吐量值= $MTU 已设置完毕"
+    sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
     if [ $WgcfMode == 0 ]; then
         if [ $WARPIPv4Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]; then
             echo ${c4} | sh
