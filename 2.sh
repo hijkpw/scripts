@@ -218,7 +218,7 @@ start_wgcf_warp(){
 onoff_wgcf_warp(){
     if [ $WgcfStatus == "已启动" ]; then
         wg-quick down wgcf
-        green "临时关闭WARP成功"
+        green "关闭WARP成功"
     fi
     if [ $WgcfStatus == "未启动" ]; then
         systemctl restart wg-quick@wgcf
