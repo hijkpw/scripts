@@ -86,7 +86,7 @@ get_status(){
 # 安装Wgcf组件——WireGuard
 install_wireguard(){
     ${PACKAGE_UPDATE[int]} && ${PACKAGE_INSTALL[int]} curl wget sudo grep
-    if [ $RELEASE == "CentOS" ]; then
+    if [[ $RELEASE == "CentOS" ]]; then
         ${PACKAGE_INSTALL[int]} epel-release
         ${PACKAGE_INSTALL[int]} wireguard-tools net-tools iptables
         if [ "$KernelVER1" -lt 5 ]|| [ "$KernelVER2" -lt 6 ]; then
@@ -97,7 +97,7 @@ install_wireguard(){
             fi
         fi
     fi
-    if [ $RELEASE == "Debian" ]; then
+    if [[ $RELEASE == "Debian" ]]; then
         ${PACKAGE_UPDATE[int]}
         ${PACKAGE_INSTALL[int]} lsb-release
         echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" > /etc/apt/sources.list.d/backports.list
@@ -110,11 +110,11 @@ install_wireguard(){
             fi
         fi
     fi
-    if [ $RELEASE == "Ubuntu" ]; then
+    if [[ $RELEASE == "Ubuntu" ]]; then
         ${PACKAGE_UPDATE[int]}
         ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
     fi
-    if [ $VIRT =~ lxc|openvz ]; then
+    if [[ $VIRT =~ lxc|openvz ]]; then
         [[ -e /usr/bin/wireguard-go ]] || wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP/master/wireguard-go -O /usr/bin/wireguard-go && chmod +x /usr/bin/wireguard-go
     fi
 }
@@ -169,20 +169,20 @@ wgcf_generate(){
     MTU=$((${MTUy} - 80))
     green "MTU最佳网络吞吐量值= $MTU 已设置完毕"
     sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
-    if [ $WgcfMode == 0 ]; then
-        if [ $WARPIPv4Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]; then
+    if [[ $WgcfMode == 0 ]]; then
+        if [[ $WARPIPv4Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]]; then
             echo ${c4} | sh
             echo ${c2} | sh
             echo ${c6} | sh
         fi
-        if [ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]; then
+        if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]]; then
             echo ${c1} | sh
             echo ${c3} | sh
             echo ${c5} | sh
         fi
     fi
-    if [ $WgcfMode == 1 ]; then
-        if [ $WARPIPv4Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]; then
+    if [[ $WgcfMode == 1 ]]; then
+        if [[ $WARPIPv4Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]]; then
             echo ${ud6} | sh
             echo ${c4} | sh
             echo ${c5} | sh
@@ -228,8 +228,8 @@ onoff_wgcf_warp(){
 
 # 安装过程
 install(){
-    [ $WARPIPv4Status == "WARP IPv4"] && exit 1
-    [ $WARPIPv6Status == "WARP IPv6"] && exit 1
+    [[ $WARPIPv4Status == "WARP IPv4" ]] && exit 1
+    [[ $WARPIPv6Status == "WARP IPv6" ]] && exit 1
     if [ $WgcfWarpCli == 0 ]; then
         install_wireguard
         wgcf_install
