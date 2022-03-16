@@ -34,7 +34,7 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
     [[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM="${RELEASE[int]}" && [[ -n $SYSTEM ]] && break
 done
 
-[[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流的操作系统" && exit 1
+[[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
 
 WgcfWarpCli=0 # 0为安装Wgcf、1为安装WARP Cli
 WgcfMode=0 # 0为Wgcf单栈模式、1为Wgcf双栈模式
@@ -187,6 +187,7 @@ start_wgcf_warp(){
     systemctl enable wg-quick@wgcf
     wg-quick down wgcf
     systemctl start wg-quick@wgcf
+    checkstatus
 }
 
 # Wgcf-WARP临时开关
