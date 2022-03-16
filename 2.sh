@@ -57,7 +57,7 @@ c6="sed -i 's/1.1.1.1/2001:4860:4860::8888,8.8.8.8/g' wgcf-profile.conf"
 arch_affix() {
     case "$(uname -m)" in
         x86_64 | amd64) cpuArch='amd64' ;;
-        armv8 | arm64 | aarch64) cpuArch='aarch64' ;;
+        armv8 | arm64 | aarch64) cpuArch='arm64' ;;
         s390x) cpuArch='s390x' ;;
         *) red "不支持的CPU架构！" && exit 1 ;;
     esac
