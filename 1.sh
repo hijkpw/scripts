@@ -146,24 +146,24 @@ wgcf_generate(){
         wgcf generate
     done
     if [ $WgcfMode == 0 ]; then
-        if [ $WARPIPv4Status == "无法检测IPv4状态" ]; then
+        if [ $WARPIPv4Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]; then
             echo ${c4} | sh
             echo ${c2} | sh
             echo ${c6} | sh
         fi
-        if [ $WARPIPv6Status == "无法检测IPv6状态" ]; then
+        if [ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]; then
             echo ${c1} | sh
             echo ${c3} | sh
             echo ${c5} | sh
         fi
     fi
     if [ $WgcfMode == 1 ]; then
-        if [ $WARPIPv4Status == "无法检测IPv4状态" ]; then
+        if [ $WARPIPv4Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]; then
             echo ${ud6} | sh
             echo ${c4} | sh
             echo ${c5} | sh
         fi
-        if [ $WARPIPv6Status == "无法检测IPv6状态" ]; then
+        if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]]; then
             echo ${ud4} | sh
             echo ${c3} | sh
             echo ${c5} | sh
