@@ -201,9 +201,9 @@ wgcf_generate(){
 
 # 移动Wgcf配置文件到WireGuard文件夹
 mv_wgcf_to_wireguard(){
-    mkdir -p /etc/wireguard/
-    mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
-    mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
+    cp -f wgcf-profile.conf /etc/wireguard/wgcf.conf >/dev/null 2>&1
+    mv -f wgcf-profile.conf /etc/wireguard >/dev/null 2>&1
+    mv -f wgcf-account.toml /etc/wireguard >/dev/null 2>&1
 }
 
 # 启动Wgcf-WARP
