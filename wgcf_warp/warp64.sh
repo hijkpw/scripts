@@ -91,3 +91,62 @@ install_wgcf(){
         chmod +x /usr/local/bin/wgcf
     fi
 }
+
+register_wgcf(){
+    rm -f wgcf-account.toml
+    until [[ -a wgcf-account.toml ]]; do
+        yes | wgcf register
+        sleep 5
+    done
+}
+
+generate_wgcf_config(){
+    yellow "继续使用原WARP账户请按回车跳过 \n启用WARP+账户，请复制WARP+的按键许可证秘钥(26个字符)后回车"
+    read -p "按键许可证秘钥(26个字符):" WPPlusKey
+    if [[ -n $WPPlusKey ]]; then
+        sed -i "s/license_key.*/license_key = \"$WPPlusKey\"/g" wgcf-account.toml
+        wgcf update
+        green "启用WARP+账户中，如上方显示：400 Bad Request，则使用WARP免费版账户" 
+    fi
+    wgcf generate
+    sed -i '/\:\:\/0/d' wgcf-profile.conf | sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
+}
+
+get_best_mtu(){
+    v66=`curl -s6m3 https://ip.gs -k`
+    v44=`curl -s4m3 https://ip.gs -k`
+    MTUy=1500
+    MTUc=10
+    if [[ -n ${v66} && -z ${v44} ]]; then
+        ping='ping6'
+        IP1='2606:4700:4700::1001'
+        IP2='2001:4860:4860::8888'
+    else
+        ping='ping'
+        IP1='1.1.1.1'
+        IP2='8.8.8.8'
+    fi
+    while true; do
+        if ${ping} -c1 -W1 -s$((${MTUy} - 28)) -Mdo ${IP1} >/dev/null 2>&1 || ${ping} -c1 -W1 -s$((${MTUy} - 28)) -Mdo ${IP2} >/dev/null 2>&1; then
+            MTUc=1
+            MTUy=$((${MTUy} + ${MTUc}))
+        else
+            MTUy=$((${MTUy} - ${MTUc}))
+            if [[ ${MTUc} = 1 ]]; then
+                break
+            fi
+        fi
+        if [[ ${MTUy} -le 1360 ]]; then
+            MTUy='1360'
+            break
+        fi
+    done
+    MTU=$((${MTUy} - 80))
+    green "MTU最佳值=$MTU 已设置完毕"
+    sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
+}
+
+cpto_wireguard(){
+    mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
+    mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
+}
