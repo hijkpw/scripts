@@ -79,15 +79,15 @@ install_wireguard(){
 
 install_wgcf(){
     if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_amd64 /usr/local/bin/wgcf
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_amd64 -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
     if [[ $arch == "armv8" || $arch == "arm64" || $arch == "aarch64" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_arm64 /usr/local/bin/wgcf
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_arm64 -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
     if [[ $arch == "s390x" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_s390x /usr/local/bin/wgcf
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_s390x -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
 }
