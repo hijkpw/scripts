@@ -113,8 +113,8 @@ generate_wgcf_config(){
 }
 
 get_best_mtu(){
-    v66=`curl -s6m3 https://ip.gs -k`
-    v44=`curl -s4m3 https://ip.gs -k`
+    v66=`curl -s6m8 https://ip.gs -k`
+    v44=`curl -s4m8 https://ip.gs -k`
     MTUy=1500
     MTUc=10
     if [[ -n ${v66} && -z ${v44} ]]; then
