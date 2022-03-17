@@ -150,3 +150,23 @@ cpto_wireguard(){
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
 }
+
+start_wgcf(){
+    wg-quick up wgcf
+    until [[ -n $(wget -T1 -t1 -qO- -4 ip.gs) ]]; do
+        wg-quick down wgcf
+        wg-quick up wgcf
+    done
+}
+
+install(){
+    install_wireguard
+    install_wgcf
+    register_wgcf
+    generate_wgcf_config
+    get_best_mtu
+    cpto_wireguard
+    # start_wgcf
+}
+
+install
