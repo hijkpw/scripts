@@ -68,6 +68,7 @@ install_wireguard_ubuntu(){
 }
 
 install_wireguard(){
+    ${PACKAGE_UPDATE[int]}
     [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
     [[ -z $(type -P sudo) ]] && ${PACKAGE_INSTALL[int]} sudo
     [[ $SYSTEM == CentOS ]] && install_wireguard_centos
