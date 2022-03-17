@@ -66,3 +66,28 @@ install_wireguard_ubuntu(){
     ${PACKAGE_UPDATE[int]}
     ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
 }
+
+install_wireguard(){
+    [[ $SYSTEM == CentOS ]] && install_wireguard_centos
+    [[ $SYSTEM == Debian ]] && install_wireguard_debian
+    [[ $SYSTEM == Ubuntu ]] && install_wireguard_ubuntu
+    if [ $vpsvirt =~ lxc|openvz ]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wireguard-go -O /usr/bin/wireguard-go
+        chmod +x /usr/bin/wireguard-go
+    fi
+}
+
+install_wgcf(){
+    if [ $arch == "amd64" || $arch == "x86_64" ]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_amd64 /usr/local/bin/wgcf
+        chmod +x /usr/local/bin/wgcf
+    fi
+    if [ $arch == "armv8" || $arch == "arm64" || $arch == "aarch64" ]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_arm64 /usr/local/bin/wgcf
+        chmod +x /usr/local/bin/wgcf
+    fi
+    if [ $arch == "s390x" ]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP@master/wgcf_2.2.12_linux_s390x /usr/local/bin/wgcf
+        chmod +x /usr/local/bin/wgcf
+    fi
+}
