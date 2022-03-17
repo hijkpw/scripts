@@ -156,9 +156,10 @@ cpto_wireguard(){
 
 start_wgcf(){
     wg-quick up wgcf
-    until [[ -n $(wget -T1 -t1 -qO- -4 ip.gs) ]]; do
+    until [[ -n $(wget -s4m2 ip.gs) ]]; do
         wg-quick down wgcf
         wg-quick up wgcf
+        sleep 5
     done
 }
 
