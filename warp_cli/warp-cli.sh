@@ -35,6 +35,11 @@ done
 arch=`uname -m`
 vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
 
+check_tun(){
+    TUN=$(cat /dev/net/tun 2>&1 | tr '[:upper:]' '[:lower:]')
+    [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]] && red "检测到未开启TUN模块，请到VPS控制面板处开启" && exit 1
+}
+
 install_warpcli_centos(){
     ${PACKAGE_INSTALL[int]} epel-release
     ${PACKAGE_INSTALL[int]} net-tools
@@ -118,4 +123,5 @@ install(){
     fi
 }
 
+check_tun
 install

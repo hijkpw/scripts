@@ -37,6 +37,11 @@ main=`uname  -r | awk -F . '{print $1 }'`
 minor=`uname -r | awk -F . '{print $2}'`
 vpsvirt=`systemd-detect-virt`
 
+check_tun(){
+    TUN=$(cat /dev/net/tun 2>&1 | tr '[:upper:]' '[:lower:]')
+    [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]] && red "检测到未开启TUN模块，请到VPS控制面板处开启" && exit 1
+}
+
 install_wireguard_centos(){
     ${PACKAGE_INSTALL[int]} epel-release
     ${PACKAGE_INSTALL} net-tools wireguard-tools iptables
@@ -188,4 +193,5 @@ install(){
     start_wgcf
 }
 
+check_tun
 install
