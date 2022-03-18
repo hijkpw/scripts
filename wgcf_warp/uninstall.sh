@@ -18,6 +18,7 @@ RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS")
 PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update")
 PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install")
 PACKAGE_REMOVE=("apt -y remove" "apt -y remove" "yum -y remove" "yum -y remove")
+PACKAGE_UNINSTALL=("apt -y autoremove" "apt -y autoremove" "yum -y autoremove" "yum -y autoremove")
 
 CMD=("$(grep -i pretty_name /etc/os-release 2>/dev/null | cut -d \" -f2)" "$(hostnamectl 2>/dev/null | grep -i system | cut -d : -f2)" "$(lsb_release -sd 2>/dev/null)" "$(grep -i description /etc/lsb-release 2>/dev/null | cut -d \" -f2)" "$(grep . /etc/redhat-release 2>/dev/null)" "$(grep . /etc/issue 2>/dev/null | cut -d \\ -f1 | sed '/^[ ]*$/d')")
 
@@ -34,8 +35,7 @@ done
 uninstall(){
     wg-quick down wgcf 2>/dev/null
     systemctl disable wg-quick@wgcf 2>/dev/null
-	apt -y autoremove wireguard-tools wireguard-dkms 2>/dev/null
-	yum -y autoremove wireguard-tools wireguard-dkms 2>/dev/null
+	${PACKAGE_UNINSTALL[int]} wireguard-tools wireguard-dkms 2>/dev/null
     rm -f /usr/local/bin/wgcf /etc/wireguard/wgcf.conf /usr/bin/wireguard-go  wgcf-account.toml  wgcf-profile.conf
     if [[ -e /etc/gai.conf ]]; then
         sed -i '/^precedence[ ]*::ffff:0:0\/96[ ]*100/d' /etc/gai.conf
