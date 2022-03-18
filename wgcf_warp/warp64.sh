@@ -158,9 +158,11 @@ cpto_wireguard(){
 
 start_wgcf(){
     wg-quick up wgcf
-    until [[ -n $(curl -s4m2 ip.gs) ]]; do
+    WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    until [[ $WgcfWARPStatus =~ on|plus ]]; do
         wg-quick down wgcf
         wg-quick up wgcf
+        WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
         sleep 5
     done
     systemctl enable wg-quick@wgcf
