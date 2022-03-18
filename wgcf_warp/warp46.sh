@@ -159,12 +159,12 @@ cpto_wireguard(){
 start_wgcf(){
     green "Wgcf-WARP正在启动"
     wg-quick up wgcf
-    WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    WgcfWARPStatus=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     until [[ $WgcfWARPStatus =~ on|plus ]]; do
         red "无法启动Wgcf-WARP，正在尝试重启"
         wg-quick down wgcf
         wg-quick up wgcf
-        WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        WgcfWARPStatus=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
         sleep 5
     done
     systemctl enable wg-quick@wgcf
