@@ -114,7 +114,10 @@ generate_wgcf_config(){
     fi
     wgcf generate
     chmod +x wgcf-profile.conf
-    sed -i '/\:\:\/0/d' wgcf-profile.conf | sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
+    sed -i "7 s/^/PostUp = ip -4 rule add from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
+    sed -i "8 s/^/PostDown = ip -4 rule delete from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
+    sed -i 's/engage.cloudflareclient.com/162.159.192.1/g' wgcf-profile.conf
+    sudo sed -i 's/1.1.1.1/9.9.9.9,8.8.8.8,1.1.1.1/g' wgcf-profile.conf
 }
 
 get_best_mtu(){
