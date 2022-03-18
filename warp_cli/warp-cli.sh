@@ -66,11 +66,11 @@ install_warpcli_ubuntu(){
 }
 
 register_warpcli(){
-    warp-cli --accept-tos register
+    warp-cli --accept-tos register >/dev/null 2>&1
     yellow "使用WARP免费版账户请按回车跳过 \n启用WARP+账户，请复制WARP+的许可证密钥(26个字符)后回车"
     read -p "按键许可证密钥(26个字符):" WPPlusKey
     if [[ -n $WPPlusKey ]]; then
-        warp-cli --accept-tos set-license "$LICENSE" && sleep 1
+        warp-cli --accept-tos set-license "$LICENSE" >/dev/null 2>&1 && sleep 1
         if [[ $(warp-cli --accept-tos account) =~ Limited ]]; then
             green "WARP+账户启用成功"
         else
@@ -88,16 +88,16 @@ set_proxy_port(){
 
 start_warpcli(){
     yellow "正在启动Warp-Cli代理模式"
-    warp-cli --accept-tos connect
+    warp-cli --accept-tos connect >/dev/null 2>&1
     socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
     until [[ $socks5Status =~ on|plus ]]; do
         red "启动Warp-Cli代理模式失败，正在尝试重启"
-        warp-cli --accept-tos disconnect
-        warp-cli --accept-tos connect
+        warp-cli --accept-tos disconnect >/dev/null 2>&1
+        warp-cli --accept-tos connect >/dev/null 2>&1
         socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
         sleep 5
     done
-    warp-cli --accept-tos enable-always-on
+    warp-cli --accept-tos enable-always-on >/dev/null 2>&1
     green "WARP-Cli代理模式已启动成功！"
     yellow "本地Socks5代理为：localhost:$WARPCliPort"
 }
