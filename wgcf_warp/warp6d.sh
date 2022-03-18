@@ -175,7 +175,7 @@ start_wgcf(){
     done
     systemctl enable wg-quick@wgcf >/dev/null 2>&1
     green "Wgcf-WARP 已启动成功"
-    exit 1
+    rm -f warp6d.sh
 }
 
 install(){
