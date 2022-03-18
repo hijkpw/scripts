@@ -36,10 +36,10 @@ vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
 
 install(){
     if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
-        [[ $SYSTEM == "CentOS" ]] && [[ ! ${vsid} =~ 8 ]] && yellow "当前系统版本号：Centos $vsid \nWARP-Cli代理模式仅支持Centos 8系统"
-        [[ $SYSTEM == "Debian" ]] && [[ ! ${vsid} =~ 9|10|11 ]] && yellow "当前系统版本号：Debian $vsid \nWARP-Cli代理模式仅支持Debian 9-11系统"
-        [[ $SYSTEM == "Ubuntu" ]] && [[ ! ${vsid} =~ 16|20 ]] && yellow "当前系统版本号：Ubuntu $vsid \nWARP-Cli代理模式仅支持Ubuntu 16.04/20.04系统"
-        [[ $(warp-cli --accept-tos status 2>/dev/null) =~ 'Connected' ]] && red "当前WARP-Cli代理模式正在运行中"
+        [[ $SYSTEM == "CentOS" ]] && [[ ! ${vsid} =~ 8 ]] && yellow "当前系统版本：Centos $vsid \nWARP-Cli代理模式仅支持Centos 8系统"
+        [[ $SYSTEM == "Debian" ]] && [[ ! ${vsid} =~ 9|10|11 ]] && yellow "当前系统版本：Debian $vsid \nWARP-Cli代理模式仅支持Debian 9-11系统"
+        [[ $SYSTEM == "Ubuntu" ]] && [[ ! ${vsid} =~ 16|20 ]] && yellow "当前系统版本：Ubuntu $vsid \nWARP-Cli代理模式仅支持Ubuntu 16.04/20.04系统"
+        [[ $(warp-cli --accept-tos status 2>/dev/null) =~ 'Connected' ]] && red "WARP-Cli代理模式正在运行中"
         ${PACKAGE_UPDATE[int]}
         [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
         [[ -z $(type -P sudo) ]] && ${PACKAGE_INSTALL[int]} sudo
