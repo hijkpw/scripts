@@ -32,18 +32,17 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
 
-uninstall(){
-    wg-quick down wgcf 2>/dev/null
-    systemctl disable wg-quick@wgcf 2>/dev/null
-    ${PACKAGE_UNINSTALL[int]} wireguard-tools wireguard-dkms 2>/dev/null
-    rm -f /usr/local/bin/wgcf 
-    rm -f /etc/wireguard/wgcf.conf
-    rm -f /usr/bin/wireguard-go
-    if [[ -e /etc/gai.conf ]]; then
-        sed -i '/^precedence[ ]*::ffff:0:0\/96[ ]*100/d' /etc/gai.conf
-    fi
-    green "Wgcf-WARP 已彻底卸载成功！"
-    rm -f uninstall.sh
-}
+[[ -z $(wgcf) ]] && red "未安装Wgcf-WARP，脚本即将退出" && exit 1
 
-uninstall
+WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+
+if [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; then
+    wg-quick down wgcf >/dev/null 2>&1
+    green "Wgcf-WARP关闭成功！"
+fi
+
+if [[ $WgcfWARP4Status == off ]] || [[ $WgcfWARP6Status == off ]]; then
+    systemctl restart wg-quick@wgcf >/dev/null 2>&1
+    green "Wgcf-WARP启动成功！"
+fi
