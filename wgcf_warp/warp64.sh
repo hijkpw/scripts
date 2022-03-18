@@ -101,6 +101,7 @@ register_wgcf(){
         yes | wgcf register
         sleep 5
     done
+    chmod +x wgcf-account.toml
 }
 
 generate_wgcf_config(){
@@ -112,6 +113,7 @@ generate_wgcf_config(){
         green "启用WARP+账户中，如上方显示：400 Bad Request，则使用WARP免费版账户" 
     fi
     wgcf generate
+    chmod +x wgcf-profile.conf
     sed -i '/\:\:\/0/d' wgcf-profile.conf | sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
 }
 
