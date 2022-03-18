@@ -169,6 +169,7 @@ start_wgcf(){
     done
     systemctl enable wg-quick@wgcf
     green "Wgcf-WARP 已启动成功"
+    exit 1
 }
 
 install(){

@@ -14,19 +14,19 @@ yellow() {
 
 # 判断系统及定义系统安装依赖方式
 REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'")
-RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS" "Alpine")
+RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS")
 PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update")
-PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install" "apk add -f")
+PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install")
 PACKAGE_REMOVE=("apt -y remove" "apt -y remove" "yum -y remove" "yum -y remove")
 
 CMD=("$(grep -i pretty_name /etc/os-release 2>/dev/null | cut -d \" -f2)" "$(hostnamectl 2>/dev/null | grep -i system | cut -d : -f2)" "$(lsb_release -sd 2>/dev/null)" "$(grep -i description /etc/lsb-release 2>/dev/null | cut -d \" -f2)" "$(grep . /etc/redhat-release 2>/dev/null)" "$(grep . /etc/issue 2>/dev/null | cut -d \\ -f1 | sed '/^[ ]*$/d')")
 
 for i in "${CMD[@]}"; do
-	SYS="$i" && [[ -n $SYS ]] && break
+    SYS="$i" && [[ -n $SYS ]] && break
 done
 
 for ((int = 0; int < ${#REGEX[@]}; int++)); do
-	[[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM="${RELEASE[int]}" && [[ -n $SYSTEM ]] && break
+    [[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM="${RELEASE[int]}" && [[ -n $SYSTEM ]] && break
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
@@ -68,6 +68,9 @@ install_wireguard_ubuntu(){
 }
 
 install_wireguard(){
+    ${PACKAGE_UPDATE[int]}
+    [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
+    [[ -z $(type -P sudo) ]] && ${PACKAGE_INSTALL[int]} sudo
     [[ $SYSTEM == CentOS ]] && install_wireguard_centos
     [[ $SYSTEM == Debian ]] && install_wireguard_debian
     [[ $SYSTEM == Ubuntu ]] && install_wireguard_ubuntu
@@ -98,17 +101,19 @@ register_wgcf(){
         yes | wgcf register
         sleep 5
     done
+    chmod +x wgcf-account.toml
 }
 
 generate_wgcf_config(){
-    yellow "继续使用原WARP账户请按回车跳过 \n启用WARP+账户，请复制WARP+的按键许可证秘钥(26个字符)后回车"
-    read -p "按键许可证秘钥(26个字符):" WPPlusKey
+    yellow "使用WARP免费版账户请按回车跳过 \n启用WARP+账户，请复制WARP+的许可证密钥(26个字符)后回车"
+    read -p "按键许可证密钥(26个字符):" WPPlusKey
     if [[ -n $WPPlusKey ]]; then
         sed -i "s/license_key.*/license_key = \"$WPPlusKey\"/g" wgcf-account.toml
         wgcf update
-        green "启用WARP+账户中，如上方显示：400 Bad Request，则使用WARP免费版账户" 
+        green "注册WARP+账户中，如上方显示：400 Bad Request，则使用WARP免费版账户" 
     fi
     wgcf generate
+    chmod +x wgcf-profile.conf
     sed -i '/\:\:\/0/d' wgcf-profile.conf | sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
 }
 
@@ -152,11 +157,19 @@ cpto_wireguard(){
 }
 
 start_wgcf(){
+    green "Wgcf-WARP正在启动"
     wg-quick up wgcf
-    until [[ -n $(wget -T1 -t1 -qO- -4 ip.gs) ]]; do
+    WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    until [[ $WgcfWARPStatus =~ on|plus ]]; do
+        red "无法启动Wgcf-WARP，正在尝试重启"
         wg-quick down wgcf
         wg-quick up wgcf
+        WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        sleep 5
     done
+    systemctl enable wg-quick@wgcf
+    green "Wgcf-WARP 已启动成功"
+    exit 1
 }
 
 install(){
@@ -166,7 +179,7 @@ install(){
     generate_wgcf_config
     get_best_mtu
     cpto_wireguard
-    # start_wgcf
+    start_wgcf
 }
 
 install
