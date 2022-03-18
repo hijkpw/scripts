@@ -39,6 +39,7 @@ install(){
         [[ $SYSTEM == "CentOS" ]] && [[ ! ${vsid} =~ 8 ]] && yellow "当前系统版本号：Centos $vsid \nWARP-Cli代理模式仅支持Centos 8系统"
         [[ $SYSTEM == "Debian" ]] && [[ ! ${vsid} =~ 9|10|11 ]] && yellow "当前系统版本号：Debian $vsid \nWARP-Cli代理模式仅支持Debian 9-11系统"
         [[ $SYSTEM == "Ubuntu" ]] && [[ ! ${vsid} =~ 16|20 ]] && yellow "当前系统版本号：Ubuntu $vsid \nWARP-Cli代理模式仅支持Ubuntu 16.04/20.04系统"
+        [[ $(warp-cli --accept-tos status 2>/dev/null) =~ 'Connected' ]] && red "当前WARP-Cli代理模式正在运行中"
     else
         red "不支持的CPU架构！脚本即将退出"
     fi
