@@ -110,7 +110,7 @@ generate_wgcf_config(){
     if [[ -n $WPPlusKey ]]; then
         sed -i "s/license_key.*/license_key = \"$WPPlusKey\"/g" wgcf-account.toml
         wgcf update
-        green "启用WARP+账户中，如上方显示：400 Bad Request，则使用WARP免费版账户" 
+        green "注册WARP+账户中，如上方显示：400 Bad Request，则使用WARP免费版账户" 
     fi
     wgcf generate
     chmod +x wgcf-profile.conf
@@ -164,6 +164,7 @@ start_wgcf(){
         sleep 5
     done
     systemctl enable wg-quick@wgcf
+    green "Wgcf-WARP 已启动成功"
 }
 
 install(){
@@ -173,7 +174,7 @@ install(){
     generate_wgcf_config
     get_best_mtu
     cpto_wireguard
-    # start_wgcf
+    start_wgcf
 }
 
 install
