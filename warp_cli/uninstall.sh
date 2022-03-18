@@ -38,6 +38,8 @@ uninstall(){
     warp-cli --accept-tos delete >/dev/null 2>&1
     ${PACKAGE_UNINSTALL[int]} cloudflare-warp 2>/dev/null
     systemctl disable --now warp-svc >/dev/null 2>&1
+    green "WARP-Cli代理模式已彻底卸载成功！"
+    rm -f uninstall.sh
 }
 
 uninstall
