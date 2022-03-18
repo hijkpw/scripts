@@ -83,7 +83,7 @@ register_warpcli(){
 set_proxy_port(){
     read -p "请输入WARP Cli使用的代理端口（默认40000）：" WARPCliPort
     [[ -z $WARPCliPort ]] && WARPCliPort=40000
-    warp-cli --accept-tos set-proxy-port "$WARPCliPort"
+    warp-cli --accept-tos set-proxy-port "$WARPCliPort" >/dev/null 2>&1
 }
 
 start_warpcli(){
