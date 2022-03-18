@@ -98,7 +98,7 @@ start_warpcli(){
 }
 
 install(){
-    [[ -z $(curl -s4m8 ip.gs )]] && red "WARP-Cli代理模式不支持IPv6 Only的VPS，脚本即将退出" && exit 1
+    [[ -z $(curl -s4m8 ip.gs )]] && red "WARP-Cli代理模式不支持IPv6 Only的VPS，脚本退出" && exit 1
     if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
         [[ $SYSTEM == "CentOS" ]] && [[ ! ${vsid} =~ 8 ]] && yellow "当前系统版本：Centos $vsid \nWARP-Cli代理模式仅支持Centos 8系统"
         [[ $SYSTEM == "Debian" ]] && [[ ! ${vsid} =~ 9|10|11 ]] && yellow "当前系统版本：Debian $vsid \nWARP-Cli代理模式仅支持Debian 9-11系统"
