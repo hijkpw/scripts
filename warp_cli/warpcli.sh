@@ -32,6 +32,7 @@ done
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
 
 arch=`uname -m`
+vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
 
 install(){
     if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
