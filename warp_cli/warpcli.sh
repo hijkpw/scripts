@@ -34,6 +34,53 @@ done
 arch=`uname -m`
 vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
 
+install_warpcli_centos(){
+    ${PACKAGE_INSTALL[int]} epel-release
+    ${PACKAGE_INSTALL[int]} net-tools
+    rpm -ivh http://pkg.cloudflareclient.com/cloudflare-release-el$vsid.rpm
+    ${PACKAGE_INSTALL[int]} cloudflare-warp
+}
+
+install_warpcli_debian(){
+    ${PACKAGE_INSTALL[int]} lsb-release
+    [[ -z $(type -P gpg 2>/dev/null) ]] && ${PACKAGE_INSTALL[int]} gnupg
+    [[ -z $(apt list 2>/dev/null | grep apt-transport-https ) =~ installed ]] && ${PACKAGE_INSTALL[int]} apt-transport-https
+    curl https://pkg.cloudflareclient.com/pubkey.gpg | apt-key add -
+    echo "deb http://pkg.cloudflareclient.com/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/cloudflare-client.list
+    ${PACKAGE_UPDATE[int]}
+    ${PACKAGE_INSTALL[int]} cloudflare-warp
+}
+
+install_warpcli_ubuntu(){
+    ${PACKAGE_INSTALL[int]} lsb-release
+    curl https://pkg.cloudflareclient.com/pubkey.gpg | apt-key add -
+    echo "deb http://pkg.cloudflareclient.com/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/cloudflare-client.list
+    ${PACKAGE_UPDATE[int]}
+    ${PACKAGE_INSTALL[int]} cloudflare-warp
+}
+
+register_warpcli(){
+    warp-cli --accept-tos register
+    yellow "使用WARP免费版账户请按回车跳过 \n启用WARP+账户，请复制WARP+的许可证密钥(26个字符)后回车"
+    read -p "按键许可证密钥(26个字符):" WPPlusKey
+    if [[ -n $WPPlusKey ]]; then
+        warp-cli --accept-tos set-license "$LICENSE" && sleep 1
+        if [[ $(warp-cli --accept-tos account) =~ Limited ]]; then
+            green "WARP+账户启用成功"
+        else
+            red "WARP+账户启用失败"
+        fi
+    fi
+    warp-cli --accept-tos set-mode proxy >/dev/null 2>&1
+    warp-cli --accept-tos enable-always-on >/dev/null 2>&1
+}
+
+set_proxy_port(){
+    read -p "请输入WARP Cli使用的代理端口（默认40000）：" WARPCliPort
+    [[ -z $WARPCliPort ]] && WARPCliPort=40000
+    warp-cli --accept-tos set-proxy-port "$WARPCliPort"
+}
+
 install(){
     if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
         [[ $SYSTEM == "CentOS" ]] && [[ ! ${vsid} =~ 8 ]] && yellow "当前系统版本：Centos $vsid \nWARP-Cli代理模式仅支持Centos 8系统"
