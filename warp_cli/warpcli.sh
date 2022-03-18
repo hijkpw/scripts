@@ -45,7 +45,7 @@ install_warpcli_centos(){
 install_warpcli_debian(){
     ${PACKAGE_INSTALL[int]} lsb-release
     [[ -z $(type -P gpg 2>/dev/null) ]] && ${PACKAGE_INSTALL[int]} gnupg
-    [[ -z $(apt list 2>/dev/null | grep apt-transport-https ) =~ installed ]] && ${PACKAGE_INSTALL[int]} apt-transport-https
+    [[ -z $(apt list 2>/dev/null | grep apt-transport-https | grep installed) ]] && ${PACKAGE_INSTALL[int]} apt-transport-https
     curl https://pkg.cloudflareclient.com/pubkey.gpg | apt-key add -
     echo "deb http://pkg.cloudflareclient.com/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/cloudflare-client.list
     ${PACKAGE_UPDATE[int]}
