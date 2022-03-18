@@ -38,7 +38,6 @@ minor=`uname -r | awk -F . '{print $2}'`
 vpsvirt=`systemd-detect-virt`
 
 install_wireguard_centos(){
-    ${PACKAGE_UPDATE[int]}
     ${PACKAGE_INSTALL[int]} epel-release
     ${PACKAGE_INSTALL} net-tools wireguard-tools iptables
     if [ "$main" -lt 5 ]|| [ "$minor" -lt 6 ]; then 
@@ -51,7 +50,6 @@ install_wireguard_centos(){
 }
 
 install_wireguard_debian(){
-    ${PACKAGE_UPDATE[int]}
     ${PACKAGE_INSTALL[int]} lsb-release
     echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" | tee /etc/apt/sources.list.d/backports.list
     ${PACKAGE_UPDATE}
@@ -64,7 +62,6 @@ install_wireguard_debian(){
 }
 
 install_wireguard_ubuntu(){
-    ${PACKAGE_UPDATE[int]}
     ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
 }
 
