@@ -69,17 +69,32 @@ register_warpcli(){
         if [[ $(warp-cli --accept-tos account) =~ Limited ]]; then
             green "WARP+账户启用成功"
         else
-            red "WARP+账户启用失败"
+            red "WARP+账户启用失败，即将使用WARP免费版账户"
         fi
     fi
     warp-cli --accept-tos set-mode proxy >/dev/null 2>&1
-    warp-cli --accept-tos enable-always-on >/dev/null 2>&1
 }
 
 set_proxy_port(){
     read -p "请输入WARP Cli使用的代理端口（默认40000）：" WARPCliPort
     [[ -z $WARPCliPort ]] && WARPCliPort=40000
     warp-cli --accept-tos set-proxy-port "$WARPCliPort"
+}
+
+start_warpcli(){
+    yellow "正在启动Warp-Cli代理模式"
+    warp-cli --accept-tos connect
+    socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+    until [[ socks5Status =~ on|plus ]]; do
+        red "启动Warp-Cli代理模式失败，正在尝试重启"
+        warp-cli --accept-tos disconnect
+        warp-cli --accept-tos Connect
+        socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+        sleep 5
+    done
+    warp-cli --accept-tos enable-always-on
+    green "WARP-Cli代理模式已启动成功！"
+    yellow "本地Socks5代理为：localhost:$WARPCliPort"
 }
 
 install(){
@@ -92,6 +107,12 @@ install(){
         ${PACKAGE_UPDATE[int]}
         [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
         [[ -z $(type -P sudo) ]] && ${PACKAGE_INSTALL[int]} sudo
+        [[ $SYSTEM == "CentOS" ]] && install_warpcli_centos
+        [[ $SYSTEM == "Debian" ]] && install_warpcli_debian
+        [[ $SYSTEM == "Ubuntu" ]] && install_warpcli_ubuntu
+        register_warpcli
+        set_proxy_port
+        start_warpcli
     else
         red "不支持的CPU架构！脚本即将退出"
     fi
