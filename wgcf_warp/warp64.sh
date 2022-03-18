@@ -163,6 +163,7 @@ start_wgcf(){
         wg-quick up wgcf
         sleep 5
     done
+    systemctl enable wg-quick@wgcf
 }
 
 install(){
