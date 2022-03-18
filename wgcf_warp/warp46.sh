@@ -78,6 +78,10 @@ install_wireguard(){
         wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wireguard-go -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
     fi
+    if [[ $vpsvirt == zvm ]]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wireguard-go-s390x -O /usr/bin/wireguard-go
+        chmod +x /usr/bin/wireguard-go
+    fi
 }
 
 install_wgcf(){
