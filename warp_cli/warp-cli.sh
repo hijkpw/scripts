@@ -85,10 +85,10 @@ start_warpcli(){
     yellow "正在启动Warp-Cli代理模式"
     warp-cli --accept-tos connect
     socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
-    until [[ socks5Status =~ on|plus ]]; do
+    until [[ $socks5Status =~ on|plus ]]; do
         red "启动Warp-Cli代理模式失败，正在尝试重启"
         warp-cli --accept-tos disconnect
-        warp-cli --accept-tos Connect
+        warp-cli --accept-tos connect
         socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
         sleep 5
     done
@@ -98,7 +98,7 @@ start_warpcli(){
 }
 
 install(){
-    [[ -z $(curl -s4m8 ip.gs )]] && red "WARP-Cli代理模式不支持IPv6 Only的VPS，脚本退出" && exit 1
+    [[ -z $(curl -s4m8 ip.gs ) ]] && red "WARP-Cli代理模式不支持IPv6 Only的VPS，脚本退出" && exit 1
     if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
         [[ $SYSTEM == "CentOS" ]] && [[ ! ${vsid} =~ 8 ]] && yellow "当前系统版本：Centos $vsid \nWARP-Cli代理模式仅支持Centos 8系统"
         [[ $SYSTEM == "Debian" ]] && [[ ! ${vsid} =~ 9|10|11 ]] && yellow "当前系统版本：Debian $vsid \nWARP-Cli代理模式仅支持Debian 9-11系统"
