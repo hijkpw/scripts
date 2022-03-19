@@ -35,6 +35,8 @@ switch(){
     if [[ $(warp-cli --accept-tos status) =~ Connected ]]; then
         warp-cli --accept-tos disconnect
         green "WARP-Cli代理模式关闭成功！"
+        rm -f switch.sh
+        exit 1
     fi
     if [[ $(warp-cli --accept-tos status) =~ Disconnected ]]; then
         yellow "正在启动Warp-Cli代理模式"
@@ -47,6 +49,8 @@ switch(){
         done
         warp-cli --accept-tos enable-always-on >/dev/null 2>&1
         green "WARP-Cli代理模式启动成功！"
+        rm -f switch.sh
+        exit 1
     fi
 }
 
