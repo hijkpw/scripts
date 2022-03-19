@@ -92,6 +92,23 @@ install(){
     fi
 }
 
+wgcfswitch(){
+    wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/switchwarp.sh && bash switchwarp.sh
+}
+
+warpcliswitch(){
+    wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/switch.sh && bash switch.sh
+}
+
+warpcliport(){
+    wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/changeport.sh && bash changeport.sh
+}
+
+uninstall(){
+    [[ -n $(type -P wgcf) ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/uninstall.sh && bash uninstall.sh
+    [[ -n $(type -P warp-cli) ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/uninstall.sh && bash uninstall.sh
+}
+
 # 菜单
 menu(){
     clear
@@ -161,6 +178,7 @@ menu(){
         1 ) install ;;
         2 ) wgcfmode=1 && install ;;
         3 ) wgcfcli=1 && install ;;
+        7 ) uninstall ;;
         * ) exit 1 ;;
     esac
 }
