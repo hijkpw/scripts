@@ -99,7 +99,7 @@ start_warpcli(){
     done
     warp-cli --accept-tos enable-always-on >/dev/null 2>&1
     green "WARP-Cli代理模式已启动成功！"
-    yellow "本地Socks5代理为：localhost:$WARPCliPort"
+    yellow "本地Socks5代理为： 127.0.0.1:$WARPCliPort"
     rm -f warp-cli.sh
 }
 
