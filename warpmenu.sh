@@ -178,6 +178,9 @@ menu(){
         1 ) install ;;
         2 ) wgcfmode=1 && install ;;
         3 ) wgcfcli=1 && install ;;
+        4 ) wgcfswitch ;;
+        5 ) warpcliswitch ;;
+        6 ) warpcliport ;;
         7 ) uninstall ;;
         * ) exit 1 ;;
     esac
