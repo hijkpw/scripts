@@ -31,7 +31,26 @@ done
 [[ -z $(warp-cli help >/dev/null 2>&1) ]] && red "WARP-Cli未安装，脚本即将退出！" && exit 1
 
 changeport(){
-
+    if [[ $(warp-cli --accept-tos status) =~ Connected ]]; then
+        warp-cli --accept-tos disconnect
+    fi
+    read -p "请输入WARP Cli使用的代理端口（默认40000）：" WARPCliPort
+    [[ -z $WARPCliPort ]] && WARPCliPort=40000
+    warp-cli --accept-tos set-proxy-port "$WARPCliPort" >/dev/null 2>&1
+    yellow "正在启动Warp-Cli代理模式"
+    warp-cli --accept-tos connect >/dev/null 2>&1
+    socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+    until [[ $socks5Status =~ on|plus ]]; do
+        red "启动Warp-Cli代理模式失败，正在尝试重启"
+        warp-cli --accept-tos disconnect >/dev/null 2>&1
+        warp-cli --accept-tos connect >/dev/null 2>&1
+        socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+        sleep 5
+    done
+    warp-cli --accept-tos enable-always-on >/dev/null 2>&1
+    green "WARP-Cli代理模式已启动成功！"
+    yellow "本地Socks5代理为： 127.0.0.1:$WARPCliPort"
+    rm -f changeport.sh
 }
 
 changeport
