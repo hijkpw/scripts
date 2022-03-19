@@ -52,7 +52,7 @@ get_status(){
     [[ -z $WARPIPv6Status ]] && WARPIPv6Status="无法检测IPv6状态"
     [[ ! -f /usr/local/bin/wgcf ]] && WgcfStatus="未安装"
     [[ -f /usr/local/bin/wgcf ]] && WgcfStatus="未启动" && [[ -n $(wg) ]] && WgcfStatus="已启动"
-    [[ -f $WARPSocks5Status ]] && WARPSocks5Status="未安装"
+    [[ -z $WARPSocks5Status ]] && WARPSocks5Status="未安装"
     [[ $WARPSocks5Status =~ Disconnected ]] && WARPSocks5Status="未启动"
     [[ $WARPSocks5Status =~ Connected ]] && WARPSocks5Status="已启动"
 }
