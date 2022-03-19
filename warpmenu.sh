@@ -29,6 +29,8 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
 
+arch=$(uname -m)
+
 # 检查TUN模块状态
 check_tun(){
     TUN=$(cat /dev/net/tun 2>&1 | tr '[:upper:]' '[:lower:]')
@@ -75,10 +77,20 @@ menu(){
     if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]]; then
         green "1. 安装Wgcf IPv4 WARP"
         green "2. 安装Wgcf 双栈 WARP"
+        if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
+            green "3. 安装WARP-Cli代理模式"
+        else
+            green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
+        fi
     fi
     if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
-        green "1. 检测到双栈VPS、无法使用单栈WARP"
+        green "1. 检测到双栈VPS、无法使用Wgcf 单栈 WARP"
         green "2. 安装Wgcf 双栈 WARP"
+        if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
+            green "3. 安装WARP-Cli代理模式"
+        else
+            green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
+        fi
     fi
     read -p "请输入选项：" menuNumberInput
     case "$menuNumberInput" in
