@@ -30,6 +30,8 @@ done
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
 
 arch=$(uname -m)
+wgcfcli=0 # 变量说明：0为Wgcf、1为WARP-Cli
+wgcfmode=0 # 变量说明：0为Wgcf单栈模式、1为双栈模式
 
 # 检查TUN模块状态
 check_tun(){
@@ -53,6 +55,41 @@ get_status(){
     [[ -f $WARPSocks5Status ]] && WARPSocks5Status="未安装"
     [[ $WARPSocks5Status =~ Disconnected ]] && WARPSocks5Status="未启动"
     [[ $WARPSocks5Status =~ Connected ]] && WARPSocks5Status="已启动"
+}
+
+install(){
+    if [[ $wgcfcli == 0 ]]; then
+        if [[ $wgcfmode == 0 ]]; then
+            if [[ $WARPIPv6Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]]; then
+                wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/warp64.sh && bash warp64.sh
+            fi
+            if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]]; then
+                wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/warp46.sh && bash warp46.sh
+            fi
+            if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
+                exit 1
+            fi
+        fi
+        if [[ $wgcfmode == 1 ]]; then
+            if [[ $WARPIPv6Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]]; then
+                wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/warp6d.sh && bash warp6d.sh
+            fi
+            if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]]; then
+                wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/warp4d.sh && bash warp4d.sh
+            fi
+            if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
+                wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/warpd.sh && bash warpd.sh
+            fi
+        fi
+    fi
+    if [[ $wgcfcli == 1 ]]; then
+        if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]]; then
+            wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/warp-cli.sh && bash warp-cli.sh
+        fi
+        if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
+            wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/warp-cli.sh && bash warp-cli.sh
+        fi
+    fi
 }
 
 # 菜单
@@ -92,8 +129,38 @@ menu(){
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
         fi
     fi
+    if [[ $WARPIPv4Status == "WARP IPv4" && $WARPIPv6Status == "WARP IPv6" ]]; then
+        green "1. 已经安装Wgcf WARP、请先卸载再更改代理模式"
+        green "2. 已经安装Wgcf WARP、请先卸载再更改代理模式"
+        if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
+            green "3. 安装WARP-Cli代理模式"
+        else
+            green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
+        fi
+    fi
+    if [[ $WARPIPv4Status == "WARP IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
+        green "1. 已经安装Wgcf WARP、请先卸载再更改代理模式"
+        green "2. 已经安装Wgcf WARP、请先卸载再更改代理模式"
+        green "3. IPv6 Only VPS无法安装WARP-Cli代理模式"
+    fi
+    if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "WARP IPv6" ]]; then
+        green "1. 已经安装Wgcf WARP、请先卸载再更改代理模式"
+        green "2. 已经安装Wgcf WARP、请先卸载再更改代理模式"
+        if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
+            green "3. 安装WARP-Cli代理模式"
+        else
+            green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
+        fi
+    fi
+    green "4. Wgcf-WARP 临时开关"
+    green "5. WARP-Cli代理模式临时开关"
+    green "6. WARP-Cli代理模式更换Socks5端口"
+    green "7. 卸载WARP"
     read -p "请输入选项：" menuNumberInput
     case "$menuNumberInput" in
+        1 ) install ;;
+        2 ) wgcfmode=1 && install ;;
+        3 ) wgcfcli=1 && install ;;
         * ) exit 1 ;;
     esac
 }
