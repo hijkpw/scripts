@@ -48,7 +48,9 @@ switch(){
             sleep 5
         done
         warp-cli --accept-tos enable-always-on >/dev/null 2>&1
+        WARPCliPort=$(warp-cli --accept-tos settings 2>/dev/null | grep 'WarpProxy on port' | awk -F "port " '{print $2}')
         green "WARP-Cli代理模式启动成功！"
+        yellow "本地Socks5代理为： 127.0.0.1:$WARPCliPort"
         rm -f switch.sh
         exit 1
     fi
