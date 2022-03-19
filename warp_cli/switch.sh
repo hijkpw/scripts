@@ -32,7 +32,24 @@ done
 [[ -z $(type -P warp-cli) ]] && red "WARP-Cli代理模式未安装，脚本即将退出！" && exit 1
 
 switch(){
-
+    if [[ $(warp-cli --accept-tos status) =~ Connected ]]; then
+        warp-cli --accept-tos disconnect
+        green "WARP-Cli代理模式关闭成功！"
+    fi
+    if [[ $(warp-cli --accept-tos status) =~ Disconnected ]]; then
+        yellow "正在启动Warp-Cli代理模式"
+        warp-cli --accept-tos connect >/dev/null 2>&1
+        socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+        until [[ $socks5Status =~ on|plus ]]; do
+            red "启动Warp-Cli代理模式失败，正在尝试重启"
+            warp-cli --accept-tos disconnect >/dev/null 2>&1
+            warp-cli --accept-tos connect >/dev/null 2>&1
+            socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+            sleep 5
+        done
+        warp-cli --accept-tos enable-always-on >/dev/null 2>&1
+        green "WARP-Cli代理模式启动成功！"
+    fi
 }
 
 switch
