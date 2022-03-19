@@ -120,6 +120,9 @@ menu(){
     echo "                          "
     green "VPS IPv4状态：$WARPIPv4Status"
     green "VPS IPv6状态：$WARPIPv6Status"
+    if [[ $WARPSocks5Status == "已启动" ]]; then
+        green "VPS Socks5代理：127.0.0.1:$WARPSocks5Port"
+    fi
     green "Wgcf状态：$WgcfStatus"
     green "WARP-Cli状态：$WARPSocks5Status"
     red "=========================="
