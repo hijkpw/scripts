@@ -29,7 +29,7 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
 
-[[ -z $(warp-cli >/dev/null 2>&1) ]] && red "WARP-Cli未安装，脚本即将退出！" && exit 1
+[[ -z $(type -P warp-cli) ]] && red "WARP-Cli代理模式未安装，脚本即将退出！" && exit 1
 
 changeport(){
     if [[ $(warp-cli --accept-tos status) =~ Connected ]]; then
