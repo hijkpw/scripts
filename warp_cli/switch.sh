@@ -31,6 +31,8 @@ done
 
 [[ -z $(type -P warp-cli) ]] && red "WARP-Cli代理模式未安装，脚本即将退出！" && exit 1
 
-switch(){}
+switch(){
+
+}
 
 switch
