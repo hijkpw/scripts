@@ -55,6 +55,7 @@ getCert(){
     curl https://get.acme.sh | sh -s email=$autoEmail@gmail.com
     source ~/.bashrc
     bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+    wg-quick down wgcf 2>/dev/null
     v4=$(curl -s4m8 ip.gs 2>/dev/null)
     if [ -z $v4 ]; then
         echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
