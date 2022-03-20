@@ -38,6 +38,7 @@ done
 
 IP=$(curl -sm8 ip.sb)
 
+# 确定CPU架构
 archAffix(){
     case "$(uname -m)" in
         i686 | i386) echo '32' ;;
@@ -50,6 +51,7 @@ archAffix(){
 	return 0
 }
 
+# 获取域名证书
 getCert(){
     systemctl stop xray
     curl https://get.acme.sh | sh -s email=example@example.com
@@ -68,6 +70,7 @@ getCert(){
     bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file $KEY_FILE --fullchain-file $CERT_FILE --ecc
 }
 
+# 安装Xray
 installXray(){
     rm -rf /tmp/xray
     mkdir -p /tmp/xray
@@ -108,6 +111,7 @@ EOF
     systemctl enable xray.service
 }
 
+# 用户选择菜单
 menu(){
     clear
     red "==============================="
