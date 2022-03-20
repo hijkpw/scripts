@@ -85,7 +85,6 @@ installXray(){
         red "Xray安装失败，请截图到TG群反馈"
         exit 1
     }
-
     cat >/etc/systemd/system/xray.service<<-EOF
 [Unit]
 Description=Xray Service
