@@ -36,6 +36,8 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
 
+IP=$(curl -sm8 ip.sb)
+
 archAffix() {
     case "$(uname -m)" in
         i686 | i386) echo '32' ;;
