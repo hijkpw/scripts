@@ -31,6 +31,7 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
+[[ -n $(type -P wgcf) ]] && red "Wgcf-WARP已经安装，脚本即将退出" && rm -f warp6d.sh && exit 1
 
 arch=`uname -m`
 main=`uname  -r | awk -F . '{print $1 }'`
