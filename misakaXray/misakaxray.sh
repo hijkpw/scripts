@@ -35,3 +35,18 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
+
+checkip(){
+    IP=$(curl -s4m8 ip.gs)
+    WARPIPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    if [[ -z $IP ]]; then
+        yellow "检测到VPS是IPv6 Only的VPS，是否安装WARP？\n输入1安装WARP，输入2设置DNS64服务器"
+        read -p "请输入选项：" warpdns64
+        [[ $warpdns64 == 1 ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/warp64.sh && bash warp64.sh
+        [[ $warpdns64 == 2 ]] && echo -e "nameserver 2001:67c:2b0::4\nnameserver 2001:67c:2b0::6" >/etc/resolv.conf
+        IP=$(curl -s6m8 ip.sb)
+    fi    
+    if [[ $WARPIPv4Status == "on" ]]; then
+        IP=$(curl -s6m8 ip.sb)
+    fi
+}
