@@ -45,9 +45,11 @@ checkip(){
         [[ $warpdns64 == 1 ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/warp64.sh && bash warp64.sh
         [[ $warpdns64 == 2 ]] && echo -e "nameserver 2001:67c:2b0::4\nnameserver 2001:67c:2b0::6" >/etc/resolv.conf
         IP=$(curl -s6m8 ip.sb)
+        echo $IP
     fi    
     if [[ $WARPIPv4Status == "on" ]]; then
         IP=$(curl -s6m8 ip.sb)
+        echo $IP
     fi
 }
 
