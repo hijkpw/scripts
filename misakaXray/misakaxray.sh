@@ -63,6 +63,9 @@ getCert(){
     else
         bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force
     fi
+    CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
+	KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
+    bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file $KEY_FILE --fullchain-file $CERT_FILE --ecc
 }
 
 installXray(){
