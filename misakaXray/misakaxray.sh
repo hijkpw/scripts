@@ -107,3 +107,14 @@ EOF
     systemctl daemon-reload
     systemctl enable xray.service
 }
+
+menu(){
+    clear
+    red "==============================="
+    red "      Misaka Xray Script       "
+    red " Site: https://owo.misaka.rest "
+    red "                               "
+    red "==============================="
+}
+
+menu
