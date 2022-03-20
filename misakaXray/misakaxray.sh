@@ -51,7 +51,7 @@ archAffix() {
 installXray(){
     rm -rf /tmp/xray
     mkdir -p /tmp/xray
-    curl -L -H "Cache-Control: no-cache" -o /tmp/xray/xray.zip https://github.com/XTLS/Xray-core/releases/download/latest/Xray-linux-$(archAffix).zip
+    wget -N https://github.com/XTLS/Xray-core/releases/download/latest/Xray-linux-$(archAffix).zip -O /tmp/xray/xray.zip
     if [ ! -f /tmp/xray/xray.zip ];then
         red "下载Xray文件失败，请检查服务器网络及DNS设置"
         exit 1
