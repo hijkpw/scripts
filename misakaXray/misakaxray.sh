@@ -38,7 +38,7 @@ done
 
 IP=$(curl -sm8 ip.sb)
 
-archAffix() {
+archAffix(){
     case "$(uname -m)" in
         i686 | i386) echo '32' ;;
         x86_64 | amd64) echo '64' ;;
@@ -48,6 +48,20 @@ archAffix() {
 	esac
 
 	return 0
+}
+
+getCert(){
+    autoEmail=$(date +%s%N | md5sum | cut -c 1-32)
+    curl https://get.acme.sh | sh -s email=$autoEmail@gmail.com
+    source ~/.bashrc
+    bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+    v4=$(curl -s4m8 ip.gs 2>/dev/null)
+    if [ -z $v4 ]; then
+        echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
+        bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force --listen-v6
+    else
+        bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --force
+    fi
 }
 
 installXray(){
