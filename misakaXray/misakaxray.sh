@@ -51,7 +51,7 @@ archAffix(){
 }
 
 getCert(){
-    autoEmail=$(date +%s%N | md5sum | cut -c 1-32)
+    systemctl stop xray
     curl https://get.acme.sh | sh -s email=example@example.com
     source ~/.bashrc
     bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
