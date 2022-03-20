@@ -138,9 +138,9 @@ menu(){
         green "2. 安装Wgcf 双栈 WARP"
         if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
             if [[ $WARPSocks5Status == "未启动" || $WARPSocks5Status == "已启动" ]]; then
-                green "3. 安装WARP-Cli代理模式"
-            else
                 green "3. 已安装WARP-Cli代理模式"
+            else
+                green "3. 安装WARP-Cli代理模式"
             fi
         else
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
@@ -151,9 +151,9 @@ menu(){
         green "2. 安装Wgcf 双栈 WARP"
         if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
             if [[ $WARPSocks5Status == "未启动" || $WARPSocks5Status == "已启动" ]]; then
-                green "3. 安装WARP-Cli代理模式"
-            else
                 green "3. 已安装WARP-Cli代理模式"
+            else
+                green "3. 安装WARP-Cli代理模式"
             fi
         else
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
@@ -164,9 +164,9 @@ menu(){
         green "2. 已经安装Wgcf WARP、请先卸载再更改代理模式"
         if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
             if [[ $WARPSocks5Status == "未启动" || $WARPSocks5Status == "已启动" ]]; then
-                green "3. 安装WARP-Cli代理模式"
-            else
                 green "3. 已安装WARP-Cli代理模式"
+            else
+                green "3. 安装WARP-Cli代理模式"
             fi
         else
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
@@ -182,9 +182,9 @@ menu(){
         green "2. 已经安装Wgcf WARP、请先卸载再更改代理模式"
         if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
             if [[ $WARPSocks5Status == "未启动" || $WARPSocks5Status == "已启动" ]]; then
-                green "3. 安装WARP-Cli代理模式"
-            else
                 green "3. 已安装WARP-Cli代理模式"
+            else
+                green "3. 安装WARP-Cli代理模式"
             fi
         else
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
