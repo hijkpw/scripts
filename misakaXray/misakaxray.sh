@@ -111,6 +111,35 @@ EOF
     systemctl enable xray.service
 }
 
+vmessConfig() {
+	local uuid="$(cat '/proc/sys/kernel/random/uuid')"
+	cat >/usr/local/etc/xray/config.json <<-EOF
+		{
+		  "inbounds": [{
+		    "port": $PORT,
+		    "protocol": "vmess",
+		    "settings": {
+		      "clients": [
+		        {
+		          "id": "$uuid",
+		          "level": 1,
+		          "alterId": 0
+		        }
+		      ]
+		    }
+		  }],
+		  "outbounds": [{
+		    "protocol": "freedom",
+		    "settings": {}
+		  },{
+		    "protocol": "blackhole",
+		    "settings": {},
+		    "tag": "blocked"
+		  }]
+		}
+	EOF
+}
+
 # 用户选择菜单
 menu(){
     clear
