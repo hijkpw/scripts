@@ -50,3 +50,5 @@ checkip(){
         IP=$(curl -s6m8 ip.sb)
     fi
 }
+
+checkip
