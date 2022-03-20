@@ -36,21 +36,55 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
 
-checkip(){
-    IP=$(curl -s4m8 ip.gs)
-    WARPIPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-    if [[ -z $IP ]]; then
-        yellow "检测到VPS是IPv6 Only的VPS，是否安装WARP？\n输入1安装WARP，输入2设置DNS64服务器"
-        read -p "请输入选项：" warpdns64
-        [[ $warpdns64 == 1 ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/warp64.sh && bash warp64.sh
-        [[ $warpdns64 == 2 ]] && echo -e "nameserver 2001:67c:2b0::4\nnameserver 2001:67c:2b0::6" >/etc/resolv.conf
-        IP=$(curl -s6m8 ip.sb)
-        echo $IP
-    fi    
-    if [[ $WARPIPv4Status == "on" ]]; then
-        IP=$(curl -s6m8 ip.sb)
-        echo $IP
-    fi
+archAffix() {
+    case "$(uname -m)" in
+        i686 | i386) echo '32' ;;
+        x86_64 | amd64) echo '64' ;;
+        armv8 | aarch64) echo 'arm64-v8a' ;;
+		s390x) echo 's390x' ;;
+		*) red "不支持的CPU架构！" && exit 1;;
+	esac
+
+	return 0
 }
 
-checkip
+installXray(){
+    rm -rf /tmp/xray
+    mkdir -p /tmp/xray
+    curl -L -H "Cache-Control: no-cache" -o /tmp/xray/xray.zip https://github.com/XTLS/Xray-core/releases/download/latest/Xray-linux-$(archAffix).zip
+    if [ ! -f /tmp/xray/xray.zip ];then
+        red "下载Xray文件失败，请检查服务器网络及DNS设置"
+        exit 1
+    fi
+    systemctl stop xray
+    mkdir -p /usr/local/etc/xray /usr/local/share/xray && \
+    unzip /tmp/xray/xray.zip -d /tmp/xray
+    cp /tmp/xray/xray /usr/local/bin
+    cp /tmp/xray/geo* /usr/local/share/xray
+    chmod +x /usr/local/bin/xray || {
+        red "Xray安装失败，请截图到TG群反馈"
+        exit 1
+    }
+
+    cat >/etc/systemd/system/xray.service<<-EOF
+[Unit]
+Description=Xray Service
+Documentation=https://github.com/xtls https://owo.misaka.rest
+After=network.target nss-lookup.target
+
+[Service]
+User=root
+#User=nobody
+#CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+#AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+ExecStart=/usr/local/bin/xray run -config /usr/local/etc/xray/config.json
+Restart=on-failure
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl daemon-reload
+    systemctl enable xray.service
+}
