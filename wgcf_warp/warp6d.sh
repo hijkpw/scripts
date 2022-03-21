@@ -167,7 +167,7 @@ cpto_wireguard(){
 }
 
 start_wgcf(){
-    yellow "Wgcf-WARP 正在启动"
+    yellow "正在启动 Wgcf-WARP"
     wg-quick up wgcf >/dev/null 2>&1
     WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
