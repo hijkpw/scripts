@@ -51,20 +51,20 @@ menu(){
     echo "                           "
     red "=================================="
     echo "          "
-    echo "1. 创建screen后台并设置名称"
-    echo "2. 查看并进入指定screen后台"
-    echo "3. 查看并删除指定screen后台"
-    echo "4. 清除所有screen后台"
-    echo "0. 退出脚本"
+    green "1. 创建screen后台并设置名称"
+    green "2. 查看并进入指定screen后台"
+    green "3. 查看并删除指定screen后台"
+    green "4. 清除所有screen后台"
+    green "0. 退出脚本"
     read -p "请输入选项:" menuNumberInput
     case "$menuNumberInput" in 
         1 )
-            readp "设置screen后台名称：" screen
-            screen -S $screen
+            read -p "设置screen后台名称：" screenName
+            screen -S $screenName
             back;;
         2 )
             names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
-            [[ -n $names ]] && green "$names" && readp "输入进入的screen后台名称：" screename && screen -r $screename || red "无执行内容"
+            [[ -n $names ]] && green "$names" && read -p "输入进入的screen后台名称：" screename && screen -r $screename || red "无执行内容"
             back;;
         3 )
             names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
@@ -73,7 +73,7 @@ menu(){
         4 )
             names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
             screen -wipe
-            [[ -n $names ]] && screen -ls | grep '(Detached)' | cut -d. -f1 | awk '{print $1}' | xargs kill && green "所有screen后台清除完毕"|| red "无执行内容，无须清除"
+            [[ -n $names ]] && screen -ls | grep '(Detached)' | cut -d. -f1 | awk '{print $1}' | xargs kill && green "所有screen后台清除完毕" || red "无执行内容，无须清除"
             back;;
         0 ) exit 0
     esac
