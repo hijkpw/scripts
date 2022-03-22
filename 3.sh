@@ -32,10 +32,28 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
 
+adddns64(){
+    ipv4=$(curl -s4m8 https://ip.gs)
+    ipv6=$(curl -s6m8 https://ip.gs)
+    if [ -z $ipv4 ]; then
+        echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
+    fi
+}
+
 checkwarp(){
     WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     if [[ $WARPv4Status =~ on|plus || $WARPv6Status =~ on|plus ]]; then
         wg-quick down wgcf >/dev/null 2>&1
     fi
+}
+
+install_acme(){
+    ${PACKAGE_UPDATE[int]}
+    [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
+    [[ -z $(type -P wget) ]] && ${PACKAGE_INSTALL[int]} wget
+    [[ -z $(type -P socat) ]] && ${PACKAGE_INSTALL[int]} socat
+    read -p "请输入注册邮箱（例：admin@misaka.rest，或留空自动生成）：" acmeEmail
+    [ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
+    curl https://get.acme.sh | sh -s email=$acmeEmail && source ~/.bashrc && bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
 }

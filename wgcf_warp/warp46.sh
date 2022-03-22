@@ -122,7 +122,7 @@ generate_wgcf_config(){
     fi
     wgcf generate
     chmod +x wgcf-profile.conf
-    sed -i '/0\.\0\/0/d' wgcf-profile.conf | sed -i 's/engage.cloudflareclient.com/162.159.193.10/g' wgcf-profile.conf | sed -i 's/1.1.1.1/9.9.9.10,8.8.8.8,1.1.1.1/g' wgcf-profile.conf
+    sed -i '/0\.\0\/0/d' wgcf-profile.conf | sed -i 's/engage.cloudflareclient.com/162.159.193.10/g' wgcf-profile.conf | sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4/g' wgcf-profile.conf
 }
 
 get_best_mtu(){
