@@ -102,3 +102,65 @@ getCert(){
     fi
     bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
 }
+
+checktls() {
+    if [[ -f /root/cert.crt && -f /root/private.key ]]; then
+        if [[ -s /root/cert.crt && -s /root/private.key ]]; then
+            
+            
+            sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
+            echo "0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1" >> /etc/crontab
+            green "证书申请成功！证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
+            yellow "证书crt路径如下：/root/cert.crt"
+            yellow "私钥key路径如下：/root/private.key"
+            exit 1
+        else
+            red "抱歉，证书申请失败"
+            green "建议如下："
+            yellow "1. 检测防火墙是否打开，如打开请关闭防火墙或放行80端口"
+            yellow "2. 检查80端口是否开放或占用"
+            yellow "3. 域名触发Acme.sh官方风控，更换域名或等待7天后再尝试执行脚本"
+            yellow "4. 脚本可能跟不上时代，建议截图发布到TG群询问"
+            exit 1
+        fi
+    fi
+}
+
+certificate() {
+	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+	bash ~/.acme.sh/acme.sh --list
+	read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
+	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
+		bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
+		bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
+		green "撤销并删除${domain}域名证书成功"
+		exit 1
+	else
+		red "未找到你输入的${domain}域名证书，请自行检查！"
+		exit 1
+	fi
+}
+
+acmerenew() {
+    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    bash ~/.acme.sh/acme.sh --list
+    read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
+    if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
+        checkwarp
+        bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
+        checktls
+        exit 1
+    else
+        red "未找到你输入的${domain}域名证书，请再次检查域名输入正确"
+        exit 1
+    fi
+}
+
+uninstall() {
+	[[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh无法执行" && exit 1
+    curl https://get.acme.sh | sh
+	~/.acme.sh/acme.sh --uninstall
+    sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
+	rm -rf ~/.acme.sh
+	rm -f acme1key.sh
+}
