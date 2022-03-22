@@ -61,16 +61,20 @@ install_acme(){
 }
 
 getCert(){
+    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    checkwarp
+    ipv4=$(curl -s4m8 https://ip.gs)
+    ipv6=$(curl -s6m8 https://ip.gs)
     read -p "请输入解析完成的域名:" domain
     green "已输入的域名:$domain" && sleep 1
     domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
     if [[ -n $(echo $domainIP | grep nginx) ]]; then
         domainIP=$(curl -s ipget.net/?ip="$domain")
-        if [[ $domainIP == $v4 ]]; then
+        if [[ $domainIP == $ipv4 ]]; then
             yellow "当前二级域名解析到的IPV4：$domainIP" && sleep 1
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt
         fi
-        if [[ $domainIP == $v6 ]]; then
+        if [[ $domainIP == $ipv6 ]]; then
             yellow "当前二级域名解析到的IPV6：$domainIP" && sleep 1
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --listen-v6
         fi
@@ -91,11 +95,11 @@ getCert(){
         export CF_Key="$GAK"
         readp "请输入登录Cloudflare的注册邮箱地址:" CFemail
         export CF_Email="$CFemail"
-        if [[ $domainIP == $v4 ]]; then
+        if [[ $domainIP == $ipv4 ]]; then
             yellow "当前泛域名解析到的IPV4：$domainIP" && sleep 1
             bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt
         fi
-        if [[ $domainIP == $v6 ]]; then
+        if [[ $domainIP == $ipv6 ]]; then
             yellow "当前泛域名解析到的IPV6：$domainIP" && sleep 1
             bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt --listen-v6
         fi
@@ -106,8 +110,6 @@ getCert(){
 checktls() {
     if [[ -f /root/cert.crt && -f /root/private.key ]]; then
         if [[ -s /root/cert.crt && -s /root/private.key ]]; then
-            
-            
             sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
             echo "0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1" >> /etc/crontab
             green "证书申请成功！证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
@@ -142,7 +144,7 @@ certificate() {
 }
 
 acmerenew() {
-    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
     bash ~/.acme.sh/acme.sh --list
     read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
     if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
@@ -156,8 +158,15 @@ acmerenew() {
     fi
 }
 
+install(){
+    checkwarp
+    adddns64
+    install_acme
+    getCert
+}
+
 uninstall() {
-	[[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh无法执行" && exit 1
+	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 1
     curl https://get.acme.sh | sh
 	~/.acme.sh/acme.sh --uninstall
     sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
