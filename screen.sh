@@ -27,7 +27,7 @@ readp(){
 [[ $(type -P yum) ]] && yumapt='yum -y' || yumapt='apt -y'
 [[ $(type -P screen) ]] || (yellow "screen未安装，正在安装中" && $yumapt install screen)	   
 
-function back(){
+back(){
     echo "设置完成，请选择接下来的操作"
     echo "1. 回到主页"
     echo "2. 退出脚本"
@@ -38,7 +38,7 @@ function back(){
     esac
 }
 
-function menu(){
+menu(){
     clear
     red "=================================="
     echo "                           "
@@ -48,11 +48,11 @@ function menu(){
     red "  Site: https://owo.misaka.rest  "
     echo "                           "
     red "=================================="
-    echo "1. 创建screen后台名称"
+    echo "          "
+    echo "1. 创建screen后台并设置名称"
     echo "2. 查看并进入指定screen后台"
     echo "3. 查看并删除指定screen后台"
     echo "4. 清除所有screen后台"
-    echo "v. 更新脚本"
     echo "0. 退出脚本"
     read -p "请输入选项:" menuNumberInput
     case "$menuNumberInput" in 
