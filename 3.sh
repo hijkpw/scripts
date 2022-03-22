@@ -173,3 +173,34 @@ uninstall() {
 	rm -rf ~/.acme.sh
 	rm -f acme1key.sh
 }
+
+menu() {
+	clear
+	red "=================================="
+	echo "                           "
+	red "    Acme.sh 域名证书一键申请脚本     "
+	red "          by 小御坂的破站           "
+	echo "                           "
+	red "  Site: https://owo.misaka.rest  "
+	echo "                           "
+	red "=================================="
+	echo "                           "
+	green "1. 安装Acme.sh并申请证书"
+	green "2. 撤销并删除已申请的证书"
+	green "3. 手动续期域名证书"
+	green "4. 卸载Acme.sh证书申请"
+	green "5. 更新脚本"
+	green "0. 退出"
+	echo "         "
+	read -p "请输入数字:" NumberInput
+	case "$NumberInput" in
+		1) install ;;
+		2) getCert ;;
+		3) certificate ;;
+		4) acmerenew ;;
+		5) uninstall ;;
+		0) exit 1 ;;
+	esac
+}
+
+menu
