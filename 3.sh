@@ -55,5 +55,50 @@ install_acme(){
     [[ -z $(type -P socat) ]] && ${PACKAGE_INSTALL[int]} socat
     read -p "请输入注册邮箱（例：admin@misaka.rest，或留空自动生成）：" acmeEmail
     [ -z $acmeEmail ] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
-    curl https://get.acme.sh | sh -s email=$acmeEmail && source ~/.bashrc && bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+    curl https://get.acme.sh | sh -s email=$acmeEmail
+    source ~/.bashrc
+    bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+}
+
+getCert(){
+    read -p "请输入解析完成的域名:" domain
+    green "已输入的域名:$domain" && sleep 1
+    domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
+    if [[ -n $(echo $domainIP | grep nginx) ]]; then
+        domainIP=$(curl -s ipget.net/?ip="$domain")
+        if [[ $domainIP == $v4 ]]; then
+            yellow "当前二级域名解析到的IPV4：$domainIP" && sleep 1
+            bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt
+        fi
+        if [[ $domainIP == $v6 ]]; then
+            yellow "当前二级域名解析到的IPV6：$domainIP" && sleep 1
+            bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --listen-v6
+        fi
+
+        if [[ -n $(echo $domainIP | grep nginx) ]]; then
+            yellow "域名解析无效，请检查二级域名是否填写正确或稍等几分钟等待解析完成再执行脚本"
+        elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
+            if [[ $domainIP != $v4 ]] && [[ $domainIP != $v6 ]]; then
+                red "当前二级域名解析的IP与当前VPS使用的IP不匹配"
+                green "建议如下："
+                yellow "1、请确保Cloudflare小黄云关闭状态(仅限DNS)，其他域名解析网站设置同理"
+                yellow "2、请检查域名解析网站设置的IP是否正确"
+            fi
+        fi
+    else
+        green "经检测，当前为泛域名申请证书模式，目前脚本仅支持Cloudflare的DNS申请方式"
+        readp "请复制Cloudflare的Global API Key:" GAK
+        export CF_Key="$GAK"
+        readp "请输入登录Cloudflare的注册邮箱地址:" CFemail
+        export CF_Email="$CFemail"
+        if [[ $domainIP == $v4 ]]; then
+            yellow "当前泛域名解析到的IPV4：$domainIP" && sleep 1
+            bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt
+        fi
+        if [[ $domainIP == $v6 ]]; then
+            yellow "当前泛域名解析到的IPV6：$domainIP" && sleep 1
+            bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt --listen-v6
+        fi
+    fi
+    bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
 }
