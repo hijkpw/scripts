@@ -31,3 +31,11 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
+
+checkwarp(){
+    WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    if [[ $WARPv4Status =~ on|plus || $WARPv6Status =~ on|plus ]]; then
+        wg-quick down wgcf >/dev/null 2>&1
+    fi
+}
