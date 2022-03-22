@@ -1,31 +1,32 @@
 #!/usr/bin/env bash
 
-green(){
-    echo -e "\033[32m$1\033[0m";
+red() {
+    echo -e "\033[31m\033[01m$1\033[0m"
 }
 
-red(){
-    echo -e "\033[31m$1\033[0m";
+green() {
+    echo -e "\033[32m\033[01m$1\033[0m"
 }
 
-yellow(){
-    echo -e "\033[33m$1\033[0m";
+yellow() {
+    echo -e "\033[33m\033[01m$1\033[0m"
 }
 
-white(){
-    echo -e "\033[37m$1\033[0m"
-}
+REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'")
+RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS")
+PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update")
+PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install")
+PACKAGE_UNINSTALL=("apt -y autoremove" "apt -y autoremove" "yum -y autoremove" "yum -y autoremove")
 
-blue(){
-    echo -e "\033[36m$1\033[0m";
-}
+for i in "${CMD[@]}"; do
+    SYS="$i" && [[ -n $SYS ]] && break
+done
 
-readp(){
-    read -p "$(white "$1")" $2;
-}
+for ((int = 0; int < ${#REGEX[@]}; int++)); do
+    [[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM="${RELEASE[int]}" && [[ -n $SYSTEM ]] && break
+done
 
-[[ $(type -P yum) ]] && yumapt='yum -y' || yumapt='apt -y'
-[[ $(type -P screen) ]] || (yellow "screen未安装，正在安装中" && $yumapt install screen)	   
+[[ -z $SYSTEM ]] && red "不支持VPS的当前系统，请使用主流的操作系统" && exit 1
 
 back(){
     echo "设置完成，请选择接下来的操作"
