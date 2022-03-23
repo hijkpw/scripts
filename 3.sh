@@ -141,6 +141,22 @@ checktls() {
             yellow "2. 检查80端口是否开放或占用"
             yellow "3. 域名触发Acme.sh官方风控，更换域名或等待7天后再尝试执行脚本"
             yellow "4. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
+            if [[ -n $(type -P wgcf) ]]; then
+                yellow "正在启动 Wgcf-WARP"
+                wg-quick up wgcf >/dev/null 2>&1
+                WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+                WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+                until [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; do
+                    red "无法启动Wgcf-WARP，正在尝试重启"
+                    wg-quick down wgcf >/dev/null 2>&1
+                    wg-quick up wgcf >/dev/null 2>&1
+                    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+                    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+                    sleep 8
+                done
+                systemctl enable wg-quick@wgcf >/dev/null 2>&1
+                green "Wgcf-WARP 已启动成功"
+            fi
             exit 1
         fi
     fi
