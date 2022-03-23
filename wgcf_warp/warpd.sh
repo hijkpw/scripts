@@ -164,6 +164,7 @@ get_best_mtu(){
 }
 
 cpto_wireguard(){
+    mkdir /etc/wireguard
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
 }
