@@ -128,14 +128,14 @@ checktls() {
     fi
 }
 
-delete_certificate() {
+revoke_certificate() {
 	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
 	bash ~/.acme.sh/acme.sh --list
 	read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
 	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
 		bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
 		bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
-		green "撤销并删除${domain}域名证书成功"
+		green "撤销${domain}域名证书成功"
 		exit 1
 	else
 		red "未找到你输入的${domain}域名证书，请自行检查！"
@@ -196,7 +196,7 @@ menu() {
 	case "$NumberInput" in
 		1) install ;;
 		2) getCert ;;
-		3) delete_certificate ;;
+		3) revoke_certificate ;;
 		4) acmerenew ;;
 		5) uninstall ;;
 		0) exit 1 ;;
