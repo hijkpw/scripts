@@ -68,16 +68,15 @@ getCert(){
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
     read -p "请输入解析完成的域名:" domain
-    green "已输入的域名:$domain" && sleep 1
+    [[ -z $domain ]] && red "未输入域名，无法执行操作！" $$ exit 1
+    green "已输入的域名：$domain" && sleep 1
     domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
     if [[ -n $(echo $domainIP | grep nginx) ]]; then
         domainIP=$(curl -s ipget.net/?ip="$domain")
         if [[ $domainIP == $ipv4 ]]; then
-            yellow "当前二级域名解析到的IPV4：$domainIP" && sleep 1
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt
         fi
         if [[ $domainIP == $ipv6 ]]; then
-            yellow "当前二级域名解析到的IPV6：$domainIP" && sleep 1
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --listen-v6
         fi
 
@@ -86,25 +85,24 @@ getCert(){
             exit 1
         elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
             if [[ $domainIP != $ipv4 ]] && [[ $domainIP != $ipv6 ]]; then
+                green "${domain} 解析结果：（$domainIP）"
                 red "当前二级域名解析的IP与当前VPS使用的IP不匹配"
                 green "建议如下："
-                yellow "1、请确保Cloudflare小黄云关闭状态(仅限DNS)，其他域名解析网站设置同理"
-                yellow "2、请检查域名解析网站设置的IP是否正确"
+                yellow "1、请确保Cloudflare小云朵关闭状态(仅限DNS)，其他域名解析网站设置同理"
+                yellow "2、请检查DNS解析设置的IP是否为VPS的IP"
                 exit 1
             fi
         fi
     else
-        green "经检测，当前为泛域名申请证书模式，目前脚本仅支持Cloudflare的DNS申请方式"
-        readp "请复制Cloudflare的Global API Key:" GAK
+        green "当前为泛域名申请证书模式，目前脚本仅支持Cloudflare的DNS申请方式"
+        read -p "请复制Cloudflare的Global API Key:" GAK
         export CF_Key="$GAK"
-        readp "请输入登录Cloudflare的注册邮箱地址:" CFemail
+        read -p "请输入登录Cloudflare的注册邮箱地址:" CFemail
         export CF_Email="$CFemail"
         if [[ $domainIP == $ipv4 ]]; then
-            yellow "当前泛域名解析到的IPV4：$domainIP" && sleep 1
             bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt
         fi
         if [[ $domainIP == $ipv6 ]]; then
-            yellow "当前泛域名解析到的IPV6：$domainIP" && sleep 1
             bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain} -d *.${domain} -k ec-256 --server letsencrypt --listen-v6
         fi
     fi
@@ -169,10 +167,12 @@ revoke_cert() {
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
     bash ~/.acme.sh/acme.sh --list
     read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
+    [[ -z $domain ]] && red "未输入域名，无法执行操作！" $$ exit 1
     if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
         bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
         bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
-        green "撤销${domain}域名证书成功"
+        rm -f ~/.acme.sh/${domain}_ecc
+        green "撤销${domain}的域名证书成功"
         exit 1
     else
         red "未找到你输入的${domain}域名证书，请自行检查！"
@@ -180,10 +180,11 @@ revoke_cert() {
     fi
 }
 
-acmerenew() {
+renew_cert() {
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
     bash ~/.acme.sh/acme.sh --list
     read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
+    [[ -z $domain ]] && red "未输入域名，无法执行操作！" $$ exit 1
     if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
         checkwarp
         bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
@@ -233,7 +234,7 @@ menu() {
         1) install ;;
         2) getCert ;;
         3) revoke_cert ;;
-        4) acmerenew ;;
+        4) renew_cert ;;
         5) uninstall ;;
         *) exit 1 ;;
     esac
