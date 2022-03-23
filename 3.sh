@@ -35,9 +35,9 @@ done
 adddns64(){
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
-    if [ -z $ipv4 ]; then
+    if [[ -z $ipv4 ]]; then
         echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
-	yellow "检测到VPS为IPv6 Only，已自动设置为DNS64服务器"
+        yellow "检测到VPS为IPv6 Only，已自动设置为DNS64服务器"
     fi
 }
 
