@@ -85,7 +85,7 @@ getCert(){
             yellow "域名解析无效，请检查二级域名是否填写正确或稍等几分钟等待解析完成再执行脚本"
             exit 1
         elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
-            if [[ $domainIP != $v4 ]] && [[ $domainIP != $v6 ]]; then
+            if [[ $domainIP != $ipv4 ]] && [[ $domainIP != $ipv6 ]]; then
                 red "当前二级域名解析的IP与当前VPS使用的IP不匹配"
                 green "建议如下："
                 yellow "1、请确保Cloudflare小黄云关闭状态(仅限DNS)，其他域名解析网站设置同理"
