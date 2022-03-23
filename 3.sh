@@ -114,7 +114,7 @@ checktls() {
         if [[ -s /root/cert.crt && -s /root/private.key ]]; then
             sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
             echo "0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1" >> /etc/crontab
-            green "证书申请成功！证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
+            green "证书申请成功！申请到的证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
             yellow "证书crt路径如下：/root/cert.crt"
             yellow "私钥key路径如下：/root/private.key"
             exit 1
@@ -130,19 +130,19 @@ checktls() {
     fi
 }
 
-revoke_certificate() {
-	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
-	bash ~/.acme.sh/acme.sh --list
-	read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
-	if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
-		bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
-		bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
-		green "撤销${domain}域名证书成功"
-		exit 1
-	else
-		red "未找到你输入的${domain}域名证书，请自行检查！"
-		exit 1
-	fi
+revoke_cert() {
+    [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    bash ~/.acme.sh/acme.sh --list
+    read -p "请输入要撤销的域名证书（复制Main_Domain下显示的域名）:" domain
+    if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
+        bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
+        bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
+        green "撤销${domain}域名证书成功"
+        exit 1
+    else
+        red "未找到你输入的${domain}域名证书，请自行检查！"
+        exit 1
+    fi
 }
 
 acmerenew() {
@@ -168,12 +168,12 @@ install(){
 }
 
 uninstall() {
-	[[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 1
+    [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 1
     curl https://get.acme.sh | sh
-	~/.acme.sh/acme.sh --uninstall
+    ~/.acme.sh/acme.sh --uninstall
     sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
-	rm -rf ~/.acme.sh
-	rm -f acme1key.sh
+    rm -rf ~/.acme.sh
+    rm -f acme1key.sh
 }
 
 menu() {
@@ -187,18 +187,18 @@ menu() {
 	echo "                           "
 	red "=================================="
 	echo "                           "
-	green "1. 安装Acme.sh"
+	green "1. 安装Acme.sh域名证书申请脚本"
 	green "2. 申请域名证书"
 	green "3. 撤销并删除已申请的证书"
 	green "4. 手动续期域名证书"
-	green "5. 卸载acme.sh域名证书申请脚本"
+	green "5. 卸载Acme.sh域名证书申请脚本"
 	green "0. 退出"
 	echo "         "
 	read -p "请输入数字:" NumberInput
 	case "$NumberInput" in
 		1) install ;;
 		2) getCert ;;
-		3) revoke_certificate ;;
+		3) revoke_cert ;;
 		4) acmerenew ;;
 		5) uninstall ;;
 		0) exit 1 ;;
