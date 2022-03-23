@@ -88,7 +88,7 @@ getCert(){
                 green "${domain} 解析结果：（$domainIP）"
                 red "当前二级域名解析的IP与当前VPS使用的IP不匹配"
                 green "建议如下："
-                yellow "1、请确保Cloudflare小云朵关闭状态(仅限DNS)，其他域名解析网站设置同理"
+                yellow "1、请确保Cloudflare小云朵为关闭状态(仅限DNS)，其他域名解析网站设置同理"
                 yellow "2、请检查DNS解析设置的IP是否为VPS的IP"
                 exit 1
             fi
