@@ -171,7 +171,7 @@ revoke_cert() {
     if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
         bash ~/.acme.sh/acme.sh --revoke -d ${domain} --ecc
         bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
-        rm -f ~/.acme.sh/${domain}_ecc
+        rm -rf ~/.acme.sh/${domain}_ecc
         green "撤销${domain}的域名证书成功"
         exit 1
     else
