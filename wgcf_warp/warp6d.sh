@@ -34,7 +34,7 @@ done
 [[ -n $(type -P wgcf) ]] && red "Wgcf-WARP已经安装，脚本即将退出" && rm -f warp6d.sh && exit 1
 
 arch=`uname -m`
-main=`uname  -r | awk -F . '{print $1 }'`
+main=`uname  -r | awk -F . '{print $1}'`
 minor=`uname -r | awk -F . '{print $2}'`
 vpsvirt=`systemd-detect-virt`
 

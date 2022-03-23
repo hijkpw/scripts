@@ -34,7 +34,7 @@ done
 [[ -n $(type -P wgcf) ]] && red "Wgcf-WARP已经安装，脚本即将退出" && rm -f warpd.sh && exit 1
 
 arch=`uname -m`
-main=`uname  -r | awk -F . '{print $1 }'`
+main=`uname  -r | awk -F . '{print $1}'`
 minor=`uname -r | awk -F . '{print $2}'`
 vpsvirt=`systemd-detect-virt`
 
@@ -122,10 +122,10 @@ generate_wgcf_config(){
     fi
     wgcf generate
     chmod +x wgcf-profile.conf
-    sed -i "5 s/^/PostUp = ip -4 rule add from $(ip route get 162.159.193.10 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
-    sed -i "6 s/^/PostDown = ip -4 rule delete from $(ip route get 162.159.193.10 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
-    sed -i "7 s/^/PostUp = ip -6 rule add from $(ip route get 2606:4700:d0::a29f:c001 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
-    sed -i "8 s/^/PostDown = ip -6 rule delete from $(ip route get 2606:4700:d0::a29f:c001 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
+    sed -i "7 s/^/PostUp = ip -4 rule add from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
+    sed -i "8 s/^/PostDown = ip -4 rule delete from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
+    sed -i "9 s/^/PostUp = ip -6 rule add from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
+    sed -i "10 s/^/PostDown = ip -6 rule delete from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
 }
 
