@@ -164,7 +164,6 @@ install(){
     checkwarp
     adddns64
     install_acme
-    getCert
 }
 
 uninstall() {
