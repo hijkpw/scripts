@@ -46,7 +46,7 @@ checkwarp(){
     WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     if [[ $WARPv4Status =~ on|plus || $WARPv6Status =~ on|plus ]]; then
         wg-quick down wgcf >/dev/null 2>&1
-	yellow "检测到Wgcf-WARP已启动，为确保正常申请证书已暂时关闭"
+        yellow "检测到Wgcf-WARP已启动，为确保正常申请证书已暂时关闭"
     fi
 }
 
@@ -117,6 +117,22 @@ checktls() {
             green "证书申请成功！申请到的证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
             yellow "证书crt路径如下：/root/cert.crt"
             yellow "私钥key路径如下：/root/private.key"
+            if [[ -n $(type -P wgcf) ]]; then
+                yellow "正在启动 Wgcf-WARP"
+                wg-quick up wgcf >/dev/null 2>&1
+                WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+                WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+                until [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; do
+                    red "无法启动Wgcf-WARP，正在尝试重启"
+                    wg-quick down wgcf >/dev/null 2>&1
+                    wg-quick up wgcf >/dev/null 2>&1
+                    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+                    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+                    sleep 8
+                done
+                systemctl enable wg-quick@wgcf >/dev/null 2>&1
+                green "Wgcf-WARP 已启动成功"
+            fi
             exit 1
         else
             red "抱歉，证书申请失败"
