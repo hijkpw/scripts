@@ -208,32 +208,32 @@ uninstall() {
 }
 
 menu() {
-	clear
-	red "=================================="
-	echo "                           "
-	red "    Acme.sh 域名证书一键申请脚本     "
-	red "          by 小御坂的破站           "
-	echo "                           "
-	red "  Site: https://owo.misaka.rest  "
-	echo "                           "
-	red "=================================="
-	echo "                           "
-	green "1. 安装Acme.sh域名证书申请脚本"
-	green "2. 申请域名证书"
-	green "3. 撤销并删除已申请的证书"
-	green "4. 手动续期域名证书"
-	green "5. 卸载Acme.sh域名证书申请脚本"
-	green "0. 退出"
-	echo "         "
-	read -p "请输入数字:" NumberInput
-	case "$NumberInput" in
-		1) install ;;
-		2) getCert ;;
-		3) revoke_cert ;;
-		4) acmerenew ;;
-		5) uninstall ;;
-		0) exit 1 ;;
-	esac
+    clear
+    red "=================================="
+    echo "                           "
+    red "    Acme.sh 域名证书一键申请脚本     "
+    red "          by 小御坂的破站           "
+    echo "                           "
+    red "  Site: https://owo.misaka.rest  "
+    echo "                           "
+    red "=================================="
+    echo "                           "
+    green "1. 安装Acme.sh域名证书申请脚本"
+    green "2. 申请域名证书"
+    green "3. 撤销并删除已申请的证书"
+    green "4. 手动续期域名证书"
+    green "5. 卸载Acme.sh域名证书申请脚本"
+    green "0. 退出"
+    echo "         "
+    read -p "请输入数字:" NumberInput
+    case "$NumberInput" in
+        1) install ;;
+        2) getCert ;;
+        3) revoke_cert ;;
+        4) acmerenew ;;
+        5) uninstall ;;
+        *) exit 1 ;;
+    esac
 }
 
 menu
