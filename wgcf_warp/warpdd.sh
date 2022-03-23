@@ -126,6 +126,7 @@ generate_wgcf_config(){
     sed -i "6 s/^/PostDown = ip -4 rule delete from $(ip route get 162.159.192.1 | grep -oP '"'src \K\S+') lookup main\n/"'" wgcf-profile.conf
     sed -i "7 s/^/PostUp = ip -6 rule add from $(ip route get 2606:4700:d0::a29f:c001 | grep -oP '"'src \K\S+') lookup main\n/"'" wgcf-profile.conf
     sed -i "8 s/^/PostDown = ip -6 rule delete from $(ip route get 2606:4700:d0::a29f:c001 | grep -oP '"'src \K\S+') lookup main\n/"'" wgcf-profile.conf
+    sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
 }
 
 get_best_mtu(){
