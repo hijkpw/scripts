@@ -37,6 +37,7 @@ adddns64(){
     ipv6=$(curl -s6m8 https://ip.gs)
     if [ -z $ipv4 ]; then
         echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
+	yellow "检测到VPS为IPv6 Only，已自动设置为DNS64服务器"
     fi
 }
 
@@ -45,6 +46,7 @@ checkwarp(){
     WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     if [[ $WARPv4Status =~ on|plus || $WARPv6Status =~ on|plus ]]; then
         wg-quick down wgcf >/dev/null 2>&1
+	yellow "检测到Wgcf-WARP已启动，为确保正常申请证书已暂时关闭"
     fi
 }
 
