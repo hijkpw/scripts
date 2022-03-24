@@ -96,7 +96,7 @@ start_warpcli(){
         warp-cli --accept-tos disconnect >/dev/null 2>&1
         warp-cli --accept-tos connect >/dev/null 2>&1
         socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
-        sleep 5
+        sleep 8
     done
     warp-cli --accept-tos enable-always-on >/dev/null 2>&1
     green "WARP-Cli代理模式已启动成功！"
@@ -110,7 +110,6 @@ install(){
         [[ $SYSTEM == "CentOS" ]] && [[ ! ${vsid} =~ 8 ]] && yellow "当前系统版本：Centos $vsid \nWARP-Cli代理模式仅支持Centos 8系统"
         [[ $SYSTEM == "Debian" ]] && [[ ! ${vsid} =~ 9|10|11 ]] && yellow "当前系统版本：Debian $vsid \nWARP-Cli代理模式仅支持Debian 9-11系统"
         [[ $SYSTEM == "Ubuntu" ]] && [[ ! ${vsid} =~ 16|20 ]] && yellow "当前系统版本：Ubuntu $vsid \nWARP-Cli代理模式仅支持Ubuntu 16.04/20.04系统"
-        [[ $(warp-cli --accept-tos status 2>/dev/null) =~ 'Connected' ]] && red "WARP-Cli代理模式正在运行中"
         ${PACKAGE_UPDATE[int]}
         [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
         [[ -z $(type -P sudo) ]] && ${PACKAGE_INSTALL[int]} sudo

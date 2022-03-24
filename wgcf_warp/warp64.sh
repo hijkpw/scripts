@@ -176,7 +176,7 @@ start_wgcf(){
         wg-quick down wgcf >/dev/null 2>&1
         wg-quick up wgcf >/dev/null 2>&1
         WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-        sleep 5
+        sleep 8
     done
     systemctl enable wg-quick@wgcf >/dev/null 2>&1
     green "Wgcf-WARP 已启动成功"
