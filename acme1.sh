@@ -65,6 +65,7 @@ install_acme(){
 getCert(){
     [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
     checkwarp
+    adddns64
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
     read -p "请输入解析完成的域名:" domain
@@ -197,12 +198,6 @@ renew_cert() {
     fi
 }
 
-install(){
-    checkwarp
-    adddns64
-    install_acme
-}
-
 uninstall() {
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh无法执行" && exit 1
     curl https://get.acme.sh | sh
@@ -232,7 +227,7 @@ menu() {
     echo "         "
     read -p "请输入数字:" NumberInput
     case "$NumberInput" in
-        1) install ;;
+        1) install_acme ;;
         2) getCert ;;
         3) revoke_cert ;;
         4) renew_cert ;;
