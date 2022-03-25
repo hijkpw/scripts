@@ -82,7 +82,7 @@ getSingleCert(){
         fi
 
         if [[ -n $(echo $domainIP | grep nginx) ]]; then
-            yellow "域名解析无效，请检查二级域名是否填写正确或稍等几分钟等待解析完成再执行脚本"
+            yellow "域名解析无效，请检查域名是否填写正确或稍等几分钟等待解析完成再执行脚本"
             exit 1
         elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
             if [[ $domainIP != $ipv4 ]] && [[ $domainIP != $ipv6 ]]; then
