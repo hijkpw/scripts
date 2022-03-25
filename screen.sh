@@ -40,6 +40,27 @@ back(){
     esac
 }
 
+enterScreen(){
+    names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
+    [[ -n $names ]] && green "$names"
+    read -p "输入进入的screen后台名称：" screename
+    screen -r $screename || red "无执行内容"
+}
+
+deleteScreen(){
+    names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
+    [[ -n $names ]] && green "$names"
+    read -p "输入删除的screen后台名称：" screename
+    screen -S $screename -X quit || red "无执行内容"
+}
+
+killAllScreen(){
+    names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
+    screen -wipe
+    [[ -n $names ]] && screen -ls | grep '(Detached)' | cut -d. -f1 | awk '{print $1}' | xargs kill
+    green "所有screen后台清除完毕" || red "无执行内容，无须清除"
+}
+
 menu(){
     clear
     red "=================================="
@@ -68,7 +89,7 @@ menu(){
             back;;
         3 )
             names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
-            [[ -n $names ]] && green "$names" && readp "输入删除的screen后台名称：" screename && screen -S $screename -X quit || red "无执行内容"
+            [[ -n $names ]] && green "$names" && read -p "输入删除的screen后台名称：" screename && screen -S $screename -X quit || red "无执行内容"
             back;;
         4 )
             names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
