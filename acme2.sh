@@ -207,6 +207,7 @@ renew_cert() {
     [[ -z $domain ]] && red "未输入域名，无法执行操作！" $$ exit 1
     if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
         checkwarp
+        adddns64
         bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
         checktls
         back2menu
