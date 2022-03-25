@@ -100,12 +100,32 @@ getSingleCert(){
     checktls
 }
 
+getDomainCert(){
+    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    checkwarp
+    adddns64
+    ipv4=$(curl -s4m8 https://ip.gs)
+    ipv6=$(curl -s6m8 https://ip.gs)
+    read -p "请输入需要申请证书的泛域名:" domain
+    read -p "请复制Cloudflare的Global API Key:" GAK
+    export CF_Key="$GAK"
+    read -p "请输入登录Cloudflare的注册邮箱地址:" CFemail
+    export CF_Email="$CFemail"
+    if [ -z $ipv4 ]; then
+        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "*.${domain}" -d "${domain}" -k ec-256 --server letsencrypt --listen-v6
+    else
+        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "*.${domain}" -d "${domain}" -k ec-256 --server letsencrypt
+    fi
+    bash ~/.acme.sh/acme.sh --install-cert -d "*.${domain}" --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
+    checktls
+}
+
 checktls() {
     if [[ -f /root/cert.crt && -f /root/private.key ]]; then
         if [[ -s /root/cert.crt && -s /root/private.key ]]; then
             sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
             echo "0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1" >> /etc/crontab
-            green "证书申请成功！申请到的证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
+            green "证书申请成功！脚本申请到的证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
             yellow "证书crt路径如下：/root/cert.crt"
             yellow "私钥key路径如下：/root/private.key"
             if [[ -n $(type -P wgcf) ]]; then
@@ -207,19 +227,21 @@ menu() {
     red "=================================="
     echo "                           "
     green "1. 安装Acme.sh域名证书申请脚本"
-    green "2. 申请域名证书"
-    green "3. 撤销并删除已申请的证书"
-    green "4. 手动续期域名证书"
-    green "5. 卸载Acme.sh域名证书申请脚本"
+    green "2. 申请单域名证书（80端口申请）"
+    green "3. 申请泛域名证书（CF API申请）"
+    green "4. 撤销并删除已申请的证书"
+    green "5. 手动续期域名证书"
+    green "6. 卸载Acme.sh域名证书申请脚本"
     green "0. 退出"
     echo "         "
     read -p "请输入数字:" NumberInput
     case "$NumberInput" in
         1) install_acme ;;
-        2) getCert ;;
-        3) revoke_cert ;;
-        4) renew_cert ;;
-        5) uninstall ;;
+        2) getSingleCert ;;
+        3) getDomainCert ;;
+        4) revoke_cert ;;
+        5) renew_cert ;;
+        6) uninstall ;;
         *) exit 1 ;;
     esac
 }
