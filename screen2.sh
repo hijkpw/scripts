@@ -50,24 +50,27 @@ createScreen(){
 }
 
 enterScreen(){
-    names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
-    [[ -n $names ]] && green "$names"
+    screenNames=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
+    [[ -n $screenNames ]] && yellow "当前运行的Screen会话如下所示：" && green "$screenNames"
     read -p "输入进入的screen后台名称：" screenName
-    screen -r $screenName || red "无执行内容"
+    screen -r $screenName || red "没有找到 $screenName 的会话"
+    back2menu
 }
 
 deleteScreen(){
-    names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
-    [[ -n $names ]] && green "$names"
+    screenNames=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
+    [[ -n $screenNames ]] && green "$screenNames"
     read -p "输入删除的screen后台名称：" screenName
-    screen -S $screenName -X quit || red "无执行内容"
+    screen -S $screenName -X quit || red "没有找到 $screenName 的会话"
+    back2menu
 }
 
 killAllScreen(){
-    names=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
+    screenNames=`screen -ls | grep '(Detached)' | awk '{print $1}' | awk -F "." '{print $2}'`
     screen -wipe
-    [[ -n $names ]] && screen -ls | grep '(Detached)' | cut -d. -f1 | awk '{print $1}' | xargs kill
-    green "所有screen后台清除完毕" || red "无执行内容，无须清除"
+    [[ -n $screenNames ]] && screen -ls | grep '(Detached)' | cut -d. -f1 | awk '{print $1}' | xargs kill
+    green "所有screen后台会话已清除完毕" || red "没有任何screen后台会话"
+    back2menu
 }
 
 menu(){
