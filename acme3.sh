@@ -260,20 +260,22 @@ menu() {
     echo "                           "
     green "1. 安装Acme.sh域名证书申请脚本"
     green "2. 申请单域名证书（80端口申请）"
-    green "3. 申请泛域名证书（CF API申请）"
-    green "4. 撤销并删除已申请的证书"
-    green "5. 手动续期域名证书"
-    green "6. 卸载Acme.sh域名证书申请脚本"
+    green "3. 申请单域名证书（CF API申请）"
+    green "4. 申请泛域名证书（CF API申请）"
+    green "5. 撤销并删除已申请的证书"
+    green "6. 手动续期域名证书"
+    green "7. 卸载Acme.sh域名证书申请脚本"
     green "0. 退出"
     echo "         "
     read -p "请输入数字:" NumberInput
     case "$NumberInput" in
         1) install_acme ;;
         2) getSingleCert ;;
-        3) getDomainCert ;;
-        4) revoke_cert ;;
-        5) renew_cert ;;
-        6) uninstall ;;
+        3) getSingleDomainCert ;;
+        4) getDomainCert ;;
+        5) revoke_cert ;;
+        6) renew_cert ;;
+        7) uninstall ;;
         *) exit 1 ;;
     esac
 }
