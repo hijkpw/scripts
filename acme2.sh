@@ -62,6 +62,42 @@ install_acme(){
     bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
 }
 
+getSingleCert(){
+    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    checkwarp
+    adddns64
+    ipv4=$(curl -s4m8 https://ip.gs)
+    ipv6=$(curl -s6m8 https://ip.gs)
+    read -p "请输入解析完成的域名:" domain
+    [[ -z $domain ]] && red "未输入域名，无法执行操作！" $$ exit 1
+    green "已输入的域名：$domain" && sleep 1
+    domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
+    if [[ -n $(echo $domainIP | grep nginx) ]]; then
+        domainIP=$(curl -s ipget.net/?ip="$domain")
+        if [[ $domainIP == $ipv4 ]]; then
+            bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt
+        fi
+        if [[ $domainIP == $ipv6 ]]; then
+            bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --listen-v6
+        fi
+
+        if [[ -n $(echo $domainIP | grep nginx) ]]; then
+            yellow "域名解析无效，请检查二级域名是否填写正确或稍等几分钟等待解析完成再执行脚本"
+            exit 1
+        elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
+            if [[ $domainIP != $ipv4 ]] && [[ $domainIP != $ipv6 ]]; then
+                green "${domain} 解析结果：（$domainIP）"
+                red "当前二级域名解析的IP与当前VPS使用的IP不匹配"
+                green "建议如下："
+                yellow "1. 请确保Cloudflare小云朵为关闭状态(仅限DNS)，其他域名解析网站设置同理"
+                yellow "2. 请检查DNS解析设置的IP是否为VPS的IP"
+                yellow "3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
+                exit 1
+            fi
+        fi
+    fi
+}
+
 checktls() {
     if [[ -f /root/cert.crt && -f /root/private.key ]]; then
         if [[ -s /root/cert.crt && -s /root/private.key ]]; then
