@@ -142,9 +142,9 @@ getSingleDomainCert(){
     read -p "请输入登录Cloudflare的注册邮箱地址：" CFemail
     export CF_Email="$CFemail"
     if [ -z $ipv4 ]; then
-        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d -d "${domain}" -k ec-256 --server letsencrypt --listen-v6
+        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" -k ec-256 --server letsencrypt --listen-v6
     else
-        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d -d "${domain}" -k ec-256 --server letsencrypt
+        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" -k ec-256 --server letsencrypt
     fi
     bash ~/.acme.sh/acme.sh --install-cert -d "${domain}" --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
     checktls
