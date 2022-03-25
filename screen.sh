@@ -43,7 +43,7 @@ back(){
 createScreen(){
     read -p "设置screen后台名称：" screenName
     screen -S $screenName
-    back;;
+    back
 }
 
 enterScreen(){
