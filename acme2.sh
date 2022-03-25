@@ -41,6 +41,15 @@ adddns64(){
     fi
 }
 
+back2menu() {
+    green "所选操作执行完成"
+    read -p "请输入“y”退出，或按任意键回到主菜单：" back2menuInput
+	case "$back2menuInput" in
+        y) exit 1 ;;
+        *) menu ;;
+    esac
+}
+
 checkwarp(){
     WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
@@ -60,6 +69,7 @@ install_acme(){
     curl https://get.acme.sh | sh -s email=$acmeEmail
     source ~/.bashrc
     bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+    back2menu
 }
 
 getSingleCert(){
@@ -144,7 +154,7 @@ checktls() {
             green "证书申请成功！脚本申请到的证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
             yellow "证书crt路径如下：/root/cert.crt"
             yellow "私钥key路径如下：/root/private.key"
-            exit 1
+            back2menu
         else
             if [[ -n $(type -P wgcf) ]]; then
                 yellow "正在启动 Wgcf-WARP"
@@ -168,7 +178,7 @@ checktls() {
             yellow "2. 检查80端口是否开放或占用"
             yellow "3. 域名触发Acme.sh官方风控，更换域名或等待7天后再尝试执行脚本"
             yellow "4. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
-            exit 1
+            back2menu
         fi
     fi
 }
@@ -183,10 +193,10 @@ revoke_cert() {
         bash ~/.acme.sh/acme.sh --remove -d ${domain} --ecc
         rm -rf ~/.acme.sh/${domain}_ecc
         green "撤销${domain}的域名证书成功"
-        exit 1
+        back2menu
     else
         red "未找到你输入的${domain}域名证书，请自行检查！"
-        exit 1
+        back2menu
     fi
 }
 
@@ -199,10 +209,10 @@ renew_cert() {
         checkwarp
         bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
         checktls
-        exit 1
+        back2menu
     else
         red "未找到你输入的${domain}域名证书，请再次检查域名输入正确"
-        exit 1
+        back2menu
     fi
 }
 
@@ -213,6 +223,7 @@ uninstall() {
     sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
     rm -rf ~/.acme.sh
     rm -f acme1key.sh
+    back2menu
 }
 
 menu() {
