@@ -44,7 +44,7 @@ adddns64(){
 back2menu() {
     green "所选操作执行完成"
     read -p "请输入“y”退出，或按任意键回到主菜单：" back2menuInput
-	case "$back2menuInput" in
+    case "$back2menuInput" in
         y) exit 1 ;;
         *) menu ;;
     esac
