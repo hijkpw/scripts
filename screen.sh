@@ -36,7 +36,7 @@ back(){
     read -p "请输入选项:" backInput
     case "$backInput" in 
         1 ) menu ;;
-        2 ) exit 0
+        2 ) exit 1 ;;
     esac
 }
 
