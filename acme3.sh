@@ -130,6 +130,26 @@ getDomainCert(){
     checktls
 }
 
+getSingleDomainCert(){
+    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    checkwarp
+    adddns64
+    ipv4=$(curl -s4m8 https://ip.gs)
+    ipv6=$(curl -s6m8 https://ip.gs)
+    read -p "请输入需要申请证书的域名：" domain
+    read -p "请复制Cloudflare的Global API Key：" GAK
+    export CF_Key="$GAK"
+    read -p "请输入登录Cloudflare的注册邮箱地址：" CFemail
+    export CF_Email="$CFemail"
+    if [ -z $ipv4 ]; then
+        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d -d "${domain}" -k ec-256 --server letsencrypt --listen-v6
+    else
+        bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d -d "${domain}" -k ec-256 --server letsencrypt
+    fi
+    bash ~/.acme.sh/acme.sh --install-cert -d "${domain}" --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
+    checktls
+}
+
 checktls() {
     if [[ -f /root/cert.crt && -f /root/private.key ]]; then
         if [[ -s /root/cert.crt && -s /root/private.key ]]; then
