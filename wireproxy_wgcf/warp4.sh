@@ -138,6 +138,11 @@ BindAddress = 127.0.0.1:40000
 EOF
 }
 
+download_wireproxy(){
+    wget -N https://raw.githubusercontent.com/misakano7545/lajiscripts/master/wireproxy_amd64 -O wireproxy
+    chmod +x wireproxy
+}
+
 start_wireproxy_warp(){
     yellow "正在启动WireProxy-WARP代理模式"
     screen -USdm WireProxy_WARP ./wireproxy ~/WireProxy_WARP.conf
@@ -158,4 +163,5 @@ install_wgcf
 register_wgcf
 generate_wgcf_config
 make_wireproxy_profile
+download_wireproxy
 start_wireproxy_warp
