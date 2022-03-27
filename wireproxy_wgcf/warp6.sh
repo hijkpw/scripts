@@ -81,18 +81,22 @@ generate_wgcf_config(){
 
 make_wireproxy_file(){
     read -p "请输入将要设置的Socks5端口：" socks5Port
-    WgcfPrivateKey=$(cat wgcf-profile.conf | grep PrivateKey | cut -d= -f2)
-    WgcfPublicKey=$(cat wgcf-profile.conf | grep PublicKey | cut -d= -f2)
+    WgcfPrivateKey=$(grep PrivateKey wgcf-profile.conf | sed "s/PrivateKey = //g")
+    WgcfPublicKey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
     cat <<EOF > ~/WireProxy_WARP.conf
-SelfSecretKey =$WgcfPrivateKey
+SelfSecretKey = $WgcfPrivateKey
 SelfEndpoint = 172.16.0.2
-PeerPublicKey =$WgcfPublicKey
+PeerPublicKey = $WgcfPublicKey
 PeerEndpoint = [2606:4700:d0::a29f:c001]:2408
 DNS = 1.1.1.1,8.8.8.8,8.8.4.4
 
 [Socks5]
 BindAddress = 127.0.0.1:#socks5Port
 EOF
+}
+
+download_wireproxy(){
+    wget -N https://raw.githubusercontent.com/misakano7545/lajiscripts/master/wireproxy_amd64 -O wireproxy
 }
 
 start_wireproxy_warp(){
@@ -114,4 +118,5 @@ check_tun
 install_wgcf
 register_wgcf
 generate_wgcf_config
+download_wireproxy
 start_wireproxy_warp
