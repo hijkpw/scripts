@@ -97,6 +97,7 @@ EOF
 
 download_wireproxy(){
     wget -N https://raw.githubusercontent.com/misakano7545/lajiscripts/master/wireproxy_amd64 -O wireproxy
+    chmod +x wireproxy
 }
 
 start_wireproxy_warp(){
