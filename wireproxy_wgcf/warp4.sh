@@ -152,3 +152,9 @@ start_wireproxy_warp(){
     green "WireProxy-WARP代理模式已启动成功！"
     yellow "本地Socks5代理为： 127.0.0.1:$socks5Port"
 }
+
+check_tun
+install_wgcf
+register_wgcf
+generate_wgcf_config
+start_wireproxy_warp
