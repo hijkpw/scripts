@@ -94,3 +94,7 @@ DNS = 1.1.1.1,8.8.8.8,8.8.4.4
 BindAddress = 127.0.0.1:#socks5Port
 EOF
 }
+
+start_wireproxy_wgcf(){
+    screen -USdm WireProxy_WARP ./wireproxy ~/WireProxy_WARP.conf
+}
