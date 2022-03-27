@@ -64,6 +64,7 @@ install_acme(){
     [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
     [[ -z $(type -P wget) ]] && ${PACKAGE_INSTALL[int]} wget
     [[ -z $(type -P socat) ]] && ${PACKAGE_INSTALL[int]} socat
+    [[ -z $(type -P crontab) ]] && ${PACKAGE_INSTALL[int]} crontab
     read -p "请输入注册邮箱（例：admin@misaka.rest，或留空自动生成）：" acmeEmail
     [[ -z $acmeEmail ]] && autoEmail=$(date +%s%N | md5sum | cut -c 1-32) && acmeEmail=$autoEmail@gmail.com
     curl https://get.acme.sh | sh -s email=$acmeEmail
