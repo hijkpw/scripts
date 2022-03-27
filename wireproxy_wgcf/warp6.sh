@@ -118,5 +118,6 @@ check_tun
 install_wgcf
 register_wgcf
 generate_wgcf_config
+make_wireproxy_file
 download_wireproxy
 start_wireproxy_warp
