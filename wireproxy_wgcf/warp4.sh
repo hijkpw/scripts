@@ -85,3 +85,18 @@ check_tun(){
     TUN=$(cat /dev/net/tun 2>&1 | tr '[:upper:]' '[:lower:]')
     [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]] && red "检测到未开启TUN模块，请到VPS控制面板处开启" && exit 1
 }
+
+install_wgcf(){
+    if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wgcf_2.2.12_linux_amd64 -O /usr/local/bin/wgcf
+        chmod +x /usr/local/bin/wgcf
+    fi
+    if [[ $arch == "armv8" || $arch == "arm64" || $arch == "aarch64" ]]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wgcf_2.2.12_linux_arm64 -O /usr/local/bin/wgcf
+        chmod +x /usr/local/bin/wgcf
+    fi
+    if [[ $arch == "s390x" ]]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wgcf_2.2.12_linux_s390x -O /usr/local/bin/wgcf
+        chmod +x /usr/local/bin/wgcf
+    fi
+}
