@@ -127,9 +127,9 @@ make_wireproxy_file(){
     WgcfPrivateKey=$(cat wgcf-profile.conf | grep PrivateKey | cut -d= -f2)
     WgcfPublicKey=$(cat wgcf-profile.conf | grep PublicKey | cut -d= -f2)
     cat <<EOF > ~/WireProxy_WARP.conf
-SelfSecretKey =$WgcfPrivateKey
+SelfSecretKey = $WgcfPrivateKey
 SelfEndpoint = 172.16.0.2
-PeerPublicKey =$WgcfPublicKey
+PeerPublicKey = $WgcfPublicKey
 PeerEndpoint = 162.159.193.10:2048
 DNS = 1.1.1.1,8.8.8.8,8.8.4.4
 
