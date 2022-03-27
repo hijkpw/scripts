@@ -96,11 +96,11 @@ EOF
 }
 
 start_wireproxy_warp(){
-    yellow "正在启动Warp-Cli代理模式"
+    yellow "正在启动WireProxy-WARP代理模式"
     screen -USdm WireProxy_WARP ./wireproxy ~/WireProxy_WARP.conf
     socks5Status=$(curl -sx socks5h://localhost:$socks5Port https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
     until [[ $socks5Status =~ on|plus ]]; do
-        red "启动Warp-Cli代理模式失败，正在尝试重启"
+        red "启动WireProxy-WARP代理模式失败，正在尝试重启"
         screen -S WireProxy_WARP -X quit
         screen -USdm WireProxy_WARP ./wireproxy ~/WireProxy_WARP.conf
         socks5Status=$(curl -sx socks5h://localhost:$socks5Port https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
