@@ -31,7 +31,7 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
-[[ -n $(type -P wgcf) ]] && red "Wgcf-WARP已经安装，脚本即将退出" && rm -f warp4d.sh && exit 1
+# [[ -n $(type -P wgcf) ]] && red "Wgcf-WARP已经安装，脚本即将退出" && rm -f warp4d.sh && exit 1
 
 arch=`uname -m`
 main=`uname  -r | awk -F . '{print $1}'`
@@ -109,3 +109,9 @@ start_wireproxy_warp(){
     green "WireProxy-WARP代理模式已启动成功！"
     yellow "本地Socks5代理为： 127.0.0.1:$socks5Port"
 }
+
+check_tun
+install_wgcf
+register_wgcf
+generate_wgcf_config
+start_wireproxy_warp
