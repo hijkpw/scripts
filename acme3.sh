@@ -71,11 +71,16 @@ install_acme(){
     curl https://get.acme.sh | sh -s email=$acmeEmail
     source ~/.bashrc
     bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+    if [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]]; then
+        green "Acme.sh 安装成功！"
+    else
+        red "Acme.sh 安装失败"
+    fi
     back2menu
 }
 
 getSingleCert(){
-    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
     checkwarp
     adddns64
     ipv4=$(curl -s4m8 https://ip.gs)
@@ -113,7 +118,7 @@ getSingleCert(){
 }
 
 getDomainCert(){
-    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
     checkwarp
     adddns64
     ipv4=$(curl -s4m8 https://ip.gs)
@@ -136,7 +141,7 @@ getDomainCert(){
 }
 
 getSingleDomainCert(){
-    [[ -z $(~/.acme.sh/acme.sh -v) ]] && yellow "未安装acme.sh，无法执行操作" && exit 1
+    [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
     checkwarp
     adddns64
     ipv4=$(curl -s4m8 https://ip.gs)
