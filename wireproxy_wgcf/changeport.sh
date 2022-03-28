@@ -35,7 +35,7 @@ changeport(){
     read -p "请输入WARP Cli使用的代理端口（默认40000）：" WireProxyPort
     [[ -z $WireProxyPort ]] && WireProxyPort=40000
     CurrentPort=$(grep BindAddress WireProxy_WARP.conf)
-    sed -i "s/BindAddress = $CurrentPort/BindAddress = 127.0.0.1:$WireProxyPort/g" WireProxy_WARP.conf
+    sed -i "s/$CurrentPort/BindAddress = 127.0.0.1:$WireProxyPort/g" WireProxy_WARP.conf
     rm -f changeport.sh
 }
 
