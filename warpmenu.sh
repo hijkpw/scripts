@@ -97,6 +97,13 @@ install(){
             wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/warp-cli.sh && bash warp-cli.sh
         fi
     fi
+    if [[ $wgcfcli == 2 ]]; then
+        if [[ $WARPIPv4Status == "无法检测IPv4状态" && $WARPIPv6Status == "原生IPv6" || $WARPIPv4Status == "WARP IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
+            wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/warp6.sh && bash warp6.sh
+        else
+            wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/warp4.sh && bash warp4.sh
+        fi
+    fi
 }
 
 wgcfswitch(){
@@ -141,6 +148,11 @@ menu(){
         green "1. 安装Wgcf IPv6 WARP"
         green "2. 安装Wgcf 双栈 WARP"
         green "3. IPv6 Only VPS无法安装WARP-Cli代理模式"
+        if [[ $WireProxyStatus == "未启动" || $WireProxyStatus == "已启动" ]]; then
+            green "4. 已安装WireProxy-WARP代理模式"
+        else
+            green "4. 安装WireProxy-WARP代理模式"
+        fi
     fi
     if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]]; then
         green "1. 安装Wgcf IPv4 WARP"
@@ -153,6 +165,11 @@ menu(){
             fi
         else
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
+        fi
+        if [[ $WireProxyStatus == "未启动" || $WireProxyStatus == "已启动" ]]; then
+            green "4. 已安装WireProxy-WARP代理模式"
+        else
+            green "4. 安装WireProxy-WARP代理模式"
         fi
     fi
     if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
@@ -167,6 +184,11 @@ menu(){
         else
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
         fi
+        if [[ $WireProxyStatus == "未启动" || $WireProxyStatus == "已启动" ]]; then
+            green "4. 已安装WireProxy-WARP代理模式"
+        else
+            green "4. 安装WireProxy-WARP代理模式"
+        fi
     fi
     if [[ $WARPIPv4Status == "WARP IPv4" && $WARPIPv6Status == "WARP IPv6" ]]; then
         green "1. 已经安装Wgcf WARP、请先卸载再更改代理模式"
@@ -180,11 +202,21 @@ menu(){
         else
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
         fi
+        if [[ $WireProxyStatus == "未启动" || $WireProxyStatus == "已启动" ]]; then
+            green "4. 已安装WireProxy-WARP代理模式"
+        else
+            green "4. 安装WireProxy-WARP代理模式"
+        fi
     fi
     if [[ $WARPIPv4Status == "WARP IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
         green "1. 已经安装Wgcf WARP、请先卸载再更改代理模式"
         green "2. 已经安装Wgcf WARP、请先卸载再更改代理模式"
         green "3. IPv6 Only VPS无法安装WARP-Cli代理模式"
+        if [[ $WireProxyStatus == "未启动" || $WireProxyStatus == "已启动" ]]; then
+            green "4. 已安装WireProxy-WARP代理模式"
+        else
+            green "4. 安装WireProxy-WARP代理模式"
+        fi
     fi
     if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "WARP IPv6" ]]; then
         green "1. 已经安装Wgcf WARP、请先卸载再更改代理模式"
@@ -198,20 +230,26 @@ menu(){
         else
             green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
         fi
+        if [[ $WireProxyStatus == "未启动" || $WireProxyStatus == "已启动" ]]; then
+            green "4. 已安装WireProxy-WARP代理模式"
+        else
+            green "4. 安装WireProxy-WARP代理模式"
+        fi
     fi
-    green "4. Wgcf-WARP 临时开关"
-    green "5. WARP-Cli代理模式临时开关"
-    green "6. WARP-Cli代理模式更换Socks5端口"
-    green "7. 卸载WARP"
+    green "5. Wgcf-WARP 临时开关"
+    green "6. WARP-Cli代理模式临时开关"
+    green "7. WARP-Cli代理模式更换Socks5端口"
+    green "9. 卸载WARP"
     read -p "请输入选项：" menuNumberInput
     case "$menuNumberInput" in
         1 ) install ;;
         2 ) wgcfmode=1 && install ;;
         3 ) wgcfcli=1 && install ;;
-        4 ) wgcfswitch ;;
-        5 ) warpcliswitch ;;
-        6 ) warpcliport ;;
-        7 ) uninstall ;;
+        4 ) wgcfcli=2 && install ;;
+        5 ) wgcfswitch ;;
+        6 ) warpcliswitch ;;
+        7 ) warpcliport ;;
+        9 ) uninstall ;;
         * ) exit 1 ;;
     esac
 }
