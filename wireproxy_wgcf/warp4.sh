@@ -31,7 +31,7 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
-# [[ -n $(type -P wgcf) ]] && red "Wgcf-WARP已经安装，脚本即将退出" && rm -f warp4d.sh && exit 1
+[[ -n $(type -P wireproxy) ]] && red "WireProxy-WARP代理模式已经安装，脚本即将退出" && rm -f warp4d.sh && exit 1
 
 arch=`uname -m`
 main=`uname  -r | awk -F . '{print $1}'`
@@ -94,7 +94,7 @@ DNS = 1.1.1.1,8.8.8.8,8.8.4.4
 [Socks5]
 BindAddress = 127.0.0.1:$socks5Port
 EOF
-    green "WireProxy-WARP 配置文件已生成成功！"
+    green "WireProxy-WARP代理模式配置文件已生成成功！"
     yellow "已保存到 /root/WireProxy_WARP.conf"
     cat <<'TEXT' > /etc/systemd/system/wireproxy-warp.service
 [Unit]
