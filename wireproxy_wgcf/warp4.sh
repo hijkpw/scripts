@@ -114,7 +114,7 @@ download_wireproxy(){
 
 start_wireproxy_warp(){
     yellow "正在启动WireProxy-WARP代理模式"
-    screen -USdm WireProxy_WARP ./wireproxy ~/WireProxy_WARP.conf
+    screen -USdm WireProxy_WARP wireproxy ~/WireProxy_WARP.conf
     green "WireProxy-WARP代理模式已启动成功！"
     yellow "本地Socks5代理为： 127.0.0.1:40000"
 }
