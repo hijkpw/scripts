@@ -150,7 +150,7 @@ menu(){
     red "================================"
     echo "   "
     if [[ $WARPIPv6Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]]; then
-        green "1. 安装Wgcf IPv6 WARP"
+        green "1. 安装Wgcf IPv4 WARP"
         green "2. 安装Wgcf 双栈 WARP"
         green "3. IPv6 Only VPS无法安装WARP-Cli代理模式"
         if [[ $WireProxyStatus == "未启动" || $WireProxyStatus == "已启动" ]]; then
@@ -160,7 +160,7 @@ menu(){
         fi
     fi
     if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "无法检测IPv6状态" ]]; then
-        green "1. 安装Wgcf IPv4 WARP"
+        green "1. 安装Wgcf IPv6 WARP"
         green "2. 安装Wgcf 双栈 WARP"
         if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
             if [[ $WARPSocks5Status == "未启动" || $WARPSocks5Status == "已启动" ]]; then
