@@ -31,9 +31,12 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
-[[ -z $(type -P warp-cli) ]] && red "WARP-Cli代理模式未安装，脚本即将退出" && rm -f uninstall.sh && exit 1
+[[ -z $(type -P wireproxy) ]] && red "WireProxy-WARP代理模式未安装，脚本即将退出" && rm -f uninstall.sh && exit 1
 
 uninstall(){
+    screen -S WireProxy_WARP -X quit
+    rm -f /usr/local/bin/wireproxy
+    rm -f /usr/local/bin/wgcf
     green "WARP-Cli代理模式已彻底卸载成功！"
     rm -f uninstall.sh
 }
