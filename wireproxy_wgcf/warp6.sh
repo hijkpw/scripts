@@ -80,7 +80,8 @@ generate_wgcf_config(){
 }
 
 make_wireproxy_file(){
-    read -p "请输入将要设置的Socks5端口：" socks5Port
+    read -p "请输入将要设置的Socks5端口（默认40000）：" socks5Port
+    [[ -z $socks5Port ]] && socks5Port=40000
     WgcfPrivateKey=$(grep PrivateKey wgcf-profile.conf | sed "s/PrivateKey = //g")
     WgcfPublicKey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
     cat <<EOF > ~/WireProxy_WARP.conf
@@ -108,6 +109,8 @@ ExecStart=/usr/local/bin/wireproxy /root/WireProxy_WARP.conf
 Restart=always
 TEXT
     green "Systemd 系统守护服务设置成功！"
+    rm -f wgcf-profile.conf
+    rm -f wgcf-account.toml
 }
 
 download_wireproxy(){
