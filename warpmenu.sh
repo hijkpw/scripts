@@ -46,7 +46,7 @@ get_status(){
     WARPIPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPSocks5Port=$(warp-cli --accept-tos settings 2>/dev/null | grep 'WarpProxy on port' | awk -F "port " '{print $2}')
     WARPSocks5Status=$(curl -sx socks5h://localhost:$WARPSocks5Port https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
-    WireProxyPort=$(grep BindAddress WireProxy_WARP.conf | sed "s/BindAddress = 127.0.0.1://g")
+    WireProxyPort=$(grep BindAddress WireProxy_WARP.conf 2>/dev/null | sed "s/BindAddress = 127.0.0.1://g")
     WireProxyStatus=$(curl -sx socks5h://localhost:$WireProxyPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
     [[ $WARPIPv4Status =~ "on"|"plus" ]] && WARPIPv4Status="WARP IPv4"
     [[ $WARPIPv4Status == "off" ]] && WARPIPv4Status="原生IPv4"
