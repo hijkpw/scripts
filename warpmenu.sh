@@ -131,6 +131,7 @@ menu(){
     fi
     yellow "Wgcf状态：$WgcfStatus"
     yellow "WARP-Cli状态：$WARPSocks5Status"
+    yellow "WireProxy-WARP状态：$WireProxyStatus"
     red "================================"
     echo "   "
     if [[ $WARPIPv6Status == "原生IPv6" && $WARPIPv4Status == "无法检测IPv4状态" ]]; then
