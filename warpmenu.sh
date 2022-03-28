@@ -129,6 +129,9 @@ menu(){
     if [[ $WARPSocks5Status == "已启动" ]]; then
         yellow "WARP-Cli Socks5代理：127.0.0.1:$WARPSocks5Port"
     fi
+    if [[ $WireProxyStatus == "已启动" ]]; then
+        yellow "WireProxy Socks5代理：127.0.0.1:$WireProxyPort"
+    fi
     yellow "Wgcf状态：$WgcfStatus"
     yellow "WARP-Cli状态：$WARPSocks5Status"
     yellow "WireProxy-WARP状态：$WireProxyStatus"
