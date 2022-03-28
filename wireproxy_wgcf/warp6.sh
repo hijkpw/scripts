@@ -93,6 +93,8 @@ DNS = 1.1.1.1,8.8.8.8,8.8.4.4
 [Socks5]
 BindAddress = 127.0.0.1:40000
 EOF
+    green "WireProxy-WARP 配置文件已生成成功！"
+    yellow "已保存到 /root/WireProxy_WARP.conf"
 }
 
 download_wireproxy(){
