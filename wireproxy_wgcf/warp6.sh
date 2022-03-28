@@ -80,8 +80,8 @@ generate_wgcf_config(){
 }
 
 make_wireproxy_file(){
-    read -p "请输入将要设置的Socks5端口（默认40000）：" socks5Port
-    [[ -z $socks5Port ]] && socks5Port=40000
+    read -p "请输入将要设置的Socks5端口（默认40000）：" WireProxyPort
+    [[ -z $WireProxyPort ]] && WireProxyPort=40000
     WgcfPrivateKey=$(grep PrivateKey wgcf-profile.conf | sed "s/PrivateKey = //g")
     WgcfPublicKey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
     cat <<EOF > ~/WireProxy_WARP.conf
@@ -92,7 +92,7 @@ PeerEndpoint = [2606:4700:d0::a29f:c001]:2408
 DNS = 1.1.1.1,8.8.8.8,8.8.4.4
 
 [Socks5]
-BindAddress = 127.0.0.1:$socks5Port
+BindAddress = 127.0.0.1:$WireProxyPort
 EOF
     green "WireProxy-WARP代理模式配置文件已生成成功！"
     yellow "已保存到 /root/WireProxy_WARP.conf"
@@ -131,17 +131,17 @@ download_wireproxy(){
 start_wireproxy_warp(){
     yellow "正在启动WireProxy-WARP代理模式"
     systemctl start wireproxy-warp
-    socks5Status=$(curl -sx socks5h://localhost:$socks5Port https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
+    socks5Status=$(curl -sx socks5h://localhost:$WireProxyPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
     until [[ $socks5Status =~ on|plus ]]; do
         red "启动WireProxy-WARP代理模式失败，正在尝试重启"
         systemctl stop wireproxy-warp
         systemctl start wireproxy-warp
-        socks5Status=$(curl -sx socks5h://localhost:$socks5Port https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
+        socks5Status=$(curl -sx socks5h://localhost:$WireProxyPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
         sleep 8
     done
     systemctl enable wireproxy-warp
     green "WireProxy-WARP代理模式已启动成功！"
-    yellow "本地Socks5代理为： 127.0.0.1:$socks5Port"
+    yellow "本地Socks5代理为： 127.0.0.1:$WireProxyPort"
 }
 
 install(){
