@@ -45,7 +45,9 @@ get_status(){
     WARPIPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPIPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPSocks5Port=$(warp-cli --accept-tos settings 2>/dev/null | grep 'WarpProxy on port' | awk -F "port " '{print $2}')
-    WARPSocks5Status=$(curl -sx socks5h://localhost:$WARPSocks5Port https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+    WARPSocks5Status=$(curl -sx socks5h://localhost:$WARPSocks5Port https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
+    WireProxyPort=$(grep BindAddress WireProxy_WARP.conf | sed "s/BindAddress = 127.0.0.1://g")
+    WireProxyStatus=$(curl -sx socks5h://localhost:$WireProxyPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
     [[ $WARPIPv4Status =~ "on"|"plus" ]] && WARPIPv4Status="WARP IPv4"
     [[ $WARPIPv4Status == "off" ]] && WARPIPv4Status="原生IPv4"
     [[ $WARPIPv6Status =~ "on"|"plus" ]] && WARPIPv6Status="WARP IPv6"
@@ -57,6 +59,9 @@ get_status(){
     [[ -z $WARPSocks5Port ]] && WARPSocks5Status="未安装"
     [[ $WARPSocks5Status == "off" ]] && WARPSocks5Status="未启动"
     [[ $WARPSocks5Status =~ "on"|"plus" ]] && WARPSocks5Status="已启动"
+    [[ -z $WireProxyPort ]] && WireProxyStatus="未安装"
+    [[ $WireProxyStatus == "off" ]] && WireProxyStatus="未启动"
+    [[ $WireProxyStatus =~ "on"|"plus" ]] && WireProxyStatus="已启动"
 }
 
 install(){
