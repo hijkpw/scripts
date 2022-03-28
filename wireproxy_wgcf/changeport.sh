@@ -34,8 +34,8 @@ changeport(){
     systemctl stop wireproxy-warp
     read -p "请输入WARP Cli使用的代理端口（默认40000）：" WireProxyPort
     [[ -z $WireProxyPort ]] && WireProxyPort=40000
-    CurrentPort=$(grep BindAddress WireProxy_WARP.conf)
-    sed -i "s/$CurrentPort/BindAddress = 127.0.0.1:$WireProxyPort/g" WireProxy_WARP.conf
+    CurrentPort=$(grep BindAddress /root/WireProxy_WARP.conf)
+    sed -i "s/$CurrentPort/BindAddress = 127.0.0.1:$WireProxyPort/g" /root/WireProxy_WARP.conf
     yellow "正在启动WireProxy-WARP代理模式"
     systemctl start wireproxy-warp
     socks5Status=$(curl -sx socks5h://localhost:$WireProxyPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 8 | grep warp | cut -d= -f2)
