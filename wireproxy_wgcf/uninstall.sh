@@ -36,7 +36,7 @@ done
 uninstall(){
     screen -S WireProxy_WARP -X quit
     rm -f /usr/local/bin/wireproxy
-    rm -f /usr/local/bin/wgcf
+    [[ ! -f /etc/wireguard/wgcf.conf ]]rm -f /usr/local/bin/wgcf
     green "WARP-Cli代理模式已彻底卸载成功！"
     rm -f uninstall.sh
 }
