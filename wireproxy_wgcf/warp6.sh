@@ -96,8 +96,18 @@ EOF
 }
 
 download_wireproxy(){
-    wget -N https://raw.githubusercontent.com/misakano7545/lajiscripts/master/wireproxy_amd64 -O wireproxy
-    chmod +x wireproxy
+    if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wireproxy-amd64 -O /usr/local/bin/wireproxy
+        chmod +x /usr/local/bin/wireproxy
+    fi
+    if [[ $arch == "armv8" || $arch == "arm64" || $arch == "aarch64" ]]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wireproxy-arm64 -O /usr/local/bin/wireproxy
+        chmod +x /usr/local/bin/wireproxy
+    fi
+    if [[ $arch == "s390x" ]]; then
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wireproxy-s390x -O /usr/local/bin/wireproxy
+        chmod +x /usr/local/bin/wireproxy
+    fi
 }
 
 start_wireproxy_warp(){
