@@ -31,7 +31,7 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
-[[ -z $(type -P wgcf) ]] && red "未安装Wgcf-WARP，脚本即将退出" && rm -f switch.sh && exit 1
+[[ -z $(type -P wg-quick) ]] && red "未安装Wgcf-WARP，脚本即将退出" && rm -f switch.sh && exit 1
 
 WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
 WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)

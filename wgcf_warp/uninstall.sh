@@ -31,7 +31,7 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
-[[ -z $(type -P wgcf) ]] && red "Wgcf-WARP未安装，脚本即将退出" && rm -f uninstall.sh && exit 1
+[[ -z $(type -P wg-quick) ]] && red "Wgcf-WARP未安装，脚本即将退出" && rm -f uninstall.sh && exit 1
 
 uninstall(){
     wg-quick down wgcf 2>/dev/null
