@@ -127,7 +127,7 @@ menu(){
     yellow "VPS IPv4状态：$WARPIPv4Status"
     yellow "VPS IPv6状态：$WARPIPv6Status"
     if [[ $WARPSocks5Status == "已启动" ]]; then
-        yellow "VPS Socks5代理：127.0.0.1:$WARPSocks5Port"
+        yellow "WARP-Cli Socks5代理：127.0.0.1:$WARPSocks5Port"
     fi
     yellow "Wgcf状态：$WgcfStatus"
     yellow "WARP-Cli状态：$WARPSocks5Status"
