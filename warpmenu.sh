@@ -118,9 +118,14 @@ warpcliport(){
     wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/changeport.sh && bash changeport.sh
 }
 
+wireproxychangeport(){
+    wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/changeport.sh && bash changeport.sh
+}
+
 uninstall(){
-    [[ -n $(type -P wgcf) ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/uninstall.sh && bash uninstall.sh
+    [[ -n $(type -P wg-quick) ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/uninstall.sh && bash uninstall.sh
     [[ -n $(type -P warp-cli) ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/uninstall.sh && bash uninstall.sh
+    [[ -n $(type -P wireproxy) ]] && wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/uninstall.sh && bash uninstall.sh
 }
 
 # 菜单
@@ -239,6 +244,7 @@ menu(){
     green "5. Wgcf-WARP 临时开关"
     green "6. WARP-Cli代理模式临时开关"
     green "7. WARP-Cli代理模式更换Socks5端口"
+    green "8. WireProxy-WARP代理模式更换Socks5端口"
     green "9. 卸载WARP"
     read -p "请输入选项：" menuNumberInput
     case "$menuNumberInput" in
@@ -249,6 +255,7 @@ menu(){
         5 ) wgcfswitch ;;
         6 ) warpcliswitch ;;
         7 ) warpcliport ;;
+        8 ) wireproxychangeport ;;
         9 ) uninstall ;;
         * ) exit 1 ;;
     esac
