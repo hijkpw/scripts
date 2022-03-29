@@ -96,6 +96,9 @@ install(){
         if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
             wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/warp-cli.sh && bash warp-cli.sh
         fi
+        if [[ $WARPIPv4Status == "原生IPv4" && $WARPIPv6Status == "WARP IPv6" ]]; then
+            wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/warp-cli.sh && bash warp-cli.sh
+        fi
     fi
     if [[ $wgcfcli == 2 ]]; then
         if [[ $WARPIPv4Status == "无法检测IPv4状态" && $WARPIPv6Status == "原生IPv6" || $WARPIPv4Status == "WARP IPv4" && $WARPIPv6Status == "原生IPv6" ]]; then
@@ -198,15 +201,7 @@ menu(){
     if [[ $WARPIPv4Status == "WARP IPv4" && $WARPIPv6Status == "WARP IPv6" ]]; then
         green "1. 已经安装Wgcf WARP、请先卸载再更改代理模式"
         green "2. 已经安装Wgcf WARP、请先卸载再更改代理模式"
-        if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
-            if [[ $WARPSocks5Status == "未启动" || $WARPSocks5Status == "已启动" ]]; then
-                green "3. 已安装WARP-Cli代理模式"
-            else
-                green "3. 安装WARP-Cli代理模式"
-            fi
-        else
-            green "3. 非AMD64 CPU架构的VPS，无法安装WARP-Cli代理模式"
-        fi
+        green "3. 由于启动了双栈Wgcf-WARP模式，脚本无法判断是否允许安装WARP-Cli代理模式"
         if [[ $WireProxyStatus == "未启动" || $WireProxyStatus == "已启动" ]]; then
             green "4. 已安装WireProxy-WARP代理模式"
         else
