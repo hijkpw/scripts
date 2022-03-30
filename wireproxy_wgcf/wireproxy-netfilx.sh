@@ -36,11 +36,15 @@ WireProxyPort=$(grep BindAddress WireProxy_WARP.conf 2>/dev/null | sed "s/BindAd
 check(){
     NetfilxStatus=$(curl -sx socks5h://localhost:$WireProxyPort -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
     if [[ $NetfilxStatus == 200 ]]; then
-        wait
+        wait1h
     fi
     if [[ $NetfilxStatus =~ 403|404 ]]; then
         systemctl stop wireproxy-warp
         systemctl start wireproxy-warp
         check
     fi
+}
+
+wait1h(){
+    sleep 1h
 }
