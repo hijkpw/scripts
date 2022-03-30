@@ -37,8 +37,8 @@ uninstall(){
     wg-quick down wgcf 2>/dev/null
     systemctl disable wg-quick@wgcf 2>/dev/null
     ${PACKAGE_UNINSTALL[int]} wireguard-tools wireguard-dkms 2>/dev/null
-    rm -f /usr/local/bin/wgcf 
-    [[ -z $(type -P wireproxy) ]] && rm -f /etc/wireguard/wgcf.conf
+    [[ -z $(type -P wireproxy) ]] && rm -f /usr/local/bin/wgcf 
+    rm -f /etc/wireguard/wgcf.conf
     rm -f /etc/wireguard/wgcf-account.toml
     rm -f /usr/bin/wireguard-go
     if [[ -e /etc/gai.conf ]]; then
