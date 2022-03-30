@@ -46,6 +46,9 @@ check(){
 }
 
 wait1h(){
-    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort ip.gs)
+    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort ip.gs -k)
+    green "当前WireProxy-WARP的IP：$WireProxyIP 已解锁Netfilx"
+    yellow "等待1小时后，脚本将会自动重新检查Netfilx解锁状态"
     sleep 1h
+    check
 }
