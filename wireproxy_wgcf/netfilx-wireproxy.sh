@@ -44,7 +44,7 @@ check(){
 }
 
 success(){
-    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort ip.gs -k)
+    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort https://ip.gs -k --connect-timeout 8)
     green "当前WireProxy-WARP的IP：$WireProxyIP 已解锁Netfilx"
     yellow "等待1小时后，脚本将会自动重新检查Netfilx解锁状态"
     sleep 1h
@@ -52,9 +52,9 @@ success(){
 }
 
 failed(){
-    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort ip.gs -k)
-    red "当前WireProxy-WARP的IP：$WireProxyIP 未解锁Netfilx，脚本将在30秒后重新测试Netfilx解锁情况"
-    sleep 30
+    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort https://ip.gs -k --connect-timeout 8)
+    red "当前WireProxy-WARP的IP：$WireProxyIP 未解锁Netfilx，脚本将在15秒后重新测试Netfilx解锁情况"
+    sleep 15
     systemctl stop wireproxy-warp
     systemctl start wireproxy-warp
     check
