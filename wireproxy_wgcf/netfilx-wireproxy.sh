@@ -55,5 +55,7 @@ failed(){
     WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort ip.gs -k)
     red "当前WireProxy-WARP的IP：$WireProxyIP 未解锁Netfilx，脚本将在30秒后重新测试Netfilx解锁情况"
     sleep 30
+    systemctl stop wireproxy-warp
+    systemctl start wireproxy-warp
     check
 }
