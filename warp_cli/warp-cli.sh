@@ -99,8 +99,10 @@ start_warpcli(){
         sleep 8
     done
     warp-cli --accept-tos enable-always-on >/dev/null 2>&1
+    socks5IP=$(curl -sx socks5h://localhost:$WARPCliPort ip.gs -k --connect-timeout 8)
     green "WARP-Cli代理模式已启动成功！"
     yellow "本地Socks5代理为： 127.0.0.1:$WARPCliPort"
+    yellow "WARP-Cli代理模式的IP为：$socks5IP"
     rm -f warp-cli.sh
 }
 
