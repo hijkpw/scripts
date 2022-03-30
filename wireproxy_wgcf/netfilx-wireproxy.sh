@@ -36,19 +36,24 @@ WireProxyPort=$(grep BindAddress WireProxy_WARP.conf 2>/dev/null | sed "s/BindAd
 check(){
     NetfilxStatus=$(curl -sx socks5h://localhost:$WireProxyPort -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
     if [[ $NetfilxStatus == 200 ]]; then
-        wait1h
+        success
     fi
     if [[ $NetfilxStatus =~ 403|404 ]]; then
-        systemctl stop wireproxy-warp
-        systemctl start wireproxy-warp
-        check
+        failed  
     fi
 }
 
-wait1h(){
+success(){
     WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort ip.gs -k)
     green "当前WireProxy-WARP的IP：$WireProxyIP 已解锁Netfilx"
     yellow "等待1小时后，脚本将会自动重新检查Netfilx解锁状态"
     sleep 1h
+    check
+}
+
+failed(){
+    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort ip.gs -k)
+    red "当前WireProxy-WARP的IP：$WireProxyIP 未解锁Netfilx，脚本将在15秒后重新测试Netfilx解锁情况"
+    sleep 15
     check
 }
