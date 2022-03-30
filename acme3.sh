@@ -206,8 +206,8 @@ checktls() {
             fi
             red "抱歉，证书申请失败"
             green "建议如下："
-            yellow "1. 检测防火墙是否打开，如打开请关闭防火墙或放行80端口"
-            yellow "2. 检查80端口是否开放或占用"
+            yellow "1. 自行检测防火墙是否打开，如使用80端口申请模式时，请关闭防火墙或放行80端口"
+            yellow "2. 在使用CF API申请模式时，如果使用的是Freenom域名，由于CF官方API对Freenom域名限制，暂时不能申请证书"
             yellow "3. 域名触发Acme.sh官方风控，更换域名或等待7天后再尝试执行脚本"
             yellow "4. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
             back2menu
