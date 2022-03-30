@@ -144,6 +144,7 @@ start_wireproxy_warp(){
     green "WireProxy-WARP代理模式已启动成功！"
     yellow "本地Socks5代理为： 127.0.0.1:$WireProxyPort"
     yellow "WireProxy-WARP代理模式的IP为：$socks5IP"
+    rm -f warp6.sh
 }
 
 install(){
