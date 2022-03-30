@@ -32,4 +32,15 @@ done
 [[ -z $(type -P wireproxy) ]] && red "WireProxy-WARP代理模式未安装，脚本即将退出！" && rm -f wireproxy-netfilx.sh && exit 1
 
 WireProxyPort=$(grep BindAddress WireProxy_WARP.conf 2>/dev/null | sed "s/BindAddress = 127.0.0.1://g")
-NetfilxStatus=$(curl -sx socks5h://localhost:$WireProxyPort -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
+
+check(){
+    NetfilxStatus=$(curl -sx socks5h://localhost:$WireProxyPort -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
+    if [[ $NetfilxStatus == 200 ]]; then
+        wait
+    fi
+    if [[ $NetfilxStatus =~ 403|404 ]]; then
+        systemctl stop wireproxy-warp
+        systemctl start wireproxy-warp
+        check
+    fi
+}
