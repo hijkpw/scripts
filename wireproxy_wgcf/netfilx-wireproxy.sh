@@ -59,3 +59,5 @@ failed(){
     systemctl start wireproxy-warp
     check
 }
+
+check
