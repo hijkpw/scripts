@@ -46,5 +46,6 @@ check(){
 }
 
 wait1h(){
+    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort ip.gs)
     sleep 1h
 }
