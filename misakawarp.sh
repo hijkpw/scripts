@@ -135,7 +135,7 @@ uninstall(){
     case "$uninstallClient" in
         1 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/uninstall.sh && bash uninstall.sh ;;
         2 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/uninstall.sh && bash uninstall.sh ;;
-        3 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/uninstall.sh && uninstall.sh ;;
+        3 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/uninstall.sh && bash uninstall.sh ;;
     esac
 }
 
