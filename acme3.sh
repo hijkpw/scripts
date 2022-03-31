@@ -74,7 +74,11 @@ install_acme(){
     if [[ -n $(~/.acme.sh/acme.sh -v 2>/dev/null) ]]; then
         green "Acme.sh 安装成功！"
     else
-        red "Acme.sh 安装失败"
+        red "抱歉，Acme.sh 安装失败"
+        green "建议如下："
+        yellow "1. 检查VPS的网络环境，如为IPv6 Only的VPS请自行添加WARP或DNS64以安装Acme.sh"
+        yellow "2. Acme.sh 上游可能出了一些问题，请过几分钟再试"
+        yellow "3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
     fi
     back2menu
 }
