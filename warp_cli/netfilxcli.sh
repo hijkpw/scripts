@@ -29,10 +29,12 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
-[[ -z $(type -P wireproxy) ]] && red "WireProxy-WARP代理模式未安装，脚本即将退出！" && rm -f wireproxy-netfilx.sh && exit 1
+[[ -z $(type -P warp-cli) ]] && red "WireProxy-WARP代理模式未安装，脚本即将退出！" && rm -f wireproxy-netfilx.sh && exit 1
+
+WARPCliPort=$(warp-cli --accept-tos settings 2>/dev/null | grep 'WarpProxy on port' | awk -F "port " '{print $2}')
 
 check(){
-    NetfilxStatus=$(curl -6 --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.39" -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
+    NetfilxStatus=$(curl -sx socks5h://localhost:$WARPCliPort -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
     if [[ $NetfilxStatus == "200" ]]; then
         success
     fi
@@ -45,25 +47,25 @@ check(){
 }
 
 retry(){
-    wg-quick down wgcf
-    wg-quick up wgcf
+    warp-cli --accept-tos disconnect >/dev/null 2>&1
+    warp-cli --accept-tos connect >/dev/null 2>&1
     check
 }
 
 success(){
-    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort https://ip.gs -k --connect-timeout 8)
-    green "当前WireProxy-WARP的IP：$WireProxyIP 已解锁Netfilx"
+    WARPCliIP=$(curl -sx socks5h://localhost:$WARPCliPort https://ip.gs -k --connect-timeout 8)
+    green "当前WireProxy-WARP的IP：$WARPCliIP 已解锁Netfilx"
     yellow "等待1小时后，脚本将会自动重新检查Netfilx解锁状态"
     sleep 1h
     check
 }
 
 failed(){
-    WireProxyIP=$(curl -sx socks5h://localhost:$WireProxyPort https://ip.gs -k --connect-timeout 8)
-    red "当前WireProxy-WARP的IP：$WireProxyIP 未解锁Netfilx，脚本将在15秒后重新测试Netfilx解锁情况"
+    WARPCliIP=$(curl -sx socks5h://localhost:$WARPCliPort https://ip.gs -k --connect-timeout 8)
+    red "当前WireProxy-WARP的IP：$WARPCliIP 未解锁Netfilx，脚本将在15秒后重新测试Netfilx解锁情况"
     sleep 15
-    wg-quick down wgcf
-    wg-quick up wgcf
+    warp-cli --accept-tos disconnect >/dev/null 2>&1
+    warp-cli --accept-tos connect >/dev/null 2>&1
     check
 }
 

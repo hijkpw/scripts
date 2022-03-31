@@ -32,7 +32,7 @@ done
 [[ -z $(type -P wireproxy) ]] && red "WireProxy-WARP代理模式未安装，脚本即将退出！" && rm -f wireproxy-netfilx.sh && exit 1
 
 check(){
-    NetfilxStatus=$(curl -sx socks5h://localhost:$WireProxyPort -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
+    NetfilxStatus=$(curl -4 --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.39" -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
     if [[ $NetfilxStatus == "200" ]]; then
         success
     fi
