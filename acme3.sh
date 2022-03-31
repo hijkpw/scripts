@@ -71,7 +71,7 @@ install_acme(){
     curl https://get.acme.sh | sh -s email=$acmeEmail
     source ~/.bashrc
     bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
-    if [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]]; then
+    if [[ -n $(~/.acme.sh/acme.sh -v 2>/dev/null) ]]; then
         green "Acme.sh 安装成功！"
     else
         red "Acme.sh 安装失败"
