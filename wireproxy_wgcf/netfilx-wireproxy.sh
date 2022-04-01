@@ -31,7 +31,7 @@ done
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
 [[ -z $(type -P wireproxy) ]] && red "WireProxy-WARP代理模式未安装，脚本即将退出！" && rm -f wireproxy-netfilx.sh && exit 1
 
-WireProxyPort=$(grep BindAddress WireProxy_WARP.conf 2>/dev/null | sed "s/BindAddress = 127.0.0.1://g")
+WireProxyPort=$(grep BindAddress /root/WireProxy_WARP.conf 2>/dev/null | sed "s/BindAddress = 127.0.0.1://g")
 
 check(){
     NetfilxStatus=$(curl -sx socks5h://localhost:$WireProxyPort -fsL --write-out %{http_code} --output /dev/null --max-time 10 "https://www.netflix.com/title/81215567" 2>&1)
