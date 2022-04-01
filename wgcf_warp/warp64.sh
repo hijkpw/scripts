@@ -124,7 +124,7 @@ generate_wgcf_config(){
     chmod +x wgcf-profile.conf
     sed -i '/\:\:\/0/d' wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
-    sed -i 's/1.1.1.1/2001:4860:4860::8888,2001:4860:4860::8844,1.1.1.1,8.8.8.8,8.8.4.4/g' wgcf-profile.conf
+    sed -i 's/1.1.1.1/2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844,1.1.1.1,8.8.8.8,8.8.4.4/g' wgcf-profile.conf
 }
 
 get_best_mtu(){
