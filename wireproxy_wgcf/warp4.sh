@@ -152,7 +152,7 @@ install(){
     [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
     [[ -z $(type -P sudo) ]] && ${PACKAGE_INSTALL[int]} sudo
     check_tun
-    install_wgcf
+    [[ -z $(type -P wgcf) ]] && install_wgcf
     register_wgcf
     generate_wgcf_config
     make_wireproxy_file

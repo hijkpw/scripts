@@ -188,7 +188,7 @@ start_wgcf(){
 
 install(){
     install_wireguard
-    install_wgcf
+    [[ -z $(type -P wgcf) ]] && install_wgcf
     register_wgcf
     generate_wgcf_config
     get_best_mtu
