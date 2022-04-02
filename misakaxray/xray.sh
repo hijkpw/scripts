@@ -24,10 +24,6 @@ SITES=(
 CONFIG_FILE="/usr/local/etc/xray/config.json"
 OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
-checkwarp(){
-	[[ -n $(wg 2>/dev/null) ]] && colorEcho $RED " 检测到WARP已打开，脚本中断运行" && colorEcho $YELLOW " 请关闭WARP之后再运行本脚本" && exit 1
-}
-
 IP=$(curl -sm8 ip.sb)
 if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
     
@@ -122,7 +118,7 @@ normalizeVersion() {
 	if [ -n "$1" ]; then
 		case "$1" in
 			v*) echo "$1" ;;
-			http*) echo "v1.5.3" ;;
+			http*) echo "v1.5.4" ;;
 			*) echo "v$1" ;;
 		esac
 	else
