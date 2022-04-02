@@ -1591,7 +1591,7 @@ showInfo() {
 	echo ""
 	yellow "Xray运行状态："
     statusText
-	yellow " ${BLUE}Xray配置文件: ${CONFIG_FILE}"
+	yellow " Xray配置文件: ${CONFIG_FILE}"
 	yellow " Xray配置信息："
 
 	getConfigFileInfo
