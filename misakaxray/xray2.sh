@@ -73,13 +73,13 @@ XTLS="false"
 KCP="false"
 
 checkSystem() {
-	[[ $EUID -ne 0 ]] && colorEcho $RED " 请以root身份执行该脚本" && exit 1
+	[[ $EUID -ne 0 ]] && red " 请以root身份执行该脚本" && exit 1
 
 	res=$(which yum 2>/dev/null)
 	if [[ "$?" != "0" ]]; then
 		res=$(which apt 2>/dev/null)
 		if [[ "$?" != "0" ]]; then
-			colorEcho $RED " 不受支持的Linux系统"
+			red " 不受支持的Linux系统"
 			exit 1
 		fi
 		PMT="apt"
@@ -94,7 +94,7 @@ checkSystem() {
 	fi
 	res=$(which systemctl 2>/dev/null)
 	if [[ "$?" != "0" ]]; then
-		colorEcho $RED " 系统版本过低，请升级到最新版本"
+		red " 系统版本过低，请升级到最新版本"
 		exit 1
 	fi
 }
@@ -165,7 +165,7 @@ getVersion() {
 	NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10 | grep 'tag_name' | cut -d\" -f4)")"
 
 	if [[ $? -ne 0 ]] || [[ $NEW_VER == "" ]]; then
-		colorEcho $RED " 检查Xray版本信息失败，请检查网络"
+		red " 检查Xray版本信息失败，请检查网络"
 		return 3
 	elif [[ $RETVAL -ne 0 ]]; then
 		return 2
@@ -221,7 +221,7 @@ getData() {
 		yellow " 伪装域名(host)：$DOMAIN"
 		echo ""
 		if [[ -f ~/xray.pem && -f ~/xray.key ]]; then
-			yellow " 检测到自有证书，将使用其部署"
+			yellow " 检测到自有证书，将使用自有证书部署"
 			CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
 			KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
 		else
@@ -240,27 +240,27 @@ getData() {
 	echo ""
 	if [[ "$(needNginx)" == "no" ]]; then
 		if [[ "$TLS" == "true" ]]; then
-			read -p " 请输入xray监听端口[强烈建议443，默认443]：" PORT
+			read -p "请输入xray监听端口 [默认443]：" PORT
 			[[ -z "${PORT}" ]] && PORT=443
 		else
-			read -p " 请输入xray监听端口[100-65535的一个数字]：" PORT
+			read -p "请输入xray监听端口 [100-65535的一个数字]：" PORT
 			[[ -z "${PORT}" ]] && PORT=$(shuf -i200-65000 -n1)
 			if [[ "${PORT:0:1}" == "0" ]]; then
-				colorEcho ${RED} " 端口不能以0开头"
+				red "端口不能以0开头"
 				exit 1
 			fi
 		fi
-		colorEcho ${BLUE} " xray端口：$PORT"
+		yellow "xray端口：$PORT"
 	else
 		read -p " 请输入Nginx监听端口[100-65535的一个数字，默认443]：" PORT
 		[[ -z "${PORT}" ]] && PORT=443
-		[ "${PORT:0:1}" = "0" ] && colorEcho ${BLUE} " 端口不能以0开头" && exit 1
-		colorEcho ${BLUE} " Nginx端口：$PORT"
+		[ "${PORT:0:1}" = "0" ] && red "端口不能以0开头" && exit 1
+		yellow " Nginx端口：$PORT"
 		XPORT=$(shuf -i10000-65000 -n1)
 	fi
 	if [[ "$KCP" == "true" ]]; then
 		echo ""
-		colorEcho $BLUE " 请选择伪装类型："
+		yellow " 请选择伪装类型："
 		echo "   1) 无"
 		echo "   2) BT下载"
 		echo "   3) 视频通话"
@@ -276,18 +276,18 @@ getData() {
 		6) HEADER_TYPE="wireguard" ;;
 		*) HEADER_TYPE="none" ;;
 		esac
-		colorEcho $BLUE " 伪装类型：$HEADER_TYPE"
+		yellow " 伪装类型：$HEADER_TYPE"
 		SEED=$(cat /proc/sys/kernel/random/uuid)
 	fi
 	if [[ "$TROJAN" == "true" ]]; then
 		echo ""
 		read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
 		[[ -z "$PASSWORD" ]] && PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
-		colorEcho $BLUE " trojan密码：$PASSWORD"
+		yellow " trojan密码：$PASSWORD"
 	fi
 	if [[ "$XTLS" == "true" ]]; then
 		echo ""
-		colorEcho $BLUE " 请选择流控模式:"
+		yellow " 请选择流控模式:"
 		echo -e "   1) xtls-rprx-direct [$RED推荐$PLAIN]"
 		echo "   2) xtls-rprx-origin"
 		read -p "  请选择流控模式[默认:direct]" answer
@@ -295,9 +295,9 @@ getData() {
 		case $answer in
 		1) FLOW="xtls-rprx-direct" ;;
 		2) FLOW="xtls-rprx-origin" ;;
-		*) colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
+		*) red " 无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
 		esac
-		colorEcho $BLUE " 流控模式：$FLOW"
+		yellow " 流控模式：$FLOW"
 	fi
 	if [[ "${WS}" == "true" ]]; then
 		echo ""
@@ -309,18 +309,18 @@ getData() {
 				WSPATH="/$ws"
 				break
 			elif [[ "${WSPATH:0:1}" != "/" ]]; then
-				colorEcho ${RED} " 伪装路径必须以/开头！"
+				red " 伪装路径必须以/开头！"
 			elif [[ "${WSPATH}" == "/" ]]; then
-				colorEcho ${RED} " 不能使用根路径！"
+				red " 不能使用根路径！"
 			else
 				break
 			fi
 		done
-		colorEcho ${BLUE} " ws路径：$WSPATH"
+		yellow " ws路径：$WSPATH"
 	fi
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		echo ""
-		colorEcho $BLUE " 请选择伪装站类型:"
+		yellow " 请选择伪装站类型:"
 		echo "   1) 静态网站(位于/usr/share/nginx/html)"
 		echo "   2) 小说站(随机选择)"
 		echo "   3) 高清壁纸站(https://bing.ioliu.cn)"
@@ -350,20 +350,20 @@ getData() {
 			4)
 				read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
 				if [[ -z "$PROXY_URL" ]]; then
-					colorEcho $RED " 请输入反代网站！"
+					red " 请输入反代网站！"
 					exit 1
 				elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
-					colorEcho $RED " 反代网站必须以http或https开头！"
+					red " 反代网站必须以http或https开头！"
 					exit 1
 				fi
 				;;
-			*) colorEcho $RED " 请输入正确的选项！" && exit 1 ;;
+			*) red " 请输入正确的选项！" && exit 1 ;;
 			esac
 		fi
 		REMOTE_HOST=$(echo ${PROXY_URL} | cut -d/ -f3)
-		colorEcho $BLUE " 伪装网站：$PROXY_URL"
+		yellow " 伪装网站：$PROXY_URL"
 		echo ""
-		colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
+		yellow "  是否允许搜索引擎爬取网站？[默认：不允许]"
 		echo "    y)允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
 		echo "    n)不允许，爬虫不会访问网站，访问ip比较单一，但能节省vps流量"
 		read -p "  请选择：[y/n]" answer
@@ -374,18 +374,18 @@ getData() {
 		else
 			ALLOW_SPIDER="n"
 		fi
-		colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
+		yellow " 允许搜索引擎：$ALLOW_SPIDER"
 	fi
 	echo ""
 	read -p " 是否安装BBR(默认安装)?[y/n]:" NEED_BBR
 	[[ -z "$NEED_BBR" ]] && NEED_BBR=y
 	[[ "$NEED_BBR" == "Y" ]] && NEED_BBR=y
-	colorEcho $BLUE " 安装BBR：$NEED_BBR"
+	yellow " 安装BBR：$NEED_BBR"
 }
 
 installNginx() {
 	echo ""
-	colorEcho $BLUE " 安装nginx..."
+	yellow "正在安装nginx..."
 	if [[ "$BT" == "false" ]]; then
 		if [[ "$PMT" == "yum" ]]; then
 			$CMD_INSTALL epel-release
@@ -401,14 +401,14 @@ module_hotfixes=true' >/etc/yum.repos.d/nginx.repo
 		fi
 		$CMD_INSTALL nginx
 		if [[ "$?" != "0" ]]; then
-			colorEcho $RED " Nginx安装失败，请截图到TG群反馈"
+			red "Nginx安装失败，请截图到TG群反馈"
 			exit 1
 		fi
 		systemctl enable nginx
 	else
 		res=$(which nginx 2>/dev/null)
 		if [[ "$?" != "0" ]]; then
-			colorEcho $RED " 您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
+			red "您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
 			exit 1
 		fi
 	fi
@@ -440,7 +440,7 @@ getCert() {
 		systemctl stop xray
 		res=$(netstat -ntlp | grep -E ':80 |:443 ')
 		if [[ "${res}" != "" ]]; then
-			colorEcho ${RED} " 其他进程占用了80或443端口，请先关闭再运行一键脚本"
+			red "其他进程占用了80或443端口，请先关闭再运行一键脚本"
 			echo " 端口占用信息如下："
 			echo ${res}
 			exit 1
@@ -473,7 +473,7 @@ getCert() {
 			fi
 		fi
 		[[ -f ~/.acme.sh/${DOMAIN}_ecc/ca.cer ]] || {
-			colorEcho $RED " 获取证书失败，请截图到TG群反馈"
+			red " 获取证书失败，请截图到TG群反馈"
 			exit 1
 		}
 		CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
@@ -483,7 +483,7 @@ getCert() {
 		--fullchain-file $CERT_FILE \
 		--reloadcmd "service nginx force-reload"
 		[[ -f $CERT_FILE && -f $KEY_FILE ]] || {
-			colorEcho $RED "获取证书失败，请截图到TG群反馈"
+			red "获取证书失败，请截图到TG群反馈"
 			exit 1
 		}
 	else
@@ -696,13 +696,13 @@ installBBR() {
 	fi
 	result=$(lsmod | grep bbr)
 	if [[ "$result" != "" ]]; then
-		colorEcho $BLUE " BBR模块已安装"
+		yellow " BBR模块已安装"
 		INSTALL_BBR=false
 		return
 	fi
 	res=$(systemd-detect-virt)
 	if [[ $res =~ lxc|openvz ]]; then
-		colorEcho $BLUE " 由于你的VPS为OpenVZ或LXC架构的VPS，跳过安装"
+		yellow " 由于你的VPS为OpenVZ或LXC架构的VPS，跳过安装"
 		INSTALL_BBR=false
 		return
 	fi
@@ -711,11 +711,11 @@ installBBR() {
 	sysctl -p
 	result=$(lsmod | grep bbr)
 	if [[ "$result" != "" ]]; then
-		colorEcho $GREEN " BBR模块已启用"
+		green " BBR模块已启用"
 		INSTALL_BBR=false
 		return
 	fi
-	colorEcho $BLUE " 安装BBR模块..."
+	yellow " 安装BBR模块..."
 	if [[ "$PMT" == "yum" ]]; then
 		if [[ "$V6_PROXY" == "" ]]; then
 			rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
@@ -738,10 +738,10 @@ installXray() {
 	rm -rf /tmp/xray
 	mkdir -p /tmp/xray
 	DOWNLOAD_LINK="https://github.com/XTLS/Xray-core/releases/download/${NEW_VER}/Xray-linux-$(archAffix).zip"
-	colorEcho $BLUE " 下载Xray: ${DOWNLOAD_LINK}"
+	yellow " 下载Xray: ${DOWNLOAD_LINK}"
 	curl -L -H "Cache-Control: no-cache" -o /tmp/xray/xray.zip ${DOWNLOAD_LINK}
 	if [ $? != 0 ]; then
-		colorEcho $RED " 下载Xray文件失败，请检查服务器网络设置"
+		red " 下载Xray文件失败，请检查服务器网络设置"
 		exit 1
 	fi
 	systemctl stop xray
@@ -750,7 +750,7 @@ installXray() {
 	cp /tmp/xray/xray /usr/local/bin
 	cp /tmp/xray/geo* /usr/local/share/xray
 	chmod +x /usr/local/bin/xray || {
-		colorEcho $RED " Xray安装失败"
+		red " Xray安装失败"
 		exit 1
 	}
 
@@ -1282,7 +1282,7 @@ install() {
 	fi
 	res=$(which unzip 2>/dev/null)
 	if [[ $? -ne 0 ]]; then
-		colorEcho $RED " unzip安装失败，请检查网络"
+		red " unzip安装失败，请检查网络"
 		exit 1
 	fi
 	installNginx
@@ -1291,15 +1291,15 @@ install() {
 		getCert
 	fi
 	configNginx
-	colorEcho $BLUE " 安装Xray..."
+	yellow " 安装Xray..."
 	getVersion
 	RETVAL="$?"
 	if [[ $RETVAL == 0 ]]; then
-		colorEcho $BLUE " Xray最新版 ${CUR_VER} 已经安装"
+		yellow " Xray最新版 ${CUR_VER} 已经安装"
 	elif [[ $RETVAL == 3 ]]; then
 		exit 1
 	else
-		colorEcho $BLUE " 安装Xray ${NEW_VER} ，架构$(archAffix)"
+		yellow " 安装Xray ${NEW_VER} ，架构$(archAffix)"
 		installXray
 	fi
 	configXray
@@ -1323,26 +1323,26 @@ bbrReboot() {
 
 update() {
 	res=$(status)
-	[[ $res -lt 2 ]] && colorEcho $RED " Xray未安装，请先安装！" && return
+	[[ $res -lt 2 ]] && red " Xray未安装，请先安装！" && return
 	getVersion
 	RETVAL="$?"
 	if [[ $RETVAL == 0 ]]; then
-		colorEcho $BLUE " Xray最新版 ${CUR_VER} 已经安装"
+		yellow " Xray最新版 ${CUR_VER} 已经安装"
 	elif [[ $RETVAL == 3 ]]; then
 		exit 1
 	else
-		colorEcho $BLUE " 安装Xray ${NEW_VER} ，架构$(archAffix)"
+		yellow " 安装Xray ${NEW_VER} ，架构$(archAffix)"
 		installXray
 		stop
 		start
-		colorEcho $GREEN " 最新版Xray安装成功！"
+		green " 最新版Xray安装成功！"
 	fi
 }
 
 uninstall() {
 	res=$(status)
 	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
+		red " Xray未安装，请先安装！"
 		return
 	fi
 	echo ""
@@ -1372,14 +1372,14 @@ uninstall() {
 			rm -rf ${NGINX_CONF_PATH}${domain}.conf
 		fi
 		[[ -f ~/.acme.sh/acme.sh ]] && ~/.acme.sh/acme.sh --uninstall
-		colorEcho $GREEN " Xray卸载成功"
+		green " Xray卸载成功"
 	fi
 }
 
 start() {
 	res=$(status)
 	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
+		red " Xray未安装，请先安装！"
 		return
 	fi
 	stopNginx
@@ -1389,22 +1389,22 @@ start() {
 	port=$(grep port $CONFIG_FILE | head -n 1 | cut -d: -f2 | tr -d \",' ')
 	res=$(ss -nutlp | grep ${port} | grep -i xray)
 	if [[ "$res" == "" ]]; then
-		colorEcho $RED " Xray启动失败，请检查日志或查看端口是否被占用！"
+		red " Xray启动失败，请检查日志或查看端口是否被占用！"
 	else
-		colorEcho $BLUE " Xray启动成功"
+		yellow " Xray启动成功"
 	fi
 }
 
 stop() {
 	stopNginx
 	systemctl stop xray
-	colorEcho $BLUE " Xray停止成功"
+	yellow " Xray停止成功"
 }
 
 restart() {
 	res=$(status)
 	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
+		red " Xray未安装，请先安装！"
 		return
 	fi
 	stop
@@ -1587,7 +1587,7 @@ outputVmessWS() {
 showInfo() {
 	res=$(status)
 	if [[ $res -lt 2 ]]; then
-		colorEcho $RED " Xray未安装，请先安装！"
+		red " Xray未安装，请先安装！"
 		return
 	fi
 
@@ -1595,7 +1595,7 @@ showInfo() {
 	echo -n -e " ${BLUE}Xray运行状态：${PLAIN}"
 	statusText
 	echo -e " ${BLUE}Xray配置文件: ${PLAIN} ${RED}${CONFIG_FILE}${PLAIN}"
-	colorEcho $BLUE " Xray配置信息："
+	yellow " Xray配置信息："
 
 	getConfigFileInfo
 
@@ -1664,7 +1664,7 @@ showInfo() {
 
 showLog() {
 	res=$(status)
-	[[ $res -lt 2 ]] && colorEcho $RED " Xray未安装，请先安装！" && return
+	[[ $res -lt 2 ]] && red " Xray未安装，请先安装！" && return
 	journalctl -xen -u xray --no-pager
 }
 
@@ -1723,7 +1723,7 @@ menu() {
 	15) stop ;;
 	16) showInfo ;;
 	17) showLog ;;
-	*) colorEcho $RED " 请选择正确的操作！" && exit 1 ;;
+	*) red " 请选择正确的操作！" && exit 1 ;;
 	esac
 }
 
