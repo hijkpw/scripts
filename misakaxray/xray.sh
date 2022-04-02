@@ -64,6 +64,47 @@ if [[ $res != "" ]]; then
     NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
 fi
 
+archAffix(){
+    case "$(uname -m)" in
+        i686|i386) echo '32' ;;
+        x86_64|amd64) echo '64' ;;
+        armv5tel) echo 'arm32-v5' ;;
+        armv6l) echo 'arm32-v6' ;;
+        armv7|armv7l) echo 'arm32-v7a' ;;
+        armv8|aarch64)
+            echo 'arm64-v8a'
+        ;;
+        mips64le)
+            echo 'mips64le'
+        ;;
+        mips64)
+            echo 'mips64'
+        ;;
+        mipsle)
+            echo 'mips32le'
+        ;;
+        mips)
+            echo 'mips32'
+        ;;
+        ppc64le)
+            echo 'ppc64le'
+        ;;
+        ppc64)
+            echo 'ppc64'
+        ;;
+        ppc64le)
+            echo 'ppc64le'
+        ;;
+        riscv64) echo 'riscv64' ;;
+        s390x) echo 's390x' ;;
+        *)
+            red "不支持的CPU架构！"
+            exit 1
+        ;;
+    esac
+	return 0
+}
+
 getVersion() {
     VER=$(/usr/local/bin/xray version | head -n1 | awk '{print $2}')
     RETVAL=$?
