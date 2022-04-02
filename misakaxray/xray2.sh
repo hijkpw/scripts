@@ -1249,21 +1249,13 @@ install() {
 	fi
 	[[ -z $(type -P unzip) ]] && red "unzip安装失败，请检查网络" && exit 1
 	# installNginx
-    if [[ $(configNeedNginx) != "yes" ]]; then
-		return
-    else
-        installNginx
-    fi
+    [[ $WS == "true" ]] && installNginx
 	setFirewall
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		getCert
 	fi
 	# configNginx
-    if [[ $(configNeedNginx) != "yes" ]]; then
-		return
-    else
-        configNginx
-    fi
+    [[ $WS == "true" ]] && configNginx
 	yellow "安装Xray..."
 	getVersion
 	RETVAL="$?"
