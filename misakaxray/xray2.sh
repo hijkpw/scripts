@@ -1669,7 +1669,7 @@ menu() {
 	statusText
 	echo
 
-	read -p " 请选择操作[0-17]：" answer
+	read -p "请选择操作[0-18]：" answer
 	case $answer in
 	0) exit 1 ;;
 	1) install ;;
@@ -1690,7 +1690,7 @@ menu() {
 	16) showInfo ;;
 	17) showLog ;;
 	18) warpmenu ;;
-	*) red " 请选择正确的操作！" && exit 1 ;;
+	*) red "请选择正确的操作！" && exit 1 ;;
 	esac
 }
 
