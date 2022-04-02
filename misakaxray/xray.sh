@@ -296,3 +296,53 @@ getData() {
     [[ "$NEED_BBR" = "Y" ]] && NEED_BBR=y
     yellow " 安装BBR：$NEED_BBR"
 }
+
+installNginx() {
+    echo ""
+    colorEcho $BLUE "安装nginx..."
+    if [[ "$BT" = "false" ]]; then
+        if [[ $SYSTEM = "CentOS" ]]; then
+            ${PACKAGE_INSTALL[int]} epel-release
+            if [[ "$?" != "0" ]]; then
+                echo '[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true' > /etc/yum.repos.d/nginx.repo
+            fi
+        fi
+        ${PACKAGE_INSTALL[int]} nginx
+        if [[ "$?" != "0" ]]; then
+            red "Nginx安装失败，请到 GitHub Issues或TG群 反馈"
+            exit 1
+        fi
+        systemctl enable nginx
+    else
+        res=`which nginx 2>/dev/null`
+        if [[ "$?" != "0" ]]; then
+            colorEcho $RED " 您安装了宝塔，请在宝塔后台安装nginx后再运行本脚本"
+            exit 1
+        fi
+    fi
+}
+
+startNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl start nginx
+    else
+        nginx -c /www/server/nginx/conf/nginx.conf
+    fi
+}
+
+stopNginx() {
+    if [[ "$BT" = "false" ]]; then
+        systemctl stop nginx
+    else
+        res=`ps aux | grep -i nginx`
+        if [[ "$res" != "" ]]; then
+            nginx -s stop
+        fi
+    fi
+}
