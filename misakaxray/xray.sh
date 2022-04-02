@@ -70,13 +70,13 @@ getVersion() {
     NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10 | grep 'tag_name' | cut -d\" -f4)")"
 
     if [[ $? -ne 0 ]] || [[ $NEW_VER == "" ]]; then
-        red " 检查Xray版本信息失败，请检查网络"
+        red "检查Xray版本信息失败，请检查网络"
         return 3
     elif [[ $RETVAL -ne 0 ]];then
         return 2
     elif [[ $NEW_VER != $CUR_VER ]];then
         return 1
     fi
-    
+
     return 0
 }
