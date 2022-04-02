@@ -238,12 +238,11 @@ getData() {
 
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
         echo ""
-        yellow " 请选择伪装站类型:"
-        echo "   1) 静态网站(位于/usr/share/nginx/html)"
-        echo "   2) 小说站(随机选择)"
-        echo "   3) 美女站(https://imeizi.me)"
-        echo "   4) 高清壁纸站(https://bing.imeizi.me)"
-        echo "   5) 自定义反代站点(需以http或者https开头)"
+        yellow "请选择伪装站类型:"
+        echo " 1) 静态网站(位于/usr/share/nginx/html)"
+        echo " 2) 小说站(随机选择)"
+        echo " 3) 高清壁纸站(https://bing.ioliu.cn)"
+        echo " 4) 自定义反代站点(需以http或者https开头)"
         read -p "  请选择伪装网站类型[默认:高清壁纸站]" answer
         if [[ -z "$answer" ]]; then
             PROXY_URL="https://bing.imeizi.me"
@@ -260,9 +259,8 @@ getData() {
                     host=`echo ${PROXY_URL} | cut -d/ -f3`
                     ip=`curl -sL https://ipget.net/?ip=${host}`
                 done ;;
-            3) PROXY_URL="https://imeizi.me" ;;
-            4) PROXY_URL="https://bing.imeizi.me" ;;
-            5)
+            3) PROXY_URL="https://bing.ioliu.cn" ;;
+            4)
                 read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
                 if [[ -z "$PROXY_URL" ]]; then
                     red "请输入反代网站！"
@@ -271,9 +269,7 @@ getData() {
                     red "反代网站必须以http或https开头！"
                     exit 1
                 fi ;;
-            *)
-                red " 请输入正确的选项！"
-                exit 1
+            *) red " 请输入正确的选项！"&& exit 1
             esac
         fi
         REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
