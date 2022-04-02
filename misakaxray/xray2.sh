@@ -1632,6 +1632,12 @@ warpmenu(){
 	wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/misakawarp.sh && bash misakawarp.sh
 }
 
+setdns64(){
+	if [[ -n $(curl -s6m8 https://ip.gs) ]]; then
+		echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
+	fi
+}
+
 menu() {
 	clear
 	echo "#############################################################"
@@ -1663,13 +1669,14 @@ menu() {
 	echo -e "  ${GREEN}17.${PLAIN}  查看Xray日志"
 	echo " -------------"
 	echo -e "  ${GREEN}18.${PLAIN}  安装并管理WARP"
+	echo -e "  ${GREEN}19.${PLAIN}  设置DNS64服务器"
 	echo " -------------"
 	echo -e "  ${GREEN}0.${PLAIN}   退出"
 	echo -n " 当前状态："
 	statusText
 	echo
 
-	read -p "请选择操作[0-18]：" answer
+	read -p "请选择操作[0-19]：" answer
 	case $answer in
 	0) exit 1 ;;
 	1) install ;;
@@ -1690,6 +1697,7 @@ menu() {
 	16) showInfo ;;
 	17) showLog ;;
 	18) warpmenu ;;
+	19) setdns64 ;;
 	*) red "请选择正确的操作！" && exit 1 ;;
 	esac
 }
