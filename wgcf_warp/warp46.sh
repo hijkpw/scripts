@@ -117,7 +117,7 @@ generate_wgcf_config(){
     read -p "按键许可证密钥(26个字符):" WPPlusKey
     if [[ -n $WPPlusKey ]]; then
         sed -i "s/license_key.*/license_key = \"$WPPlusKey\"/g" wgcf-account.toml
-        read -p "请输入自定义设备名：如未输入则使用默认随机设备名：" WPPlusName
+        read -p "请输入自定义设备名，如未输入则使用默认随机设备名：" WPPlusName
         if [[ -n $WPPlusName ]]; then
             wgcf update --name $(echo $WPPlusName | sed s/[[:space:]]/_/g)
         else
