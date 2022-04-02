@@ -57,7 +57,7 @@ SITES=(
 )
 
 res=`which bt 2>/dev/null`
-if [[ "$res" != "" ]]; then
+if [[ $res != "" ]]; then
     BT="true"
     NGINX_CONF_PATH="/www/server/panel/vhost/nginx/"
 fi
