@@ -26,7 +26,7 @@ OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
 IP=$(curl -s4m8 ip.sb) || IP=$(curl -s6m8 ip.sb)
 if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
-    echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
+	echo -e nameserver 2a01:4f8:c2c:123f::1 >/etc/resolv.conf
 fi
 
 BT="false"
@@ -106,20 +106,20 @@ status() {
 statusText() {
 	res=$(status)
 	case $res in
-		2) echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN} ;;
-		3) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN} ;;
-		4) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN}, ${RED}Nginx未运行${PLAIN} ;;
-		5) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行, Nginx正在运行${PLAIN} ;;
-		*) echo -e ${RED}未安装${PLAIN} ;;
+	2) echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN} ;;
+	3) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN} ;;
+	4) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN}, ${RED}Nginx未运行${PLAIN} ;;
+	5) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行, Nginx正在运行${PLAIN} ;;
+	*) echo -e ${RED}未安装${PLAIN} ;;
 	esac
 }
 
 normalizeVersion() {
 	if [ -n "$1" ]; then
 		case "$1" in
-			v*) echo "$1" ;;
-			http*) echo "v1.5.4" ;;
-			*) echo "v$1" ;;
+		v*) echo "$1" ;;
+		http*) echo "v1.5.4" ;;
+		*) echo "v$1" ;;
 		esac
 	else
 		echo ""
@@ -147,22 +147,22 @@ getVersion() {
 
 archAffix() {
 	case "$(uname -m)" in
-		i686 | i386) echo '32' ;;
-		x86_64 | amd64) echo '64' ;;
-		armv5tel) echo 'arm32-v5' ;;
-		armv6l) echo 'arm32-v6' ;;
-		armv7 | armv7l) echo 'arm32-v7a' ;;
-		armv8 | aarch64) echo 'arm64-v8a' ;;
-		mips64le) echo 'mips64le' ;;
-		mips64) echo 'mips64' ;;
-		mipsle) echo 'mips32le' ;;
-		mips) echo 'mips32' ;;
-		ppc64le) echo 'ppc64le' ;;
-		ppc64) echo 'ppc64' ;;
-		ppc64le) echo 'ppc64le' ;;
-		riscv64) echo 'riscv64' ;;
-		s390x) echo 's390x' ;;
-		*) colorEcho $RED " 不支持的CPU架构！" && exit 1;;
+	i686 | i386) echo '32' ;;
+	x86_64 | amd64) echo '64' ;;
+	armv5tel) echo 'arm32-v5' ;;
+	armv6l) echo 'arm32-v6' ;;
+	armv7 | armv7l) echo 'arm32-v7a' ;;
+	armv8 | aarch64) echo 'arm64-v8a' ;;
+	mips64le) echo 'mips64le' ;;
+	mips64) echo 'mips64' ;;
+	mipsle) echo 'mips32le' ;;
+	mips) echo 'mips32' ;;
+	ppc64le) echo 'ppc64le' ;;
+	ppc64) echo 'ppc64' ;;
+	ppc64le) echo 'ppc64le' ;;
+	riscv64) echo 'riscv64' ;;
+	s390x) echo 's390x' ;;
+	*) colorEcho $RED " 不支持的CPU架构！" && exit 1 ;;
 	esac
 
 	return 0
@@ -235,12 +235,12 @@ getData() {
 		echo "   6) wiregard"
 		read -p "  请选择伪装类型[默认：无]：" answer
 		case $answer in
-			2) HEADER_TYPE="utp" ;;
-			3) HEADER_TYPE="srtp" ;;
-			4) HEADER_TYPE="wechat-video" ;;
-			5) HEADER_TYPE="dtls" ;;
-			6) HEADER_TYPE="wireguard" ;;
-			*) HEADER_TYPE="none" ;;
+		2) HEADER_TYPE="utp" ;;
+		3) HEADER_TYPE="srtp" ;;
+		4) HEADER_TYPE="wechat-video" ;;
+		5) HEADER_TYPE="dtls" ;;
+		6) HEADER_TYPE="wireguard" ;;
+		*) HEADER_TYPE="none" ;;
 		esac
 		colorEcho $BLUE " 伪装类型：$HEADER_TYPE"
 		SEED=$(cat /proc/sys/kernel/random/uuid)
@@ -259,9 +259,9 @@ getData() {
 		read -p "  请选择流控模式[默认:direct]" answer
 		[[ -z "$answer" ]] && answer=1
 		case $answer in
-			1) FLOW="xtls-rprx-direct" ;;
-			2) FLOW="xtls-rprx-origin" ;;
-			*) colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
+		1) FLOW="xtls-rprx-direct" ;;
+		2) FLOW="xtls-rprx-origin" ;;
+		*) colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
 		esac
 		colorEcho $BLUE " 流控模式：$FLOW"
 	fi
@@ -296,34 +296,34 @@ getData() {
 			PROXY_URL="https://bing.ioliu.cn"
 		else
 			case $answer in
-				1) PROXY_URL="" ;;
-				2)
-					len=${#SITES[@]}
-					((len--))
-					while true; do
-						index=$(shuf -i0-${len} -n1)
-						PROXY_URL=${SITES[$index]}
-						host=$(echo ${PROXY_URL} | cut -d/ -f3)
-						ip=$(curl -sm8 ipget.net/?ip=${host})
-						res=$(echo -n ${ip} | grep ${host})
-						if [[ "${res}" == "" ]]; then
-							echo "$ip $host" >>/etc/hosts
-							break
-						fi
-					done
-					;;
-				3) PROXY_URL="https://bing.ioliu.cn" ;;
-				4)
-					read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
-					if [[ -z "$PROXY_URL" ]]; then
-						colorEcho $RED " 请输入反代网站！"
-						exit 1
-					elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
-						colorEcho $RED " 反代网站必须以http或https开头！"
-						exit 1
+			1) PROXY_URL="" ;;
+			2)
+				len=${#SITES[@]}
+				((len--))
+				while true; do
+					index=$(shuf -i0-${len} -n1)
+					PROXY_URL=${SITES[$index]}
+					host=$(echo ${PROXY_URL} | cut -d/ -f3)
+					ip=$(curl -sm8 ipget.net/?ip=${host})
+					res=$(echo -n ${ip} | grep ${host})
+					if [[ "${res}" == "" ]]; then
+						echo "$ip $host" >>/etc/hosts
+						break
 					fi
-					;;
-				*) colorEcho $RED " 请输入正确的选项！" && exit 1 ;;
+				done
+				;;
+			3) PROXY_URL="https://bing.ioliu.cn" ;;
+			4)
+				read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
+				if [[ -z "$PROXY_URL" ]]; then
+					colorEcho $RED " 请输入反代网站！"
+					exit 1
+				elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+					colorEcho $RED " 反代网站必须以http或https开头！"
+					exit 1
+				fi
+				;;
+			*) colorEcho $RED " 请输入正确的选项！" && exit 1 ;;
 			esac
 		fi
 		REMOTE_HOST=$(echo ${PROXY_URL} | cut -d/ -f3)
@@ -433,10 +433,10 @@ getCert() {
 			fi
 		else
 			if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
-                ~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "nginx -s stop || { echo -n ''; }" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf || { echo -n ''; }" --standalone --listen-v6
-            else
-                ~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "nginx -s stop || { echo -n ''; }" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf || { echo -n ''; }" --standalone
-            fi
+				~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "nginx -s stop || { echo -n ''; }" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf || { echo -n ''; }" --standalone --listen-v6
+			else
+				~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "nginx -s stop || { echo -n ''; }" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf || { echo -n ''; }" --standalone
+			fi
 		fi
 		[[ -f ~/.acme.sh/${DOMAIN}_ecc/ca.cer ]] || {
 			colorEcho $RED " 获取证书失败，请截图到TG群反馈"
@@ -1671,25 +1671,25 @@ menu() {
 
 	read -p " 请选择操作[0-17]：" answer
 	case $answer in
-		0) exit 1 ;;
-		1) install ;;
-		2) KCP="true" && install ;;
-		3) TLS="true" && install ;;
-		4) TLS="true" && WS="true" && install ;;
-		5) VLESS="true" && KCP="true" && install ;;
-		6) VLESS="true" && TLS="true" && install ;;
-		7) VLESS="true" && TLS="true" && WS="true" && install ;;
-		8) VLESS="true" && TLS="true" && XTLS="true" && install ;;
-		9) TROJAN="true" && TLS="true" && install ;;
-		10) TROJAN="true" && TLS="true" && XTLS="true" && install ;;
-		11) update ;;
-		12) uninstall ;;
-		13) start ;;
-		14) restart ;;
-		15) stop ;;
-		16) showInfo ;;
-		17) showLog ;;
-		*) colorEcho $RED " 请选择正确的操作！" && exit 1 ;;
+	0) exit 1 ;;
+	1) install ;;
+	2) KCP="true" && install ;;
+	3) TLS="true" && install ;;
+	4) TLS="true" && WS="true" && install ;;
+	5) VLESS="true" && KCP="true" && install ;;
+	6) VLESS="true" && TLS="true" && install ;;
+	7) VLESS="true" && TLS="true" && WS="true" && install ;;
+	8) VLESS="true" && TLS="true" && XTLS="true" && install ;;
+	9) TROJAN="true" && TLS="true" && install ;;
+	10) TROJAN="true" && TLS="true" && XTLS="true" && install ;;
+	11) update ;;
+	12) uninstall ;;
+	13) start ;;
+	14) restart ;;
+	15) stop ;;
+	16) showInfo ;;
+	17) showLog ;;
+	*) colorEcho $RED " 请选择正确的操作！" && exit 1 ;;
 	esac
 }
 
@@ -1698,6 +1698,6 @@ checkSystem
 action=$1
 [[ -z $1 ]] && action=menu
 case "$action" in
-	menu | update | uninstall | start | restart | stop | showInfo | showLog) ${action} ;;
-	*) echo " 参数错误" && echo " 用法: $(basename $0) [menu|update|uninstall|start|restart|stop|showInfo|showLog]" ;;
+menu | update | uninstall | start | restart | stop | showInfo | showLog) ${action} ;;
+*) echo " 参数错误" && echo " 用法: $(basename $0) [menu|update|uninstall|start|restart|stop|showInfo|showLog]" ;;
 esac
