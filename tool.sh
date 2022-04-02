@@ -146,8 +146,7 @@ warp() {
 	echo "1. 【推荐】 fscarmen"
 	echo "2. fscarmen-docker"
 	echo "3. fscarmen warp解锁奈飞流媒体脚本"
-	echo "4. kkkyg（甬哥）"
-	echo "5. P3TERX"
+	echo "4. P3TERX"
 	echo "                            "
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" warpNumberInput
@@ -155,8 +154,7 @@ warp() {
         1) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
         2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
         3) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
-        4) wget -N https://cdn.jsdelivr.net/gh/kkkyg/CFwarp/CFwarp.sh && bash CFwarp.sh ;;
-        5) bash <(curl -fsSL git.io/warp.sh) ;;
+        4) bash <(curl -fsSL git.io/warp.sh) ;;
         0) menu ;;
 	esac
 }
