@@ -22,7 +22,7 @@ SITES=(
 )
 
 CONFIG_FILE="/usr/local/etc/xray/config.json"
-OS=$(hostnamectl | grep -i system | cut -d: -f2)
+# OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
 IP=$(curl -s4m8 ip.sb) || IP=$(curl -s6m8 ip.sb)
 if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
