@@ -28,10 +28,10 @@ checkwarp(){
 	[[ -n $(wg 2>/dev/null) ]] && colorEcho $RED " 检测到WARP已打开，脚本中断运行" && colorEcho $YELLOW " 请关闭WARP之后再运行本脚本" && exit 1
 }
 
-V6_PROXY=""
-IP=$(curl -s4m8 https://ip.gs)
-[[ "$?" != "0" ]] && IP=$(curl -s6m8 https://ip.gs) && V6_PROXY="https://gh-proxy-misakano7545.koyeb.app/"
-[[ $V6_PROXY != "" ]] && echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
+IP=$(curl -sm8 ip.sb)
+if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
+    
+fi
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
@@ -449,7 +449,7 @@ getCert() {
 		--fullchain-file $CERT_FILE \
 		--reloadcmd "service nginx force-reload"
 		[[ -f $CERT_FILE && -f $KEY_FILE ]] || {
-			colorEcho $RED " 获取证书失败，请截图到TG群反馈"
+			colorEcho $RED "获取证书失败，请截图到TG群反馈"
 			exit 1
 		}
 	else
@@ -703,7 +703,7 @@ installBBR() {
 installXray() {
 	rm -rf /tmp/xray
 	mkdir -p /tmp/xray
-	DOWNLOAD_LINK="${V6_PROXY}https://github.com/XTLS/Xray-core/releases/download/${NEW_VER}/Xray-linux-$(archAffix).zip"
+	DOWNLOAD_LINK="https://github.com/XTLS/Xray-core/releases/download/${NEW_VER}/Xray-linux-$(archAffix).zip"
 	colorEcho $BLUE " 下载Xray: ${DOWNLOAD_LINK}"
 	curl -L -H "Cache-Control: no-cache" -o /tmp/xray/xray.zip ${DOWNLOAD_LINK}
 	if [ $? != 0 ]; then
