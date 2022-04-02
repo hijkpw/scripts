@@ -1247,7 +1247,7 @@ install() {
 	if [[ $SYSTEM != "CentOS" ]]; then
 		${PACKAGE_INSTALL[int]} libssl-dev g++
 	fi
-	[[ -z $(type -P unzip)]] && red "unzip安装失败，请检查网络" && exit 1
+	[[ -z $(type -P unzip) ]] && red "unzip安装失败，请检查网络" && exit 1
 	installNginx
 	setFirewall
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
