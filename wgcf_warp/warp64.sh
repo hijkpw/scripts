@@ -117,7 +117,12 @@ generate_wgcf_config(){
     read -p "按键许可证密钥(26个字符):" WPPlusKey
     if [[ -n $WPPlusKey ]]; then
         sed -i "s/license_key.*/license_key = \"$WPPlusKey\"/g" wgcf-account.toml
-        wgcf update
+        read -p "请输入自定义设备名：如未输入则使用默认随机设备名：" WPPlusName
+        if [[ -n $WPPlusName ]]; then
+            wgcf update --name $(echo $WPPlusName | sed s/[[:space:]]/_/g)
+        else
+            wgcf update
+        fi
         green "注册WARP+账户中，如上方显示：400 Bad Request，则使用WARP免费版账户" 
     fi
     wgcf generate
@@ -179,7 +184,9 @@ start_wgcf(){
         sleep 8
     done
     systemctl enable wg-quick@wgcf >/dev/null 2>&1
+    WgcfIPv4=$(curl -s4m8 https://ip.gs -k)
     green "Wgcf-WARP 已启动成功"
+    yellow "Wgcf-WARP的IPv4 IP为：$WgcfIPv4"
     rm -f warp64.sh
 }
 
