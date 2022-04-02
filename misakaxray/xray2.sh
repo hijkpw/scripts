@@ -388,7 +388,7 @@ installNginx() {
 	yellow "正在安装nginx..."
 	if [[ "$BT" == "false" ]]; then
 		if [[ "$PMT" == "yum" ]]; then
-			$CMD_INSTALL epel-release
+			${PACKAGE_INSTALL[int]} epel-release
 			if [[ "$?" != "0" ]]; then
 				echo '[nginx-stable]
 name=nginx stable repo
@@ -399,7 +399,7 @@ gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true' >/etc/yum.repos.d/nginx.repo
 			fi
 		fi
-		$CMD_INSTALL nginx
+		${PACKAGE_INSTALL[int]} nginx
 		if [[ "$?" != "0" ]]; then
 			red "Nginx安装失败，请截图到TG群反馈"
 			exit 1
@@ -445,13 +445,13 @@ getCert() {
 			echo ${res}
 			exit 1
 		fi
-		$CMD_INSTALL socat openssl
+		${PACKAGE_INSTALL[int]} socat openssl
 		if [[ "$PMT" == "yum" ]]; then
-			$CMD_INSTALL cronie
+			${PACKAGE_INSTALL[int]} cronie
 			systemctl start crond
 			systemctl enable crond
 		else
-			$CMD_INSTALL cron
+			${PACKAGE_INSTALL[int]} cron
 			systemctl start cron
 			systemctl enable cron
 		fi
@@ -720,14 +720,14 @@ installBBR() {
 		if [[ "$V6_PROXY" == "" ]]; then
 			rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 			rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-			$CMD_INSTALL --enablerepo=elrepo-kernel kernel-ml
+			${PACKAGE_INSTALL[int]} --enablerepo=elrepo-kernel kernel-ml
 			$CMD_REMOVE kernel-3.*
 			grub2-set-default 0
 			echo "tcp_bbr" >>/etc/modules-load.d/modules.conf
 			INSTALL_BBR=true
 		fi
 	else
-		$CMD_INSTALL --install-recommends linux-generic-hwe-16.04
+		${PACKAGE_INSTALL[int]} --install-recommends linux-generic-hwe-16.04
 		grub-set-default 0
 		echo "tcp_bbr" >>/etc/modules-load.d/modules.conf
 		INSTALL_BBR=true
@@ -1272,13 +1272,11 @@ configXray() {
 
 install() {
 	getData
-	$PMT clean all
-	[[ "$PMT" == "apt" ]] && $PMT update
-	#echo $CMD_UPGRADE | bash
-	$CMD_INSTALL wget curl sudo vim unzip tar gcc openssl
-	$CMD_INSTALL net-tools
-	if [[ "$PMT" == "apt" ]]; then
-		$CMD_INSTALL libssl-dev g++
+	${PACKAGE_UPDATE[int]}
+	${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl
+	${PACKAGE_INSTALL[int]} net-tools
+	if [[ $SYSTEM != "CentOS" ]]; then
+		${PACKAGE_INSTALL[int]} libssl-dev g++
 	fi
 	res=$(which unzip 2>/dev/null)
 	if [[ $? -ne 0 ]]; then
