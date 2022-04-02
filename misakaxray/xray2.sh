@@ -57,9 +57,6 @@ SITES=(
 CONFIG_FILE="/usr/local/etc/xray/config.json"
 
 IP=$(curl -s4m8 ip.sb) || IP=$(curl -s6m8 ip.sb)
-if [[ -n $(curl -s6m8 ip.sb | grep ":") ]]; then
-	echo -e nameserver 2a01:4f8:c2c:123f::1 >/etc/resolv.conf
-fi
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
