@@ -1629,7 +1629,7 @@ showLog() {
 }
 
 warpmenu(){
-
+	wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/misakawarp.sh && bash misakawarp.sh
 }
 
 menu() {
@@ -1662,6 +1662,8 @@ menu() {
 	echo -e "  ${GREEN}16.${PLAIN}  查看Xray配置"
 	echo -e "  ${GREEN}17.${PLAIN}  查看Xray日志"
 	echo " -------------"
+	echo -e "  ${GREEN}18.${PLAIN}  安装并管理WARP"
+	echo " -------------"
 	echo -e "  ${GREEN}0.${PLAIN}   退出"
 	echo -n " 当前状态："
 	statusText
@@ -1687,6 +1689,7 @@ menu() {
 	15) stop ;;
 	16) showInfo ;;
 	17) showLog ;;
+	18) warpmenu ;;
 	*) red " 请选择正确的操作！" && exit 1 ;;
 	esac
 }
