@@ -35,12 +35,14 @@ done
 CONFIG_FILE="/usr/local/etc/xray/config.json"
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
+
 VLESS="false"
 TROJAN="false"
 TLS="false"
 WS="false"
 XTLS="false"
 KCP="false"
+
 SITES=(
     "http://www.zhuizishu.com/"
     "http://xs.56dyc.com/"
