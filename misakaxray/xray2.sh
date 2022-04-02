@@ -1258,7 +1258,12 @@ install() {
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		getCert
 	fi
-	configNginx
+	# configNginx
+    if [[ $(configNeedNginx) != "yes" ]]; then
+		return
+    else
+        configNginx
+    fi
 	yellow "安装Xray..."
 	getVersion
 	RETVAL="$?"
