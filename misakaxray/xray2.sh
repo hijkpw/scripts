@@ -721,7 +721,7 @@ installBBR() {
 			rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 			rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
 			${PACKAGE_INSTALL[int]} --enablerepo=elrepo-kernel kernel-ml
-			$CMD_REMOVE kernel-3.*
+			${PACKAGE_UNINSTALL[int]} kernel-3.*
 			grub2-set-default 0
 			echo "tcp_bbr" >>/etc/modules-load.d/modules.conf
 			INSTALL_BBR=true
@@ -1356,9 +1356,9 @@ uninstall() {
 		rm -rf /usr/local/etc/xray
 		if [[ "$BT" == "false" ]]; then
 			systemctl disable nginx
-			$CMD_REMOVE nginx
+			${PACKAGE_UNINSTALL[int]} nginx
 			if [[ "$PMT" == "apt" ]]; then
-				$CMD_REMOVE nginx-common
+				${PACKAGE_UNINSTALL[int]} nginx-common
 			fi
 			rm -rf /etc/nginx/nginx.conf
 			if [[ -f /etc/nginx/nginx.conf.bak ]]; then
