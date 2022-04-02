@@ -196,7 +196,7 @@ getData() {
 			KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
 		else
 			resolve=$(curl -sm8 ipget.net/?ip=${DOMAIN})
-			if [ $resolve != $IP ]; then
+			if [[ $resolve != $IP ]]; then
 				yellow "${DOMAIN} 解析结果：${resolve}"
 				red "域名未解析到当前服务器IP(${IP})！"
 				green "建议如下："
