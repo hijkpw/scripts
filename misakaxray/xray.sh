@@ -24,8 +24,8 @@ SITES=(
 CONFIG_FILE="/usr/local/etc/xray/config.json"
 OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
-IP=$(curl -sm8 ip.sb)
-if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
+IP=$(curl -s4m8 ip.sb) || IP=$(curl -s6m8 ip.sb)
+if [[ -n $(curl -s6m8 ip.sb | grep ":") ]]; then
     echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
 fi
 
