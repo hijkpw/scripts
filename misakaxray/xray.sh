@@ -31,3 +31,18 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
+
+SITES=(
+    "http://www.zhuizishu.com/"
+    "http://xs.56dyc.com/"
+    "http://www.ddxsku.com/"
+    "http://www.biqu6.com/"
+    "https://www.wenshulou.cc/"
+    "http://www.55shuba.com/"
+    "http://www.39shubao.com/"
+    "https://www.23xsw.cc/"
+    "https://www.jueshitangmen.info/"
+    "https://www.zhetian.org/"
+    "http://www.bequgexs.com/"
+    "http://www.tjwl.com/"
+)
