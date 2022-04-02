@@ -127,7 +127,7 @@ normalizeVersion() {
 
 # 1: new Xray. 0: no. 1: yes. 2: not installed. 3: check failed.
 getVersion() {
-	VER=$(/usr/local/bin/xray version | head -n1 | awk '{print $2}')
+	VER=$(/usr/local/bin/xray version 2>/dev/null | head -n1 | awk '{print $2}')
 	RETVAL=$?
 	CUR_VER="$(normalizeVersion "$(echo "$VER" | head -n 1 | cut -d " " -f2)")"
 	TAG_URL="https://api.github.com/repos/XTLS/Xray-core/releases/latest"
