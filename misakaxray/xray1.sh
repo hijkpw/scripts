@@ -25,7 +25,7 @@ CONFIG_FILE="/usr/local/etc/xray/config.json"
 OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
 IP=$(curl -s4m8 ip.sb) || IP=$(curl -s6m8 ip.sb)
-if [[ -n $(curl -s6m8 ip.sb | grep ":") ]]; then
+if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
     echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
 fi
 
@@ -426,13 +426,13 @@ getCert() {
 		~/.acme.sh/acme.sh --upgrade --auto-upgrade
 		~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 		if [[ "$BT" == "false" ]]; then
-			if [[ -n $(curl -s6m8 ip.sb | grep ":") ]]; then
+			if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
 				~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx" --standalone --listen-v6
 			else
 				~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx" --standalone
 			fi
 		else
-			if [[ -n $(curl -s6m8 ip.sb | grep ":") ]]; then
+			if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
                 ~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "nginx -s stop || { echo -n ''; }" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf || { echo -n ''; }" --standalone --listen-v6
             else
                 ~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "nginx -s stop || { echo -n ''; }" --post-hook "nginx -c /www/server/nginx/conf/nginx.conf || { echo -n ''; }" --standalone
