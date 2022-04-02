@@ -35,6 +35,9 @@ done
 install_lxde_vnc(){
     ${PACKAGE_UPDATE[int]}
     ${PACKAGE_INSTALL[int]} lxde tightvncserver
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    chmod +x google-chrome-stable_current_amd64.deb
+    ${PACKAGE_INSTALL[int]} ./google-chrome-stable_current_amd64.deb
 }
 
 set_vnc_pwd(){
@@ -43,8 +46,8 @@ set_vnc_pwd(){
 }
 
 show_vnc_address(){
-    IP=$(curl -s4m8 httpss://ip.gs)
-    [[ -z $IP ]] && IP=$(curl -s6m8 httpss://ip.gs)
+    IP=$(curl -s4m8 https://ip.gs)
+    [[ -z $IP ]] && IP=$(curl -s6m8 https://ip.gs)
     green "LXDE桌面安装成功！"
     yellow "VNC Viewer连接端口为："
     yellow "$IP:5901"
