@@ -1589,9 +1589,9 @@ showInfo() {
 	fi
 
 	echo ""
-	echo -n -e " ${BLUE}Xray运行状态：${PLAIN}"
-	statusText
-	echo -e " ${BLUE}Xray配置文件: ${PLAIN} ${RED}${CONFIG_FILE}${PLAIN}"
+	yellow "Xray运行状态："
+    statusText
+	yellow " ${BLUE}Xray配置文件: ${CONFIG_FILE}"
 	yellow " Xray配置信息："
 
 	getConfigFileInfo
