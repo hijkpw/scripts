@@ -42,7 +42,6 @@ XTLS="false"
 KCP="false"
 
 checkSystem() {
-	result=$(id | awk '{print $1}')
 	[[ $EUID -ne 0 ]] && colorEcho $RED " 请以root身份执行该脚本" && exit 1
 
 	res=$(which yum 2>/dev/null)
