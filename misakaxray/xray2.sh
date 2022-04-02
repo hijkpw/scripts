@@ -192,7 +192,7 @@ archAffix() {
 	ppc64le) echo 'ppc64le' ;;
 	riscv64) echo 'riscv64' ;;
 	s390x) echo 's390x' ;;
-	*) colorEcho $RED " 不支持的CPU架构！" && exit 1 ;;
+	*) red " 不支持的CPU架构！" && exit 1 ;;
 	esac
 
 	return 0
@@ -202,34 +202,38 @@ getData() {
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		echo ""
 		echo " Xray一键脚本，运行之前请确认如下条件已经具备："
-		colorEcho ${YELLOW} "  1. 一个伪装域名"
-		colorEcho ${YELLOW} "  2. 伪装域名DNS解析指向当前服务器ip（${IP}）"
-		colorEcho ${BLUE} "  3. 如果/root目录下有 xray.pem 和 xray.key 证书密钥文件，无需理会条件2"
+		yellow "  1. 一个伪装域名"
+		yellow "  2. 伪装域名DNS解析指向当前服务器ip（${IP}）"
+		yellow "  3. 如果/root目录下有 xray.pem 和 xray.key 证书密钥文件，无需理会条件2"
 		echo " "
 		read -p " 确认满足按y，按其他退出脚本：" answer
 		[[ "${answer,,}" != "y" ]] && exit 1
 		echo ""
 		while true; do
-			read -p " 请输入伪装域名：" DOMAIN
+			read -p "请输入伪装域名：" DOMAIN
 			if [[ -z "${DOMAIN}" ]]; then
-				colorEcho ${RED} " 域名输入错误，请重新输入！"
+				red " 域名输入错误，请重新输入！"
 			else
 				break
 			fi
 		done
 		DOMAIN=${DOMAIN,,}
-		colorEcho ${BLUE} " 伪装域名(host)：$DOMAIN"
+		yellow " 伪装域名(host)：$DOMAIN"
 		echo ""
 		if [[ -f ~/xray.pem && -f ~/xray.key ]]; then
-			colorEcho ${BLUE} " 检测到自有证书，将使用其部署"
+			yellow " 检测到自有证书，将使用其部署"
 			CERT_FILE="/usr/local/etc/xray/${DOMAIN}.pem"
 			KEY_FILE="/usr/local/etc/xray/${DOMAIN}.key"
 		else
 			resolve=$(curl -sm8 ipget.net/?ip=${DOMAIN})
 			if [ $resolve != $IP ]; then
-				colorEcho ${BLUE} "${DOMAIN} 解析结果：${resolve}"
-				colorEcho ${RED} " 域名未解析到当前服务器IP(${IP})！"
-				exit 1
+				yellow "${DOMAIN} 解析结果：${resolve}"
+				red " 域名未解析到当前服务器IP(${IP})！"
+				green "建议如下："
+                yellow "1. 请确保Cloudflare小云朵为关闭状态(仅限DNS)，其他域名解析网站设置同理"
+                yellow "2. 请检查DNS解析设置的IP是否为VPS的IP"
+                yellow "3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
+                exit 1
 			fi
 		fi
 	fi
