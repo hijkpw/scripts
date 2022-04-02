@@ -79,17 +79,55 @@ generate_wgcf_config(){
     chmod +x wgcf-profile.conf
 }
 
+get_best_mtu(){
+    v66=`curl -s6m8 https://ip.gs -k`
+    v44=`curl -s4m8 https://ip.gs -k`
+    MTUy=1500
+    MTUc=10
+    if [[ -n ${v66} && -z ${v44} ]]; then
+        ping='ping6'
+        IP1='2606:4700:4700::1001'
+        IP2='2001:4860:4860::8888'
+    else
+        ping='ping'
+        IP1='1.1.1.1'
+        IP2='8.8.8.8'
+    fi
+    while true; do
+        if ${ping} -c1 -W1 -s$((${MTUy} - 28)) -Mdo ${IP1} >/dev/null 2>&1 || ${ping} -c1 -W1 -s$((${MTUy} - 28)) -Mdo ${IP2} >/dev/null 2>&1; then
+            MTUc=1
+            MTUy=$((${MTUy} + ${MTUc}))
+        else
+            MTUy=$((${MTUy} - ${MTUc}))
+            if [[ ${MTUc} = 1 ]]; then
+                break
+            fi
+        fi
+        if [[ ${MTUy} -le 1360 ]]; then
+            MTUy='1360'
+            break
+        fi
+    done
+    MTU=$((${MTUy} - 80))
+    green "MTU最佳值=$MTU 已设置完毕"
+    sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
+}
+
 make_wireproxy_file(){
     read -p "请输入将要设置的Socks5端口（默认40000）：" WireProxyPort
     [[ -z $WireProxyPort ]] && WireProxyPort=40000
     WgcfPrivateKey=$(grep PrivateKey wgcf-profile.conf | sed "s/PrivateKey = //g")
     WgcfPublicKey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
     cat <<EOF > ~/WireProxy_WARP.conf
-SelfSecretKey = $WgcfPrivateKey
-SelfEndpoint = 172.16.0.2
-PeerPublicKey = $WgcfPublicKey
-PeerEndpoint = 162.159.193.10:2408
+[Interface]
+Address = 172.16.0.2/32
+MTU = $MTU
+PrivateKey = $WgcfPrivateKey
 DNS = 1.1.1.1,8.8.8.8,8.8.4.4
+
+[Peer]
+PublicKey = $WgcfPublicKey
+Endpoint = 162.159.193.10:2408
 
 [Socks5]
 BindAddress = 127.0.0.1:$WireProxyPort
@@ -105,7 +143,7 @@ WantedBy=multi-user.target
 [Service]
 Type=simple
 WorkingDirectory=/root
-ExecStart=/usr/local/bin/wireproxy /root/WireProxy_WARP.conf
+ExecStart=/usr/local/bin/wireproxy -c /root/WireProxy_WARP.conf
 Restart=always
 TEXT
     green "Systemd 系统守护服务设置成功！"
