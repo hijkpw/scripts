@@ -1628,6 +1628,10 @@ showLog() {
 	journalctl -xen -u xray --no-pager
 }
 
+warpmenu(){
+
+}
+
 menu() {
 	clear
 	echo "#############################################################"
