@@ -666,9 +666,9 @@ installBBR() {
 		INSTALL_BBR=false
 		return
 	fi
-	res=$(hostnamectl | grep -i openvz)
-	if [[ "$res" != "" ]]; then
-		colorEcho $BLUE " openvz机器，跳过安装"
+	res=$(systemd-detect-virt)
+	if [[ $res =~ lxc|openvz ]]; then
+		colorEcho $BLUE " 由于你的VPS为OpenVZ或LXC架构的VPS，跳过安装"
 		INSTALL_BBR=false
 		return
 	fi
