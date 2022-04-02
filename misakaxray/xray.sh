@@ -26,7 +26,7 @@ OS=$(hostnamectl | grep -i system | cut -d: -f2)
 
 IP=$(curl -sm8 ip.sb)
 if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
-    
+    echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
 fi
 
 BT="false"
