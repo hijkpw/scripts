@@ -74,12 +74,8 @@ archAffix(){
         armv8|aarch64) echo 'arm64-v8a' ;;
         mips64le) echo 'mips64le' ;;
         mips64) echo 'mips64' ;;
-        mipsle)
-            echo 'mips32le'
-        ;;
-        mips)
-            echo 'mips32'
-        ;;
+        mipsle) echo 'mips32le' ;;
+        mips) echo 'mips32' ;;
         ppc64le) echo 'ppc64le' ;;
         ppc64) echo 'ppc64' ;;
         ppc64le) echo 'ppc64le' ;;
