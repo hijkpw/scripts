@@ -72,37 +72,6 @@ WS="false"
 XTLS="false"
 KCP="false"
 
-checkSystem() {
-	[[ $EUID -ne 0 ]] && red " 请以root身份执行该脚本" && exit 1
-
-	res=$(which yum 2>/dev/null)
-	if [[ "$?" != "0" ]]; then
-		res=$(which apt 2>/dev/null)
-		if [[ "$?" != "0" ]]; then
-			red " 不受支持的Linux系统"
-			exit 1
-		fi
-		PMT="apt"
-		CMD_INSTALL="apt install -y "
-		CMD_REMOVE="apt remove -y "
-		CMD_UPGRADE="apt update; apt upgrade -y; apt autoremove -y"
-	else
-		PMT="yum"
-		CMD_INSTALL="yum install -y "
-		CMD_REMOVE="yum remove -y "
-		CMD_UPGRADE="yum update -y"
-	fi
-	res=$(which systemctl 2>/dev/null)
-	if [[ "$?" != "0" ]]; then
-		red " 系统版本过低，请升级到最新版本"
-		exit 1
-	fi
-}
-
-colorEcho() {
-	echo -e "${1}${@:2}${PLAIN}"
-}
-
 configNeedNginx() {
 	local ws=$(grep wsSettings $CONFIG_FILE)
 	[[ -z "$ws" ]] && echo no && return
@@ -1722,10 +1691,9 @@ menu() {
 	esac
 }
 
-checkSystem
-
 action=$1
 [[ -z $1 ]] && action=menu
+
 case "$action" in
 menu | update | uninstall | start | restart | stop | showInfo | showLog) ${action} ;;
 *) echo " 参数错误" && echo " 用法: $(basename $0) [menu|update|uninstall|start|restart|stop|showInfo|showLog]" ;;
