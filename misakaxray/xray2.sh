@@ -1273,8 +1273,7 @@ configXray() {
 install() {
 	getData
 	${PACKAGE_UPDATE[int]}
-	${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl
-	${PACKAGE_INSTALL[int]} net-tools
+	${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl net-tools
 	if [[ $SYSTEM != "CentOS" ]]; then
 		${PACKAGE_INSTALL[int]} libssl-dev g++
 	fi
