@@ -1347,8 +1347,8 @@ start() {
 		red "Xray未安装，请先安装！"
 		return
 	fi
-	stopNginx
-	startNginx
+	[[ $WS == "true" ]] && stopNginx
+	[[ $WS == "true" ]] && startNginx
 	systemctl restart xray
 	sleep 2
 	port=$(grep port $CONFIG_FILE | head -n 1 | cut -d: -f2 | tr -d \",' ')
@@ -1361,7 +1361,7 @@ start() {
 }
 
 stop() {
-	stopNginx
+	[[ $WS == "true" ]] && stopNginx
 	systemctl stop xray
 	yellow "Xray停止成功"
 }
