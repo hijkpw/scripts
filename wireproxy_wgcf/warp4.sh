@@ -193,6 +193,7 @@ install(){
     [[ -z $(type -P wgcf) ]] && install_wgcf
     register_wgcf
     generate_wgcf_config
+    get_best_mtu
     make_wireproxy_file
     download_wireproxy
     start_wireproxy_warp
