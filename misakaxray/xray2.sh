@@ -1,15 +1,15 @@
 #!/bin/bash
 
 red() {
-    echo -e "\033[31m\033[01m$1\033[0m"
+	echo -e "\033[31m\033[01m$1\033[0m"
 }
 
 green() {
-    echo -e "\033[32m\033[01m$1\033[0m"
+	echo -e "\033[32m\033[01m$1\033[0m"
 }
 
 yellow() {
-    echo -e "\033[33m\033[01m$1\033[0m"
+	echo -e "\033[33m\033[01m$1\033[0m"
 }
 
 RED="\033[31m"
@@ -29,11 +29,11 @@ PACKAGE_UNINSTALL=("apt -y autoremove" "apt -y autoremove" "yum -y autoremove" "
 CMD=("$(grep -i pretty_name /etc/os-release 2>/dev/null | cut -d \" -f2)" "$(hostnamectl 2>/dev/null | grep -i system | cut -d : -f2)" "$(lsb_release -sd 2>/dev/null)" "$(grep -i description /etc/lsb-release 2>/dev/null | cut -d \" -f2)" "$(grep . /etc/redhat-release 2>/dev/null)" "$(grep . /etc/issue 2>/dev/null | cut -d \\ -f1 | sed '/^[ ]*$/d')")
 
 for i in "${CMD[@]}"; do
-    SYS="$i" && [[ -n $SYS ]] && break
+	SYS="$i" && [[ -n $SYS ]] && break
 done
 
 for ((int = 0; int < ${#REGEX[@]}; int++)); do
-    [[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM="${RELEASE[int]}" && [[ -n $SYSTEM ]] && break
+	[[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM="${RELEASE[int]}" && [[ -n $SYSTEM ]] && break
 done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
@@ -57,7 +57,7 @@ SITES=(
 CONFIG_FILE="/usr/local/etc/xray/config.json"
 
 IP=$(curl -s4m8 ip.sb) || IP=$(curl -s6m8 ip.sb)
-if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
+if [[ -n $(curl -s6m8 ip.sb | grep ":") ]]; then
 	echo -e nameserver 2a01:4f8:c2c:123f::1 >/etc/resolv.conf
 fi
 
@@ -200,10 +200,10 @@ getData() {
 				yellow "${DOMAIN} 解析结果：${resolve}"
 				red "域名未解析到当前服务器IP(${IP})！"
 				green "建议如下："
-                yellow " 1. 请确保Cloudflare小云朵为关闭状态(仅限DNS)，其他域名解析网站设置同理"
-                yellow " 2. 请检查DNS解析设置的IP是否为VPS的IP"
-                yellow " 3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
-                exit 1
+				yellow " 1. 请确保Cloudflare小云朵为关闭状态(仅限DNS)，其他域名解析网站设置同理"
+				yellow " 2. 请检查DNS解析设置的IP是否为VPS的IP"
+				yellow " 3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
+				exit 1
 			fi
 		fi
 	fi
@@ -1249,13 +1249,13 @@ install() {
 	fi
 	[[ -z $(type -P unzip) ]] && red "unzip安装失败，请检查网络" && exit 1
 	# installNginx
-    [[ $WS == "true" ]] && installNginx
+	[[ $WS == "true" ]] && installNginx
 	setFirewall
 	if [[ "$TLS" == "true" || "$XTLS" == "true" ]]; then
 		getCert
 	fi
 	# configNginx
-    [[ $WS == "true" ]] && configNginx
+	[[ $WS == "true" ]] && configNginx
 	yellow "安装Xray..."
 	getVersion
 	RETVAL="$?"
