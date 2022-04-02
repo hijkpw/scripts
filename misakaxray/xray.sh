@@ -140,7 +140,7 @@ getData() {
             resolve=$(curl -sm8 https://ipget.net/?ip=${DOMAIN})
             if [[ -z "${res}" || $resolve != $IP ]]; then
                 yellow  "${DOMAIN} 解析结果：${resolve}"
-                red  "域名未解析到当前服务器IP(${IP})!"
+                red  "域名未解析到当前服务器IP(${IP})或解析错误！"
                 exit 1
             fi
         fi
@@ -173,65 +173,46 @@ getData() {
 
     if [[ "$KCP" = "true" ]]; then
         echo ""
-        colorEcho $BLUE " 请选择伪装类型："
-        echo "   1) 无"
-        echo "   2) BT下载"
-        echo "   3) 视频通话"
-        echo "   4) 微信视频通话"
-        echo "   5) dtls"
-        echo "   6) wiregard"
-        read -p "  请选择伪装类型[默认：无]：" answer
+        yellow " 请选择伪装类型："
+        echo " 1) 无"
+        echo " 2) BT下载"
+        echo " 3) 视频通话"
+        echo " 4) 微信视频通话"
+        echo " 5) dtls"
+        echo " 6) wiregard"
+        read -p "请选择伪装类型 [默认：无]：" answer
         case $answer in
-            2)
-                HEADER_TYPE="utp"
-                ;;
-            3)
-                HEADER_TYPE="srtp"
-                ;;
-            4)
-                HEADER_TYPE="wechat-video"
-                ;;
-            5)
-                HEADER_TYPE="dtls"
-                ;;
-            6)
-                HEADER_TYPE="wireguard"
-                ;;
-            *)
-                HEADER_TYPE="none"
-                ;;
+            2) HEADER_TYPE="utp" ;;
+            3) HEADER_TYPE="srtp" ;;
+            4) HEADER_TYPE="wechat-video" ;;
+            5) HEADER_TYPE="dtls" ;;
+            6) HEADER_TYPE="wireguard" ;;
+            *) HEADER_TYPE="none" ;;
         esac
-        colorEcho $BLUE " 伪装类型：$HEADER_TYPE"
+        yellow " 伪装类型：$HEADER_TYPE"
         SEED=`cat /proc/sys/kernel/random/uuid`
     fi
 
     if [[ "$TROJAN" = "true" ]]; then
         echo ""
-        read -p " 请设置trojan密码（不输则随机生成）:" PASSWORD
+        read -p "请设置trojan密码（不输则随机生成）:" PASSWORD
         [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
-        colorEcho $BLUE " trojan密码：$PASSWORD"
+        yellow "trojan密码：$PASSWORD"
     fi
 
     if [[ "$XTLS" = "true" ]]; then
         echo ""
-        colorEcho $BLUE " 请选择流控模式:" 
-        echo -e "   1) xtls-rprx-direct [$RED推荐$PLAIN]"
-        echo "   2) xtls-rprx-origin"
+        yellow "请选择流控模式:" 
+        green " 1) xtls-rprx-direct [推荐]"
+        green " 2) xtls-rprx-origin"
         read -p "  请选择流控模式[默认:direct]" answer
         [[ -z "$answer" ]] && answer=1
         case $answer in
-            1)
-                FLOW="xtls-rprx-direct"
-                ;;
-            2)
-                FLOW="xtls-rprx-origin"
-                ;;
-            *)
-                colorEcho $RED " 无效选项，使用默认的xtls-rprx-direct"
-                FLOW="xtls-rprx-direct"
-                ;;
+            1) FLOW="xtls-rprx-direct" ;;
+            2) FLOW="xtls-rprx-origin" ;;
+            *) red " 无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
         esac
-        colorEcho $BLUE " 流控模式：$FLOW"
+        yellow "流控模式：$FLOW"
     fi
 
     if [[ "${WS}" = "true" ]]; then
@@ -257,7 +238,7 @@ getData() {
 
     if [[ "$TLS" = "true" || "$XTLS" = "true" ]]; then
         echo ""
-        colorEcho $BLUE " 请选择伪装站类型:"
+        yellow " 请选择伪装站类型:"
         echo "   1) 静态网站(位于/usr/share/nginx/html)"
         echo "   2) 小说站(随机选择)"
         echo "   3) 美女站(https://imeizi.me)"
@@ -268,9 +249,7 @@ getData() {
             PROXY_URL="https://bing.imeizi.me"
         else
             case $answer in
-            1)
-                PROXY_URL=""
-                ;;
+            1) PROXY_URL="" ;;
             2)
                 len=${#SITES[@]}
                 ((len--))
@@ -279,42 +258,31 @@ getData() {
                     index=`shuf -i0-${len} -n1`
                     PROXY_URL=${SITES[$index]}
                     host=`echo ${PROXY_URL} | cut -d/ -f3`
-                    ip=`curl -sL https://hijk.art/hostip.php?d=${host}`
-                    res=`echo -n ${ip} | grep ${host}`
-                    if [[ "${res}" = "" ]]; then
-                        echo "$ip $host" >> /etc/hosts
-                        break
-                    fi
-                done
-                ;;
-            3)
-                PROXY_URL="https://imeizi.me"
-                ;;
-            4)
-                PROXY_URL="https://bing.imeizi.me"
-                ;;
+                    ip=`curl -sL https://ipget.net/?ip=${host}`
+                done ;;
+            3) PROXY_URL="https://imeizi.me" ;;
+            4) PROXY_URL="https://bing.imeizi.me" ;;
             5)
                 read -p " 请输入反代站点(以http或者https开头)：" PROXY_URL
                 if [[ -z "$PROXY_URL" ]]; then
-                    colorEcho $RED " 请输入反代网站！"
+                    red "请输入反代网站！"
                     exit 1
                 elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
-                    colorEcho $RED " 反代网站必须以http或https开头！"
+                    red "反代网站必须以http或https开头！"
                     exit 1
-                fi
-                ;;
+                fi ;;
             *)
-                colorEcho $RED " 请输入正确的选项！"
+                red " 请输入正确的选项！"
                 exit 1
             esac
         fi
         REMOTE_HOST=`echo ${PROXY_URL} | cut -d/ -f3`
-        colorEcho $BLUE " 伪装网站：$PROXY_URL"
+        yellow "伪装网站：$PROXY_URL"
 
         echo ""
-        colorEcho $BLUE "  是否允许搜索引擎爬取网站？[默认：不允许]"
-        echo "    y)允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
-        echo "    n)不允许，爬虫不会访问网站，访问ip比较单一，但能节省vps流量"
+        yellow "是否允许搜索引擎爬取网站？[默认：不允许]"
+        echo "y) 允许，会有更多ip请求网站，但会消耗一些流量，vps流量充足情况下推荐使用"
+        echo "n) 不允许，爬虫不会访问网站，访问ip比较单一，但能节省vps流量"
         read -p "  请选择：[y/n]" answer
         if [[ -z "$answer" ]]; then
             ALLOW_SPIDER="n"
@@ -323,12 +291,12 @@ getData() {
         else
             ALLOW_SPIDER="n"
         fi
-        colorEcho $BLUE " 允许搜索引擎：$ALLOW_SPIDER"
+        yellow "允许搜索引擎：$ALLOW_SPIDER"
     fi
 
     echo ""
     read -p " 是否安装BBR(默认安装)?[y/n]:" NEED_BBR
     [[ -z "$NEED_BBR" ]] && NEED_BBR=y
     [[ "$NEED_BBR" = "Y" ]] && NEED_BBR=y
-    colorEcho $BLUE " 安装BBR：$NEED_BBR"
+    yellow " 安装BBR：$NEED_BBR"
 }
