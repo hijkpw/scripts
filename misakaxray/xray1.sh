@@ -1694,7 +1694,6 @@ menu() {
 }
 
 checkSystem
-checkwarp
 
 action=$1
 [[ -z $1 ]] && action=menu
