@@ -1763,6 +1763,7 @@ menu() {
 		17) showLog ;;
 		18) warpmenu ;;
 		19) setdns64 ;;
+		20) system_optimize ;;
 		*) red "请选择正确的操作！" && exit 1 ;;
 	esac
 }
