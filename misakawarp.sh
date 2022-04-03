@@ -118,12 +118,30 @@ warpcliswitch(){
     wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/switch.sh && bash switch.sh
 }
 
-warpcliport(){
-    wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/changeport.sh && bash changeport.sh
+changeport(){
+    yellow "请选择需要更换端口的WARP客户端："
+    green "1. WARP-Cli 代理模式"
+    green "2. WireProxy-WARP 代理模式"
+    read -p "请输入需要卸载的客户端 [1-2]：" changePortClient
+    case "$changePortClient" in
+        1 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/changeport.sh && bash changeport.sh ;;
+        2 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/changeport.sh && bash changeport.sh ;;
+    esac
 }
 
-wireproxychangeport(){
-    wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/changeport.sh && bash changeport.sh
+warpNetFilx(){
+    yellow "请选择需要刷NetFilx IP的WARP客户端："
+    green "1. Wgcf-WARP IPv4模式"
+    green "2. Wgcf-WARP IPv6模式"
+    green "3. WARP-Cli 代理模式"
+    green "4. WireProxy-WARP 代理模式"
+    read -p "请输入需要卸载的客户端 [1-3]：" uninstallClient
+    case "$uninstallClient" in
+        1 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/netfilx4.sh && bash netfilx4.sh ;;
+        2 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wgcf-warp/netfilx6.sh && bash netfilx6.sh ;;
+        3 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/warp-cli/netfilxcli.sh && bash netfilxcli.sh ;;
+        4 ) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/wireproxy-warp/netfilx-wireproxy.sh && bash netfilx-wireproxy.sh ;;
+    esac
 }
 
 uninstall(){
@@ -246,8 +264,7 @@ menu(){
     fi
     green "5. Wgcf-WARP 临时开关"
     green "6. WARP-Cli代理模式临时开关"
-    green "7. WARP-Cli代理模式更换Socks5端口"
-    green "8. WireProxy-WARP代理模式更换Socks5端口"
+    green "7. WARP代理模式更改Socks5端口"
     green "9. 卸载WARP"
     read -p "请输入选项：" menuNumberInput
     case "$menuNumberInput" in
@@ -257,7 +274,7 @@ menu(){
         4 ) wgcfcli=2 && install ;;
         5 ) wgcfswitch ;;
         6 ) warpcliswitch ;;
-        7 ) warpcliport ;;
+        7 ) changeport ;;
         8 ) wireproxychangeport ;;
         9 ) uninstall ;;
         * ) exit 1 ;;
