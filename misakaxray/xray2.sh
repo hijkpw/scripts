@@ -144,22 +144,22 @@ getVersion() {
 
 archAffix() {
 	case "$(uname -m)" in
-	i686 | i386) echo '32' ;;
-	x86_64 | amd64) echo '64' ;;
-	armv5tel) echo 'arm32-v5' ;;
-	armv6l) echo 'arm32-v6' ;;
-	armv7 | armv7l) echo 'arm32-v7a' ;;
-	armv8 | aarch64) echo 'arm64-v8a' ;;
-	mips64le) echo 'mips64le' ;;
-	mips64) echo 'mips64' ;;
-	mipsle) echo 'mips32le' ;;
-	mips) echo 'mips32' ;;
-	ppc64le) echo 'ppc64le' ;;
-	ppc64) echo 'ppc64' ;;
-	ppc64le) echo 'ppc64le' ;;
-	riscv64) echo 'riscv64' ;;
-	s390x) echo 's390x' ;;
-	*) red " 不支持的CPU架构！" && exit 1 ;;
+		i686 | i386) echo '32' ;;
+		x86_64 | amd64) echo '64' ;;
+		armv5tel) echo 'arm32-v5' ;;
+		armv6l) echo 'arm32-v6' ;;
+		armv7 | armv7l) echo 'arm32-v7a' ;;
+		armv8 | aarch64) echo 'arm64-v8a' ;;
+		mips64le) echo 'mips64le' ;;
+		mips64) echo 'mips64' ;;
+		mipsle) echo 'mips32le' ;;
+		mips) echo 'mips32' ;;
+		ppc64le) echo 'ppc64le' ;;
+		ppc64) echo 'ppc64' ;;
+		ppc64le) echo 'ppc64le' ;;
+		riscv64) echo 'riscv64' ;;
+		s390x) echo 's390x' ;;
+		*) red " 不支持的CPU架构！" && exit 1 ;;
 	esac
 
 	return 0
@@ -368,7 +368,11 @@ module_hotfixes=true' >/etc/yum.repos.d/nginx.repo
 		fi
 		${PACKAGE_INSTALL[int]} nginx
 		if [[ "$?" != "0" ]]; then
-			red "Nginx安装失败，请截图到TG群反馈"
+			red "Nginx安装失败！"
+			green "建议如下："
+			yellow "1. 检查VPS系统的网络设置和软件源设置，强烈建议使用官方软件源！"
+			yellow "2. 你可能用的是CentOS 8操作系统，请重置系统为CentOS 7后再安装本脚本"
+			yellow "3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
 			exit 1
 		fi
 		systemctl enable nginx
@@ -1679,27 +1683,27 @@ menu() {
 
 	read -p "请选择操作[0-19]：" answer
 	case $answer in
-	0) exit 1 ;;
-	1) install ;;
-	2) KCP="true" && install ;;
-	3) TLS="true" && install ;;
-	4) TLS="true" && WS="true" && install ;;
-	5) VLESS="true" && KCP="true" && install ;;
-	6) VLESS="true" && TLS="true" && install ;;
-	7) VLESS="true" && TLS="true" && WS="true" && install ;;
-	8) VLESS="true" && TLS="true" && XTLS="true" && install ;;
-	9) TROJAN="true" && TLS="true" && install ;;
-	10) TROJAN="true" && TLS="true" && XTLS="true" && install ;;
-	11) update ;;
-	12) uninstall ;;
-	13) start ;;
-	14) restart ;;
-	15) stop ;;
-	16) showInfo ;;
-	17) showLog ;;
-	18) warpmenu ;;
-	19) setdns64 ;;
-	*) red "请选择正确的操作！" && exit 1 ;;
+		0) exit 1 ;;
+		1) install ;;
+		2) KCP="true" && install ;;
+		3) TLS="true" && install ;;
+		4) TLS="true" && WS="true" && install ;;
+		5) VLESS="true" && KCP="true" && install ;;
+		6) VLESS="true" && TLS="true" && install ;;
+		7) VLESS="true" && TLS="true" && WS="true" && install ;;
+		8) VLESS="true" && TLS="true" && XTLS="true" && install ;;
+		9) TROJAN="true" && TLS="true" && install ;;
+		10) TROJAN="true" && TLS="true" && XTLS="true" && install ;;
+		11) update ;;
+		12) uninstall ;;
+		13) start ;;
+		14) restart ;;
+		15) stop ;;
+		16) showInfo ;;
+		17) showLog ;;
+		18) warpmenu ;;
+		19) setdns64 ;;
+		*) red "请选择正确的操作！" && exit 1 ;;
 	esac
 }
 
