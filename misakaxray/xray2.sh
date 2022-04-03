@@ -354,7 +354,7 @@ installNginx() {
 	echo ""
 	yellow "正在安装nginx..."
 	if [[ "$BT" == "false" ]]; then
-		if [[ "$PMT" == "yum" ]]; then
+		if [[ $SYSTEM == "CentOS" ]]; then
 			${PACKAGE_INSTALL[int]} epel-release
 			if [[ "$?" != "0" ]]; then
 				echo '[nginx-stable]
