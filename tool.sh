@@ -45,8 +45,8 @@ ${PACKAGE_UPDATE[int]}
 ${PACKAGE_INSTALL[int]} curl wget sudo
 
 # 获取IP地址及其信息
-IP4=$(curl -s4m2 https://ip.gs/json)
-IP6=$(curl -s6m2 https://ip.gs/json)
+IP4=$(curl -s4m8 https://ip.gs/json)
+IP6=$(curl -s6m8 https://ip.gs/json)
 WAN4=$(expr "$IP4" : '.*ip\":\"\([^"]*\).*')
 WAN6=$(expr "$IP6" : '.*ip\":\"\([^"]*\).*')
 COUNTRY4=$(expr "$IP4" : '.*country\":\"\([^"]*\).*')
