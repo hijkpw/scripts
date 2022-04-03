@@ -417,7 +417,7 @@ getCert() {
 			exit 1
 		fi
 		${PACKAGE_INSTALL[int]} socat openssl
-		if [[ "$PMT" == "yum" ]]; then
+		if [[ $SYSTEM == "CentOS" ]]; then
 			${PACKAGE_INSTALL[int]} cronie
 			systemctl start crond
 			systemctl enable crond
@@ -695,7 +695,7 @@ installBBR() {
 		return
 	fi
 	yellow " 安装BBR模块..."
-	if [[ "$PMT" == "yum" ]]; then
+	if [[ $SYSTEM == "CentOS" ]]; then
 		if [[ "$V6_PROXY" == "" ]]; then
 			rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 			rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
