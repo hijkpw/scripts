@@ -430,7 +430,7 @@ getCert() {
 		source ~/.bashrc
 		~/.acme.sh/acme.sh --upgrade --auto-upgrade
 		~/.acme.sh/acme.sh --set-default-ca --server zerossl
-		if [[ "$BT" == "false" ]]; then
+		if [[ $BT == "false" ]]; then
 			if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
 				~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx" --standalone --listen-v6
 			else
