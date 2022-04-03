@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 全局变量
-ver="2.1.6"
-changeLog="新增Ngrok脚本"
+ver="2.1.7"
+changeLog="wARP处新增Misaka-WARP脚本"
 arch=$(uname -m)
 virt=$(systemd-detect-virt)
 kernelVer=$(uname -r)
@@ -143,18 +143,20 @@ warp() {
 	echo "                            "
 	green "请选择你接下来使用的脚本"
 	echo "                            "
-	echo "1. 【推荐】 fscarmen"
-	echo "2. fscarmen-docker"
-	echo "3. fscarmen warp解锁奈飞流媒体脚本"
-	echo "4. P3TERX"
+	echo "1. Misaka-WARP"
+	echo "2. fscarmen"
+	echo "3. fscarmen-docker"
+	echo "4. fscarmen warp解锁奈飞流媒体脚本"
+	echo "5. P3TERX"
 	echo "                            "
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" warpNumberInput
 	case "$warpNumberInput" in
-        1) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
-        2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
-        3) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
-        4) bash <(curl -fsSL git.io/warp.sh) ;;
+		1) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/misakawarp.sh && bash misakawarp.sh ;;
+        2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
+        3) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
+        4) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
+        5) bash <(curl -fsSL git.io/warp.sh) ;;
         0) menu ;;
 	esac
 }
