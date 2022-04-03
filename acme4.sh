@@ -296,7 +296,7 @@ menu() {
         4) getSingleDomainCert ;;
         5) certsrv="zerossl" && getSingleDomainCert ;;
         6) getDomainCert ;;
-        7) certsrv="zerossl" && getDomainCert
+        7) certsrv="zerossl" && getDomainCert ;;
         8) revoke_cert ;;
         9) renew_cert ;;
         10) uninstall ;;
