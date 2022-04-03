@@ -458,7 +458,11 @@ getCert() {
 		--fullchain-file $CERT_FILE \
 		--reloadcmd "service nginx force-reload"
 		[[ -f $CERT_FILE && -f $KEY_FILE ]] || {
-			red "获取证书失败，请截图到TG群反馈"
+			red "抱歉，证书申请失败"
+			green "建议如下："
+			yellow " 1. 自行检测防火墙是否打开，如防火墙正在开启，请关闭防火墙或放行80端口"
+			yellow " 2. 同一域名多次申请触发Acme.sh官方风控，请更换域名或等待7天后再尝试执行脚本"
+			yellow " 3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
 			exit 1
 		}
 	else
