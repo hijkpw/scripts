@@ -45,7 +45,7 @@ check_tun(){
 
 install_wireguard_centos(){
     ${PACKAGE_INSTALL[int]} epel-release
-    ${PACKAGE_INSTALL} net-tools wireguard-tools iptables
+    ${PACKAGE_INSTALL[int]} net-tools wireguard-tools iptables
     if [ "$main" -lt 5 ]|| [ "$minor" -lt 6 ]; then 
         if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
             vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
@@ -58,7 +58,7 @@ install_wireguard_centos(){
 install_wireguard_debian(){
     ${PACKAGE_INSTALL[int]} lsb-release
     echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" | tee /etc/apt/sources.list.d/backports.list
-    ${PACKAGE_UPDATE}
+    ${PACKAGE_UPDATE[int]}
     ${PACKAGE_INSTALL} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
     if [ "$main" -lt 5 ]|| [ "$minor" -lt 6 ]; then
         if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
