@@ -370,7 +370,7 @@ module_hotfixes=true' >/etc/yum.repos.d/nginx.repo
 		if [[ "$?" != "0" ]]; then
 			red "Nginx安装失败！"
 			green "建议如下："
-			yellow "1. 检查VPS系统的网络设置和软件源设置，强烈建议使用官方软件源！"
+			yellow "1. 检查VPS系统的网络设置和软件源设置，强烈建议使用系统官方软件源！"
 			yellow "2. 你可能用的是CentOS 8操作系统，请重置系统为CentOS 7后再安装本脚本"
 			yellow "3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
 			exit 1
