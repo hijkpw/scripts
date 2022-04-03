@@ -265,8 +265,10 @@ menu(){
     green "5. Wgcf-WARP 临时开关"
     green "6. WARP-Cli代理模式临时开关"
     green "7. WARP代理模式更改Socks5端口"
+    green "8. WARP刷NetFilx IP"
     green "9. 卸载WARP"
-    read -p "请输入选项：" menuNumberInput
+    green "0. 退出菜单"
+    read -p "请输入选项 [1-0]：" menuNumberInput
     case "$menuNumberInput" in
         1 ) install ;;
         2 ) wgcfmode=1 && install ;;
