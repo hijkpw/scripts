@@ -268,7 +268,7 @@ menu(){
     green "8. WARP刷NetFilx IP"
     green "9. 卸载WARP"
     green "0. 退出菜单"
-    read -p "请输入选项 [1-0]：" menuNumberInput
+    read -p "请输入选项 [0-9]：" menuNumberInput
     case "$menuNumberInput" in
         1 ) install ;;
         2 ) wgcfmode=1 && install ;;
