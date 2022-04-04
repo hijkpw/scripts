@@ -1737,7 +1737,7 @@ menu() {
 	echo -e "  ${GREEN}20.${PLAIN}  VPS系统优化"
 	echo " -------------"
 	echo -e "  ${GREEN}0.${PLAIN}   退出"
-	echo -n " 当前状态："
+	echo -n " 当前Xray状态："
 	statusText
 	echo
 
