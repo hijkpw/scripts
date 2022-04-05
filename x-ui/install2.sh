@@ -75,10 +75,10 @@ else
     exit 1
 fi
 
-echo "架构: ${arch}"
+echo "CPU架构: ${arch}"
 
 if [ $(getconf WORD_BIT) != '32' ] && [ $(getconf LONG_BIT) != '64' ]; then
-    echo "本软件不支持 32 位系统(x86)，请使用 64 位系统(x86_64)，如果检测有误，请联系作者"
+    echo "X-ui面板不支持 32 位系统(x86)，请使用 64 位系统(x86_64)，如果检测有误，请联系作者"
     rm -f install.sh
     exit -1
 fi
