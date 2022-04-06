@@ -33,6 +33,8 @@ done
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
 
 arch=$(arch)
+os_version=$(grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1)
+IP=$(curl -sm8 ip.sb)
 
 if [[ $arch == "x86_64" || $arch == "x64" || $arch == "amd64" ]]; then
     arch="amd64"
@@ -53,8 +55,6 @@ if [ $(getconf WORD_BIT) != '32' ] && [ $(getconf LONG_BIT) != '64' ]; then
     rm -f install.sh
     exit -1
 fi
-
-os_version=$(grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1)
 
 if [[ $SYSTEM == "CentOS" ]]; then
     if [[ ${os_version} -le 6 ]]; then
