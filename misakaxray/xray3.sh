@@ -1762,7 +1762,7 @@ menu() {
 	statusText
 	echo
 
-	read -p "请选择操作[0-20]：" answer
+	read -p "请选择操作[0-21]：" answer
 	case $answer in
 		0) exit 1 ;;
 		1) install ;;
