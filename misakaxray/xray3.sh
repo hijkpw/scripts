@@ -1790,6 +1790,6 @@ action=$1
 [[ -z $1 ]] && action=menu
 
 case "$action" in
-menu | update | uninstall | start | restart | stop | showInfo | showLog) ${action} ;;
-*) echo " 参数错误" && echo " 用法: $(basename $0) [menu|update|uninstall|start|restart|stop|showInfo|showLog]" ;;
+	menu | update | uninstall | start | restart | stop | showInfo | showLog) ${action} ;;
+	*) echo " 参数错误" && echo " 用法: $(basename $0) [menu|update|uninstall|start|restart|stop|showInfo|showLog]" ;;
 esac
