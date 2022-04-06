@@ -1,65 +1,55 @@
 #!/bin/bash
 
+red() {
+    echo -e "\033[31m\033[01m$1\033[0m"
+}
+
+green() {
+    echo -e "\033[32m\033[01m$1\033[0m"
+}
+
+yellow() {
+    echo -e "\033[33m\033[01m$1\033[0m"
+}
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 PLAIN='\033[0m'
 
-#Add some basic function here
-function LOGD() {
-    echo -e "${YELLOW}[DEG] $* ${PLAIN}"
-}
+REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'")
+RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS")
+PACKAGE_UPDATE=("apt -y update" "apt -y update" "yum -y update" "yum -y update")
+PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install")
+PACKAGE_UNINSTALL=("apt -y autoremove" "apt -y autoremove" "yum -y autoremove" "yum -y autoremove")
 
-function LOGE() {
-    echo -e "${RED}[ERR] $* ${PLAIN}"
-}
+[[ $EUID -ne 0 ]] && red "请在root用户下运行脚本" && exit 1
 
-function LOGI() {
-    echo -e "${GREEN}[INF] $* ${PLAIN}"
-}
-# check root
-[[ $EUID -ne 0 ]] && LOGE "错误:  必须使用root用户运行此脚本！\n" && exit 1
+CMD=("$(grep -i pretty_name /etc/os-release 2>/dev/null | cut -d \" -f2)" "$(hostnamectl 2>/dev/null | grep -i system | cut -d : -f2)" "$(lsb_release -sd 2>/dev/null)" "$(grep -i description /etc/lsb-release 2>/dev/null | cut -d \" -f2)" "$(grep . /etc/redhat-release 2>/dev/null)" "$(grep . /etc/issue 2>/dev/null | cut -d \\ -f1 | sed '/^[ ]*$/d')")
 
-# check os
-if [[ -f /etc/redhat-release ]]; then
-    release="centos"
-elif cat /etc/issue | grep -Eqi "debian"; then
-    release="debian"
-elif cat /etc/issue | grep -Eqi "ubuntu"; then
-    release="ubuntu"
-elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
-    release="centos"
-elif cat /proc/version | grep -Eqi "debian"; then
-    release="debian"
-elif cat /proc/version | grep -Eqi "ubuntu"; then
-    release="ubuntu"
-elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
-    release="centos"
-else
-    LOGE "未检测到系统版本，请联系脚本作者！\n" && exit 1
-fi
+for i in "${CMD[@]}"; do
+    SYS="$i" && [[ -n $SYS ]] && break
+done
 
-os_version=""
+for ((int = 0; int < ${#REGEX[@]}; int++)); do
+    [[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM="${RELEASE[int]}" && [[ -n $SYSTEM ]] && break
+done
 
-# os version
-if [[ -f /etc/os-release ]]; then
-    os_version=$(awk -F'[= ."]' '/VERSION_ID/{print $3}' /etc/os-release)
-fi
-if [[ -z "$os_version" && -f /etc/lsb-release ]]; then
-    os_version=$(awk -F'[= ."]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
-fi
+[[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
 
-if [[ x"${release}" == x"centos" ]]; then
+os_version=$(grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1)
+
+if [[ $SYSTEM == "CentOS" ]]; then
     if [[ ${os_version} -le 6 ]]; then
-        LOGE "请使用 CentOS 7 或更高版本的系统！\n" && exit 1
+        red "请使用 CentOS 7 或更高版本的系统！\n" && exit 1
     fi
-elif [[ x"${release}" == x"ubuntu" ]]; then
+elif [[ $SYSTEM == "Ubuntu" ]]; then
     if [[ ${os_version} -lt 16 ]]; then
-        LOGE "请使用 Ubuntu 16 或更高版本的系统！\n" && exit 1
+        red "请使用 Ubuntu 16 或更高版本的系统！\n" && exit 1
     fi
-elif [[ x"${release}" == x"debian" ]]; then
+elif [[ $SYSTEM == "Debian" ]]; then
     if [[ ${os_version} -lt 8 ]]; then
-        LOGE "请使用 Debian 8 或更高版本的系统！\n" && exit 1
+        red "请使用 Debian 8 或更高版本的系统！\n" && exit 1
     fi
 fi
 
@@ -80,7 +70,7 @@ confirm() {
 }
 
 confirm_restart() {
-    confirm "是否重启面板，重启面板也会重启 xray" "y"
+    confirm "是否重启X-ui面板，重启面板也会重启xray" "y"
     if [[ $? == 0 ]]; then
         restart
     else
@@ -89,7 +79,7 @@ confirm_restart() {
 }
 
 before_show_menu() {
-    echo && echo -n -e "${YELLOW}按回车返回主菜单: ${PLAIN}" && read temp
+    echo && echo -n -e "${YELLOW}按回车键返回主菜单: ${PLAIN}" && read temp
     show_menu
 }
 
@@ -105,9 +95,9 @@ install() {
 }
 
 update() {
-    confirm "本功能会强制重装当前最新版，数据不会丢失，是否继续?" "n"
+    confirm "本功能会强制重装当前最新版X-ui面板，数据不会丢失，是否继续?" "n"
     if [[ $? != 0 ]]; then
-        LOGE "已取消"
+        red "已取消"
         if [[ $# == 0 ]]; then
             before_show_menu
         fi
@@ -115,13 +105,13 @@ update() {
     fi
     bash <(curl -Ls https://raw.githubusercontent.com/Misaka-blog/x-ui/master/install.sh)
     if [[ $? == 0 ]]; then
-        LOGI "更新完成，已自动重启面板 "
+        green "更新完成，已自动重启面板 "
         exit 0
     fi
 }
 
 uninstall() {
-    confirm "确定要卸载面板吗，xray 也会卸载?" "n"
+    confirm "确定要卸载X-ui面板吗，xray 也会卸载?" "n"
     if [[ $? != 0 ]]; then
         if [[ $# == 0 ]]; then
             show_menu
@@ -137,8 +127,9 @@ uninstall() {
     rm /usr/local/x-ui/ -rf
 
     echo ""
-    echo -e "卸载成功，如果你想删除此脚本，则退出脚本后运行 ${GREEN}rm /usr/bin/x-ui -f${PLAIN} 进行删除"
+    echo -e "卸载X-ui面板成功"
     echo ""
+    rm /usr/bin/x-ui -f
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -146,7 +137,7 @@ uninstall() {
 }
 
 reset_user() {
-    confirm "确定要将用户名和密码重置为 admin 吗" "n"
+    confirm "确定要将面板用户名和密码重置为 admin 吗" "n"
     if [[ $? != 0 ]]; then
         if [[ $# == 0 ]]; then
             show_menu
@@ -154,12 +145,12 @@ reset_user() {
         return 0
     fi
     /usr/local/x-ui/x-ui setting -username admin -password admin
-    echo -e "用户名和密码已重置为 ${GREEN}admin${PLAIN}，现在请重启面板"
+    echo -e "面板用户名和密码已重置为 ${GREEN}admin${PLAIN}，现在请重启面板"
     confirm_restart
 }
 
 reset_config() {
-    confirm "确定要重置所有面板设置吗，账号数据不会丢失，用户名和密码不会改变" "n"
+    confirm "确定要重置所有设置吗，账号数据不会丢失，用户名和密码不会改变" "n"
     if [[ $? != 0 ]]; then
         if [[ $# == 0 ]]; then
             show_menu
@@ -167,18 +158,18 @@ reset_config() {
         return 0
     fi
     /usr/local/x-ui/x-ui setting -reset
-    echo -e "所有面板设置已重置为默认值，现在请重启面板，并使用默认的 ${GREEN}54321${PLAIN} 端口访问面板"
+    echo -e "所有面板设置已重置为默认值，请重启面板并使用默认的 ${GREEN}54321${PLAIN} 端口访问面板"
     confirm_restart
 }
 
 set_port() {
     echo && echo -n -e "输入端口号[1-65535]: " && read port
     if [[ -z "${port}" ]]; then
-        LOGD "已取消"
+        yellow "已取消"
         before_show_menu
     else
         /usr/local/x-ui/x-ui setting -port ${port}
-        echo -e "设置端口完毕，现在请重启面板，并使用新设置的端口 ${GREEN}${port}${PLAIN} 访问面板"
+        echo -e "设置端口完毕，请重启面板并使用新设置的端口 ${GREEN}${port}${PLAIN} 访问面板"
         confirm_restart
     fi
 }
@@ -187,15 +178,15 @@ start() {
     check_status
     if [[ $? == 0 ]]; then
         echo ""
-        LOGI "面板已运行，无需再次启动，如需重启请选择重启"
+        green "X-ui面板已运行，无需再次启动，如需重启请选择重启"
     else
         systemctl start x-ui
         sleep 2
         check_status
         if [[ $? == 0 ]]; then
-            LOGI "x-ui 启动成功"
+            green "X-ui 面板启动成功"
         else
-            LOGE "面板启动失败，可能是因为启动时间超过了两秒，请稍后查看日志信息"
+            red "X-ui 面板启动失败，可能是因为启动时间超过了两秒，请稍后查看日志信息"
         fi
     fi
 
@@ -208,15 +199,15 @@ stop() {
     check_status
     if [[ $? == 1 ]]; then
         echo ""
-        LOGI "面板已停止，无需再次停止"
+        green "X-ui 面板已停止，无需再次停止"
     else
         systemctl stop x-ui
         sleep 2
         check_status
         if [[ $? == 1 ]]; then
-            LOGI "x-ui 与 xray 停止成功"
+            green "X-ui 与 xray 停止成功"
         else
-            LOGE "面板停止失败，可能是因为停止时间超过了两秒，请稍后查看日志信息"
+            red "X-ui 面板停止失败，可能是因为停止时间超过了两秒，请稍后查看日志信息"
         fi
     fi
 
@@ -230,9 +221,9 @@ restart() {
     sleep 2
     check_status
     if [[ $? == 0 ]]; then
-        LOGI "x-ui 与 xray 重启成功"
+        green "X-ui 与 xray 重启成功"
     else
-        LOGE "面板重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息"
+        red "X-ui 面板重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息"
     fi
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -246,12 +237,12 @@ status() {
     fi
 }
 
-enable() {
+enable_xui() {
     systemctl enable x-ui
     if [[ $? == 0 ]]; then
-        LOGI "x-ui 设置开机自启成功"
+        green "X-ui 设置开机自启成功"
     else
-        LOGE "x-ui 设置开机自启失败"
+        red "X-ui 设置开机自启失败"
     fi
 
     if [[ $# == 0 ]]; then
@@ -259,12 +250,12 @@ enable() {
     fi
 }
 
-disable() {
+disable_xui() {
     systemctl disable x-ui
     if [[ $? == 0 ]]; then
-        LOGI "x-ui 取消开机自启成功"
+        green "X-ui 取消开机自启成功"
     else
-        LOGE "x-ui 取消开机自启失败"
+        red "X-ui 取消开机自启失败"
     fi
 
     if [[ $# == 0 ]]; then
@@ -296,11 +287,11 @@ update_shell() {
     wget -O /usr/bin/x-ui -N --no-check-certificate https://github.com/Misaka-blog/x-ui/raw/master/x-ui.sh
     if [[ $? != 0 ]]; then
         echo ""
-        LOGE "下载脚本失败，请检查本机能否连接 Github"
+        red "下载脚本失败，请检查本机能否连接 Github"
         before_show_menu
     else
         chmod +x /usr/bin/x-ui
-        LOGI "升级脚本成功，请重新运行脚本" && exit 0
+        green "升级脚本成功，请重新运行脚本" && exit 0
     fi
 }
 
@@ -330,7 +321,7 @@ check_uninstall() {
     check_status
     if [[ $? != 2 ]]; then
         echo ""
-        LOGE "面板已安装，请不要重复安装"
+        red "X-ui 面板已安装，请不要重复安装"
         if [[ $# == 0 ]]; then
             before_show_menu
         fi
@@ -344,7 +335,7 @@ check_install() {
     check_status
     if [[ $? == 2 ]]; then
         echo ""
-        LOGE "请先安装面板"
+        red "请先安装 X-ui 面板"
         if [[ $# == 0 ]]; then
             before_show_menu
         fi
@@ -401,12 +392,12 @@ show_xray_status() {
 
 ssl_cert_issue() {
     echo -E ""
-    LOGD "******使用说明******"
-    LOGI "该脚本将使用Acme脚本申请证书,使用时需保证:"
-    LOGI "1.知晓Cloudflare 注册邮箱"
-    LOGI "2.知晓Cloudflare Global API Key"
-    LOGI "3.域名已通过Cloudflare进行解析到当前服务器"
-    LOGI "4.该脚本申请证书默认安装路径为/root/cert目录"
+    yellow "******使用说明******"
+    yellow "该脚本将使用Acme脚本申请证书,使用时需保证:"
+    yellow "1.知晓Cloudflare 注册邮箱"
+    yellow "2.知晓Cloudflare Global API Key"
+    yellow "3.域名已通过Cloudflare进行解析到当前服务器"
+    yellow "4.该脚本申请证书默认安装路径为/root/cert目录"
     confirm "我已确认以上内容[y/n]" "y"
     if [ $? -eq 0 ]; then
         wget -N https://raw.githubusercontents.com/Misaka-blog/acme-1key/master/acme1key.sh && bash acme1key.sh
@@ -459,98 +450,42 @@ show_menu() {
  ${GREEN}15.${PLAIN} 一键申请SSL证书(acme申请)
  "
     show_status
-    echo && read -p "请输入选择 [0-14]: " num
+    echo && read -p "请输入选择 [0-15]: " num
 
     case "${num}" in
-    0)
-        exit 0
-        ;;
-    1)
-        check_uninstall && install
-        ;;
-    2)
-        check_install && update
-        ;;
-    3)
-        check_install && uninstall
-        ;;
-    4)
-        check_install && reset_user
-        ;;
-    5)
-        check_install && reset_config
-        ;;
-    6)
-        check_install && set_port
-        ;;
-    7)
-        check_install && start
-        ;;
-    8)
-        check_install && stop
-        ;;
-    9)
-        check_install && restart
-        ;;
-    10)
-        check_install && status
-        ;;
-    11)
-        check_install && show_log
-        ;;
-    12)
-        check_install && enable
-        ;;
-    13)
-        check_install && disable
-        ;;
-    14)
-        install_bbr
-        ;;
-    15)
-        ssl_cert_issue
-        ;;
-    *)
-        LOGE "请输入正确的数字 [0-14]"
-        ;;
+        0) exit 0 ;;
+        1) check_uninstall && install ;;
+        2) check_install && update ;;
+        3) check_install && uninstall ;;
+        4) check_install && reset_user ;;
+        5) check_install && reset_config ;;
+        6) check_install && set_port ;;
+        7) check_install && start ;;
+        8) check_install && stop ;;
+        9) check_install && restart ;;
+        10) check_install && status ;;
+        11) check_install && show_log ;;
+        12) check_install && enable_xui ;;
+        13) check_install && disable_xui ;;
+        14) install_bbr ;;
+        15) ssl_cert_issue ;;
+        *) red "请输入正确的数字 [0-15]" ;;
     esac
 }
 
 if [[ $# > 0 ]]; then
     case $1 in
-    "start")
-        check_install 0 && start 0
-        ;;
-    "stop")
-        check_install 0 && stop 0
-        ;;
-    "restart")
-        check_install 0 && restart 0
-        ;;
-    "status")
-        check_install 0 && status 0
-        ;;
-    "enable")
-        check_install 0 && enable 0
-        ;;
-    "disable")
-        check_install 0 && disable 0
-        ;;
-    "log")
-        check_install 0 && show_log 0
-        ;;
-    "v2-ui")
-        check_install 0 && migrate_v2_ui 0
-        ;;
-    "update")
-        check_install 0 && update 0
-        ;;
-    "install")
-        check_uninstall 0 && install 0
-        ;;
-    "uninstall")
-        check_install 0 && uninstall 0
-        ;;
+    "start") check_install 0 && start 0 ;;
+    "stop") check_install 0 && stop 0 ;;
+    "restart") check_install 0 && restart 0 ;;
+    "status") check_install 0 && status 0 ;;
+    "enable") check_install 0 && enable_xui 0 ;;
+    "disable") check_install 0 && disable_xui 0 ;;
+    "log") check_install 0 && show_log 0 ;;
+    "v2-ui") check_install 0 && migrate_v2_ui 0 ;;
+    "update") check_install 0 && update 0 ;;
+    "install") check_uninstall 0 && install 0 ;;
+    "uninstall") check_install 0 && uninstall 0 ;;
     *) show_usage ;;
     esac
 else
