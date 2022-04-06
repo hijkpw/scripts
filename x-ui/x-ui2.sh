@@ -406,6 +406,22 @@ ssl_cert_issue() {
     fi
 }
 
+open_ports(){
+    systemctl stop firewalld.service
+    systemctl disable firewalld.service
+    setenforce 0
+    ufw disable
+    iptables -P INPUT ACCEPT
+    iptables -P FORWARD ACCEPT
+    iptables -P OUTPUT ACCEPT
+    iptables -t nat -F
+    iptables -t mangle -F 
+    iptables -F
+    iptables -X
+    netfilter-persistent save
+    yellow "VPS中的所有网络端口已开启"
+}
+
 show_usage() {
     echo "x-ui 管理脚本使用方法: "
     echo "------------------------------------------"
@@ -448,9 +464,10 @@ show_menu() {
 ————————————————
  ${GREEN}14.${PLAIN} 一键安装 bbr (最新内核)
  ${GREEN}15.${PLAIN} 一键申请SSL证书(acme申请)
+ ${GREEN}16.${PLAIN} VPS防火墙放开所有网络端口
  "
     show_status
-    echo && read -p "请输入选择 [0-15]: " num
+    echo && read -p "请输入选择 [0-16]: " num
 
     case "${num}" in
         0) exit 0 ;;
@@ -469,6 +486,7 @@ show_menu() {
         13) check_install && disable_xui ;;
         14) install_bbr ;;
         15) ssl_cert_issue ;;
+        16) open_ports ;;
         *) red "请输入正确的数字 [0-15]" ;;
     esac
 }
