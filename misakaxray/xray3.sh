@@ -1715,6 +1715,7 @@ open_ports(){
     iptables -F
     iptables -X
     netfilter-persistent save
+	yellow "VPS中的所有网络端口已开启"
 }
 
 menu() {
@@ -1750,6 +1751,7 @@ menu() {
 	echo -e "  ${GREEN}18.${PLAIN}  安装并管理WARP"
 	echo -e "  ${GREEN}19.${PLAIN}  设置DNS64服务器"
 	echo -e "  ${GREEN}20.${PLAIN}  VPS系统优化"
+	echo -e "  ${GREEN}21.${PLAIN}  放开VPS的所有端口"
 	echo " -------------"
 	echo -e "  ${GREEN}0.${PLAIN}   退出"
 	echo -n " 当前Xray状态："
@@ -1779,6 +1781,7 @@ menu() {
 		18) warpmenu ;;
 		19) setdns64 ;;
 		20) system_optimize ;;
+		21) open_ports ;;
 		*) red "请选择正确的操作！" && exit 1 ;;
 	esac
 }
