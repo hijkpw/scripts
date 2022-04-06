@@ -68,14 +68,24 @@ back2menu(){
 getNgrokAddress(){
 	if [ $httptcp == "tcp" ]; then
 		tcpNgrok=$(curl --silent --show-error http://127.0.0.1:4040/api/tunnels | sed -nE 's/.*public_url":"tcp:..([^"]*).*/\1/p')
-		green "隧道启动成功！当前TCP隧道地址为：$tcpNgrok"
+		if [[ -n $tcpNgrok ]]; then
+			green "隧道启动成功！当前TCP隧道地址为：$tcpNgrok"
+		else
+			screen -S screen4ngrok -X quit
+			screen -USdm screen4ngrok ngrok $httptcp $tunnelPort -region $ngrok_region
+		fi
 	fi
 	if [ $httptcp == "http" ]; then
 		httpNgrok=$(curl --silent --show-error http://127.0.0.1:4040/api/tunnels | sed -nE 's/.*public_url":"http:..([^"]*).*/\1/p')
 		httpsNgrok=$(curl --silent --show-error http://127.0.0.1:4040/api/tunnels | sed -nE 's/.*public_url":"https..([^"]*).*/\1/p')
-		green "隧道启动成功！"
-		yellow "当前隧道HTTP地址为：http://$httpNgrok"
-		yellow "当前隧道HTTPS地址为：https://$httpsNgrok"
+		if [[ -n $httpNgrok && -n $httpsNgrok ]]; then
+			green "隧道启动成功！"
+			yellow "当前隧道HTTP地址为：http://$httpNgrok"
+			yellow "当前隧道HTTPS地址为：https://$httpsNgrok"
+		else
+			screen -S screen4ngrok -X quit
+			screen -USdm screen4ngrok ngrok $httptcp $tunnelPort -region $ngrok_region
+		fi
 	fi
 }
 
