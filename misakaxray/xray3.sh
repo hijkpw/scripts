@@ -112,10 +112,14 @@ statusText() {
 }
 
 normalizeVersion() {
+	latestXrayVer=$(curl -Ls "https://api.github.com/repos/XTLS/Xray-core/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+	until [[ $latestXrayVer != "mentions_count" ]]; do
+		latestXrayVer=$(curl -Ls "https://api.github.com/repos/XTLS/Xray-core/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+	done
 	if [ -n "$1" ]; then
 		case "$1" in
 			v*) echo "$1" ;;
-			http*) echo $(curl -Ls "https://api.github.com/repos/XTLS/Xray-core/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') ;;
+			http*) echo $latestXrayVer ;;
 			*) echo "v$1" ;;
 		esac
 	else
