@@ -103,20 +103,20 @@ status() {
 statusText() {
 	res=$(status)
 	case $res in
-	2) echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN} ;;
-	3) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN} ;;
-	4) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN}, ${RED}Nginx未运行${PLAIN} ;;
-	5) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行, Nginx正在运行${PLAIN} ;;
-	*) echo -e ${RED}未安装${PLAIN} ;;
+		2) echo -e ${GREEN}已安装${PLAIN} ${RED}未运行${PLAIN} ;;
+		3) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN} ;;
+		4) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行${PLAIN}, ${RED}Nginx未运行${PLAIN} ;;
+		5) echo -e ${GREEN}已安装${PLAIN} ${GREEN}Xray正在运行, Nginx正在运行${PLAIN} ;;
+		*) echo -e ${RED}未安装${PLAIN} ;;
 	esac
 }
 
 normalizeVersion() {
 	if [ -n "$1" ]; then
 		case "$1" in
-		v*) echo "$1" ;;
-		http*) echo "v1.5.4" ;;
-		*) echo "v$1" ;;
+			v*) echo "$1" ;;
+			http*) echo $(curl -Ls "https://api.github.com/repos/XTLS/Xray-core/releases/latest" | grep '"tag_name": ' | sed -E 's/.*"([^"]+)".*/\1/') ;;
+			*) echo "v$1" ;;
 		esac
 	else
 		echo ""
@@ -236,12 +236,12 @@ getData() {
 		echo "   6) wiregard"
 		read -p "请选择伪装类型[默认：无]：" answer
 		case $answer in
-		2) HEADER_TYPE="utp" ;;
-		3) HEADER_TYPE="srtp" ;;
-		4) HEADER_TYPE="wechat-video" ;;
-		5) HEADER_TYPE="dtls" ;;
-		6) HEADER_TYPE="wireguard" ;;
-		*) HEADER_TYPE="none" ;;
+			2) HEADER_TYPE="utp" ;;
+			3) HEADER_TYPE="srtp" ;;
+			4) HEADER_TYPE="wechat-video" ;;
+			5) HEADER_TYPE="dtls" ;;
+			6) HEADER_TYPE="wireguard" ;;
+			*) HEADER_TYPE="none" ;;
 		esac
 		yellow "伪装类型：$HEADER_TYPE"
 		SEED=$(cat /proc/sys/kernel/random/uuid)
@@ -260,9 +260,9 @@ getData() {
 		read -p "请选择流控模式[默认:direct]" answer
 		[[ -z "$answer" ]] && answer=1
 		case $answer in
-		1) FLOW="xtls-rprx-direct" ;;
-		2) FLOW="xtls-rprx-origin" ;;
-		*) red "无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
+			1) FLOW="xtls-rprx-direct" ;;
+			2) FLOW="xtls-rprx-origin" ;;
+			*) red "无效选项，使用默认的xtls-rprx-direct" && FLOW="xtls-rprx-direct" ;;
 		esac
 		yellow "流控模式：$FLOW"
 	fi
@@ -297,34 +297,34 @@ getData() {
 			PROXY_URL="https://bing.ioliu.cn"
 		else
 			case $answer in
-			1) PROXY_URL="" ;;
-			2)
-				len=${#SITES[@]}
-				((len--))
-				while true; do
-					index=$(shuf -i0-${len} -n1)
-					PROXY_URL=${SITES[$index]}
-					host=$(echo ${PROXY_URL} | cut -d/ -f3)
-					ip=$(curl -sm8 ipget.net/?ip=${host})
-					res=$(echo -n ${ip} | grep ${host})
-					if [[ "${res}" == "" ]]; then
-						echo "$ip $host" >>/etc/hosts
-						break
+				1) PROXY_URL="" ;;
+				2)
+					len=${#SITES[@]}
+					((len--))
+					while true; do
+						index=$(shuf -i0-${len} -n1)
+						PROXY_URL=${SITES[$index]}
+						host=$(echo ${PROXY_URL} | cut -d/ -f3)
+						ip=$(curl -sm8 ipget.net/?ip=${host})
+						res=$(echo -n ${ip} | grep ${host})
+						if [[ "${res}" == "" ]]; then
+							echo "$ip $host" >>/etc/hosts
+							break
+						fi
+					done
+					;;
+				3) PROXY_URL="https://bing.ioliu.cn" ;;
+				4)
+					read -p "请输入反代站点(以http或者https开头)：" PROXY_URL
+					if [[ -z "$PROXY_URL" ]]; then
+						red "请输入反代网站！"
+						exit 1
+					elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
+						red "反代网站必须以http或https开头！"
+						exit 1
 					fi
-				done
-				;;
-			3) PROXY_URL="https://bing.ioliu.cn" ;;
-			4)
-				read -p "请输入反代站点(以http或者https开头)：" PROXY_URL
-				if [[ -z "$PROXY_URL" ]]; then
-					red "请输入反代网站！"
-					exit 1
-				elif [[ "${PROXY_URL:0:4}" != "http" ]]; then
-					red "反代网站必须以http或https开头！"
-					exit 1
-				fi
-				;;
-			*) red "请输入正确的选项！" && exit 1 ;;
+					;;
+				*) red "请输入正确的选项！" && exit 1 ;;
 			esac
 		fi
 		REMOTE_HOST=$(echo ${PROXY_URL} | cut -d/ -f3)
@@ -1704,17 +1704,17 @@ system_optimize(){
 
 open_ports(){
 	systemctl stop firewalld.service
-    systemctl disable firewalld.service
-    setenforce 0
-    ufw disable
-    iptables -P INPUT ACCEPT
-    iptables -P FORWARD ACCEPT
-    iptables -P OUTPUT ACCEPT
-    iptables -t nat -F
-    iptables -t mangle -F 
-    iptables -F
-    iptables -X
-    netfilter-persistent save
+	systemctl disable firewalld.service
+	setenforce 0
+	ufw disable
+	iptables -P INPUT ACCEPT
+	iptables -P FORWARD ACCEPT
+	iptables -P OUTPUT ACCEPT
+	iptables -t nat -F
+	iptables -t mangle -F 
+	iptables -F
+	iptables -X
+	netfilter-persistent save
 	yellow "VPS中的所有网络端口已开启"
 }
 
