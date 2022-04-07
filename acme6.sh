@@ -95,11 +95,11 @@ getSingleCert(){
     domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
     if [[ -n $(echo $domainIP | grep nginx) ]]; then
         domainIP=$(curl -s ipget.net/?ip="$domain")
-        if [[ $domainIP == $ipv4 ]]; then
-            bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server zerossl
-        fi
         if [[ $domainIP == $ipv6 ]]; then
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server zerossl --listen-v6
+        fi
+        if [[ $domainIP == $ipv4 ]]; then
+            bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server zerossl
         fi
 
         if [[ -n $(echo $domainIP | grep nginx) ]]; then
