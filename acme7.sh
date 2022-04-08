@@ -123,10 +123,10 @@ getSingleCert(){
 
 getDomainCert(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
-    checkwarp
-    adddns64
-    ipv4=$(curl -s4m8 https://ip.gs)
-    ipv6=$(curl -s6m8 https://ip.gs)
+    # checkwarp
+    # adddns64
+    # ipv4=$(curl -s4m8 https://ip.gs)
+    # ipv6=$(curl -s6m8 https://ip.gs)
     read -p "请输入需要申请证书的泛域名（输入格式：example.com）：" domain
     [[ -z $domain ]] && red "未输入域名，无法执行操作！" && exit 1
     read -p "请输入Cloudflare Global API Key：" GAK
@@ -135,7 +135,7 @@ getDomainCert(){
     read -p "请输入Cloudflare的登录邮箱：" CFemail
     [[ -z $domain ]] && red "未输入Cloudflare的登录邮箱，无法执行操作！" && exit 1
     export CF_Email="$CFemail"
-    if [[ -z $ipv4 ]]; then
+    if [[ -z $(curl -sm8 ip.sb | grep ":") ]]; then
         bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "*.${domain}" -d "${domain}" -k ec-256 --server zerossl --listen-v6
     else
         bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "*.${domain}" -d "${domain}" -k ec-256 --server zerossl
@@ -146,10 +146,10 @@ getDomainCert(){
 
 getSingleDomainCert(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
-    checkwarp
-    adddns64
-    ipv4=$(curl -s4m8 https://ip.gs)
-    ipv6=$(curl -s6m8 https://ip.gs)
+    # checkwarp
+    # adddns64
+    # ipv4=$(curl -s4m8 https://ip.gs)
+    # ipv6=$(curl -s6m8 https://ip.gs)
     read -p "请输入需要申请证书的域名：" domain
     read -p "请复制Cloudflare的Global API Key：" GAK
     [[ -z $GAK ]] && red "未输入Cloudflare Global API Key，无法执行操作！" && exit 1
@@ -157,7 +157,7 @@ getSingleDomainCert(){
     read -p "请输入登录Cloudflare的注册邮箱地址：" CFemail
     [[ -z $domain ]] && red "未输入Cloudflare的登录邮箱，无法执行操作！" && exit 1
     export CF_Email="$CFemail"
-    if [[ -z $ipv4 ]]; then
+    if [[ -z $(curl -sm8 ip.sb | grep ":") ]]; then
         bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" -k ec-256 --server zerossl --listen-v6
     else
         bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" -k ec-256 --server zerossl
