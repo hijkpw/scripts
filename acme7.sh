@@ -87,8 +87,8 @@ getSingleCert(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
     # checkwarp
     # adddns64
-    ipv4=$(curl -s4m8 https://ip.gs)
-    ipv6=$(curl -s6m8 https://ip.gs)
+    # ipv4=$(curl -s4m8 https://ip.gs)
+    # ipv6=$(curl -s6m8 https://ip.gs)
     read -p "请输入解析完成的域名:" domain
     [[ -z $domain ]] && red "未输入域名，无法执行操作！" && exit 1
     green "已输入的域名：$domain" && sleep 1
@@ -97,7 +97,8 @@ getSingleCert(){
         domainIP=$(curl -s ipget.net/?ip="$domain")
         if [[ $domainIP == $(curl -sm8 ip.sb | grep ":") ]]; then
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server zerossl --listen-v6
-        else
+        fi
+        if [[ $domainIP == $(curl -sm8 ip.sb | grep ".") ]]; then
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server zerossl
         fi
 
@@ -105,7 +106,7 @@ getSingleCert(){
             yellow "域名解析无效，请检查域名是否填写正确或稍等几分钟等待解析完成再执行脚本"
             exit 1
         elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
-            if [[ $domainIP != $ipv4 ]] && [[ $domainIP != $ipv6 ]]; then
+            if [[ $domainIP != $(curl -sm8 ip.sb | grep ".") ]] && [[ $domainIP != $(curl -sm8 ip.sb | grep ":") ]]; then
                 green "${domain} 解析结果：（$domainIP）"
                 red "当前二级域名解析的IP与当前VPS使用的IP不匹配"
                 green "建议如下："
