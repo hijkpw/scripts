@@ -85,7 +85,7 @@ install_acme(){
 
 getSingleCert(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
-    checkwarp
+    # checkwarp
     # adddns64
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
