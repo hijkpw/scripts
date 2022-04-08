@@ -146,43 +146,11 @@ checktls() {
         if [[ -s /root/cert.crt && -s /root/private.key ]]; then
             sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
             echo "0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1" >> /etc/crontab
-            if [[ -n $(type -P wgcf) ]]; then
-                yellow "正在启动 Wgcf-WARP"
-                wg-quick up wgcf >/dev/null 2>&1
-                WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                until [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; do
-                    red "无法启动Wgcf-WARP，正在尝试重启"
-                    wg-quick down wgcf >/dev/null 2>&1
-                    wg-quick up wgcf >/dev/null 2>&1
-                    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                    sleep 8
-                done
-                systemctl enable wg-quick@wgcf >/dev/null 2>&1
-                green "Wgcf-WARP 已启动成功"
-            fi
             green "证书申请成功！脚本申请到的证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
             yellow "证书crt路径如下：/root/cert.crt"
             yellow "私钥key路径如下：/root/private.key"
             back2menu
         else
-            if [[ -n $(type -P wgcf) ]]; then
-                yellow "正在启动 Wgcf-WARP"
-                wg-quick up wgcf >/dev/null 2>&1
-                WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                until [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; do
-                    red "无法启动Wgcf-WARP，正在尝试重启"
-                    wg-quick down wgcf >/dev/null 2>&1
-                    wg-quick up wgcf >/dev/null 2>&1
-                    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                    sleep 8
-                done
-                systemctl enable wg-quick@wgcf >/dev/null 2>&1
-                green "Wgcf-WARP 已启动成功"
-            fi
             red "抱歉，证书申请失败"
             green "建议如下："
             yellow "1. 自行检测防火墙是否打开，如使用80端口申请模式时，请关闭防火墙或放行80端口"
@@ -217,8 +185,6 @@ renew_cert() {
     read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
     [[ -z $domain ]] && red "未输入域名，无法执行操作！" && exit 1
     if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
-        checkwarp
-        adddns64
         bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
         checktls
         back2menu
