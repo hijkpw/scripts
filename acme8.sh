@@ -73,10 +73,10 @@ getSingleCert(){
     domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
     if [[ -n $(echo $domainIP | grep nginx) ]]; then
         domainIP=$(curl -s ipget.net/?ip="$domain")
-        if [[ $domainIP == $(curl -sm8 ip.sb | grep ":") ]]; then
+        if [[ $domainIP == $(curl -s6m8 ip.sb | grep ":") ]]; then
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server zerossl --listen-v6
         fi
-        if [[ $domainIP == $(curl -sm8 ip.sb | grep ".") ]]; then
+        if [[ $domainIP == $(curl -s4m8 ip.sb | grep ".") ]]; then
             bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server zerossl
         fi
 
@@ -84,7 +84,7 @@ getSingleCert(){
             yellow "域名解析无效，请检查域名是否填写正确或稍等几分钟等待解析完成再执行脚本"
             exit 1
         elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
-            if [[ $domainIP != $(curl -sm8 ip.sb | grep ".") ]] && [[ $domainIP != $(curl -sm8 ip.sb | grep ":") ]]; then
+            if [[ $domainIP != $(curl -s4m8 ip.sb | grep ".") ]] && [[ $domainIP != $(curl -s6m8 ip.sb | grep ":") ]]; then
                 green "${domain} 解析结果：（$domainIP）"
                 red "当前二级域名解析的IP与当前VPS使用的IP不匹配"
                 green "建议如下："
@@ -114,7 +114,7 @@ getDomainCert(){
     read -p "请输入Cloudflare的登录邮箱：" CFemail
     [[ -z $domain ]] && red "未输入Cloudflare的登录邮箱，无法执行操作！" && exit 1
     export CF_Email="$CFemail"
-    if [[ -z $(curl -sm8 ip.sb | grep ":") ]]; then
+    if [[ -z $(curl -s6m8 ip.sb | grep ":") ]]; then
         bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "*.${domain}" -d "${domain}" -k ec-256 --server zerossl --listen-v6
     else
         bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "*.${domain}" -d "${domain}" -k ec-256 --server zerossl
@@ -132,7 +132,7 @@ getSingleDomainCert(){
     read -p "请输入登录Cloudflare的注册邮箱地址：" CFemail
     [[ -z $domain ]] && red "未输入Cloudflare的登录邮箱，无法执行操作！" && exit 1
     export CF_Email="$CFemail"
-    if [[ -z $(curl -sm8 ip.sb | grep ":") ]]; then
+    if [[ -z $(curl -s6m8 ip.sb | grep ":") ]]; then
         bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" -k ec-256 --server zerossl --listen-v6
     else
         bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" -k ec-256 --server zerossl
