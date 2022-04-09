@@ -394,10 +394,10 @@ ssl_cert_issue() {
     echo -E ""
     yellow "******使用说明******"
     yellow "该脚本将使用Acme脚本申请证书,使用时需保证:"
-    yellow "1.知晓Cloudflare 注册邮箱"
-    yellow "2.知晓Cloudflare Global API Key"
-    yellow "3.域名已通过Cloudflare进行解析到当前服务器"
-    yellow "4.该脚本申请证书默认安装路径为/root/cert目录"
+    yellow "1.准备一个 Cloudflare 注册邮箱"
+    yellow "2.准备一个 Cloudflare Global API Key"
+    yellow "3.域名已通过 Cloudflare 进行解析到当前服务器"
+    yellow "4.该脚本申请证书默认安装路径为 /root 目录"
     confirm "我已确认以上内容[y/n]" "y"
     if [ $? -eq 0 ]; then
         wget -N https://raw.githubusercontents.com/Misaka-blog/acme-1key/master/acme1key.sh && bash acme1key.sh
