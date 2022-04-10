@@ -72,11 +72,12 @@ downwpfree(){
 
 upwpplus(){
     cd /etc/wireguard
-    rm -f wgcf-account.toml
-    until [[ -a wgcf-account.toml ]]; do
-        yes | wgcf register
-        sleep 5
-    done
+    if [[ ! -f wgcf-account.toml ]]; then
+        until [[ -a wgcf-account.toml ]]; do
+            yes | wgcf register
+            sleep 5
+        done
+    fi
     chmod +x wgcf-account.toml
     yellow "使用WARP+账户，请复制WARP+的许可证密钥(26个字符)后回车"
     read -p "按键许可证密钥(26个字符):" WPPlusKey
