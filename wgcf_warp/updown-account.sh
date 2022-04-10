@@ -44,13 +44,15 @@ downwpfree(){
         sleep 5
     done
     chmod +x wgcf-account.toml
+    wgcf generate
+    chmod +x wgcf-profile.conf
     if [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; then
         wg-quick down wgcf >/dev/null 2>&1
     fi
-    wppluspublickey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
-    wpplusprivatekey=$(grep PrivateKey wgcf-profile.conf | sed "s/PrivateKey = //g")
-    sed -i "s#PublicKey.*#PublicKey = $wpteampublickey#g" /etc/wireguard/wgcf.conf;
-    sed -i "s#PrivateKey.*#PrivateKey = $wpteamprivatekey#g" /etc/wireguard/wgcf.conf;
+    wpfreepublickey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
+    wpfreeprivatekey=$(grep PrivateKey wgcf-profile.conf | sed "s/PrivateKey = //g")
+    sed -i "s#PublicKey.*#PublicKey = $wpfreepublickey#g" /etc/wireguard/wgcf.conf;
+    sed -i "s#PrivateKey.*#PrivateKey = $wpfreeprivatekey#g" /etc/wireguard/wgcf.conf;
     rm -f wgcf-profile.conf
     yellow "正在启动 Wgcf-WARP"
     wg-quick up wgcf >/dev/null 2>&1
@@ -94,8 +96,8 @@ upwpplus(){
     fi
     wppluspublickey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
     wpplusprivatekey=$(grep PrivateKey wgcf-profile.conf | sed "s/PrivateKey = //g")
-    sed -i "s#PublicKey.*#PublicKey = $wpteampublickey#g" /etc/wireguard/wgcf.conf;
-    sed -i "s#PrivateKey.*#PrivateKey = $wpteamprivatekey#g" /etc/wireguard/wgcf.conf;
+    sed -i "s#PublicKey.*#PublicKey = $wppluspublickey#g" /etc/wireguard/wgcf.conf;
+    sed -i "s#PrivateKey.*#PrivateKey = $wpplusprivatekey#g" /etc/wireguard/wgcf.conf;
     rm -f wgcf-profile.conf
     yellow "正在启动 Wgcf-WARP"
     wg-quick up wgcf >/dev/null 2>&1
