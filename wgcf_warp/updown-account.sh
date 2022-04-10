@@ -160,6 +160,8 @@ menu(){
     green "3. WARP Teams"
     read -p "请输入选项 [1-3]：" menuNumberInput
     case "$menuNumberInput" in
+        1 ) downwpfree ;;
+        2 ) upwpplus ;;
         3 ) upgradeTeam ;;
         * ) red "输入无效！脚本即将退出" && exit 1 ;;
     esac
