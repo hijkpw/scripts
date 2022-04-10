@@ -131,7 +131,7 @@ upgradeTeam(){
     green "EndPoint: $wpteamendpoint"
     read -p "确认请输入y，其他按键退出升级过程：" wpteamconfirm
     if [ $wpteamconfirm == "y" ]; then
-        if [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; then
+        if [[ $WgcfWARP4Status =~ on|plus || $WgcfWARP6Status =~ on|plus ]]; then
             wg-quick down wgcf >/dev/null 2>&1
         fi
         sed -i "s#PublicKey.*#PublicKey = $wpteampublickey#g" /etc/wireguard/wgcf.conf;
