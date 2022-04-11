@@ -101,7 +101,7 @@ install_x-ui() {
     if [ $# == 0 ]; then
         last_version=$(curl -Ls "https://api.github.com/repos/Misaka-blog/x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$last_version" ]]; then
-            red "检测 x-ui 版本失败，可能是超出 Github API 限制，请稍后再试，或手动指定 x-ui 版本安装"
+            red "检测 x-ui 版本失败，可能是超出 Github API 限制，正在使用备用 Jsdelivr API 获取 X-ui 最新版本"
             rm -f install.sh
             exit 1
         fi
