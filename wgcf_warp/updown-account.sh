@@ -47,7 +47,7 @@ downwpfree(){
     chmod +x wgcf-account.toml
     wgcf generate
     chmod +x wgcf-profile.conf
-    if [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; then
+    if [[ $WgcfWARP6Status =~ on|plus  || $WgcfWARP4Status =~ on|plus ]]; then
         wg-quick down wgcf >/dev/null 2>&1
     fi
     wpfreepublickey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
@@ -59,7 +59,7 @@ downwpfree(){
     wg-quick up wgcf >/dev/null 2>&1
     WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-    until [[ $WgcfWARP4Status =~ on|plus || $WgcfWARP6Status =~ on|plus ]]; do
+    until [[ $WgcfWARP6Status =~ on|plus || $WgcfWARP4Status =~ on|plus ]]; do
         red "无法启动Wgcf-WARP，正在尝试重启"
         wg-quick down wgcf >/dev/null 2>&1
         wg-quick up wgcf >/dev/null 2>&1
@@ -93,7 +93,7 @@ upwpplus(){
     fi
     wgcf generate
     chmod +x wgcf-profile.conf
-    if [[ $WgcfWARP4Status =~ on|plus || $WgcfWARP6Status =~ on|plus ]]; then
+    if [[ $WgcfWARP6Status =~ on|plus || $WgcfWARP4Status =~ on|plus ]]; then
         wg-quick down wgcf >/dev/null 2>&1
     fi
     wppluspublickey=$(grep PublicKey wgcf-profile.conf | sed "s/PublicKey = //g")
@@ -105,7 +105,7 @@ upwpplus(){
     wg-quick up wgcf >/dev/null 2>&1
     WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-    until [[ $WgcfWARP4Status =~ on|plus || $WgcfWARP6Status =~ on|plus ]]; do
+    until [[ $WgcfWARP6Status =~ on|plus || $WgcfWARP4Status =~ on|plus ]]; do
         red "无法启动Wgcf-WARP，正在尝试重启"
         wg-quick down wgcf >/dev/null 2>&1
         wg-quick up wgcf >/dev/null 2>&1
@@ -144,7 +144,7 @@ upgradeTeam(){
         wg-quick up wgcf >/dev/null 2>&1
         WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
         WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-        until [[ $WgcfWARP4Status =~ on|plus || $WgcfWARP6Status =~ on|plus ]]; do
+        until [[ $WgcfWARP6Status =~ on|plus || $WgcfWARP4Status =~ on|plus ]]; do
             red "无法启动Wgcf-WARP，正在尝试重启"
             wg-quick down wgcf >/dev/null 2>&1
             wg-quick up wgcf >/dev/null 2>&1
