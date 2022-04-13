@@ -130,7 +130,7 @@ upgradeTeam(){
     green "IPv4 地址: $wpteamv4address"
     green "IPv6 地址: $wpteamv6address"
     green "EndPoint: $wpteamendpoint"
-    read -p "确认请输入y，其他按键退出升级过程：" wpteamconfirm
+    read -p "确认以上信息正确请输入y，其他按键退出升级过程：" wpteamconfirm
     if [ $wpteamconfirm == "y" ]; then
         if [[ $WgcfWARP4Status =~ on|plus || $WgcfWARP6Status =~ on|plus ]]; then
             wg-quick down wgcf >/dev/null 2>&1
