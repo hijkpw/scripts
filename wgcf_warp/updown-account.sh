@@ -39,6 +39,7 @@ WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep 
 downwpfree(){
     cd /etc/wireguard
     rm -f wgcf-account.toml
+    yellow "正在注册WARP 免费版账户"
     until [[ -a wgcf-account.toml ]]; do
         yes | wgcf register
         sleep 5
