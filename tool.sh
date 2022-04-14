@@ -411,14 +411,14 @@ page2() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page2NumberInput
 	case "$page2NumberInput" in
-        1) bt ;;
-        2) xui ;;
-        3) aria2 ;;
-        4) cyberpanel ;;
-        5) qlPanel ;;
-        6) trojanpanel ;;
-        7) wget -N --no-check-certificate https://raw.githubusercontents.com/FunctionClub/V2ray.Fun/master/install.sh && bash install.sh ;;
-        0) menu ;;
+        	1) bt ;;
+        	2) xui ;;
+        	3) aria2 ;;
+        	4) cyberpanel ;;
+        	5) qlPanel ;;
+        	6) trojanpanel ;;
+        	7) wget -N --no-check-certificate https://raw.githubusercontents.com/FunctionClub/V2ray.Fun/master/install.sh && bash install.sh ;;
+        	0) menu ;;
 	esac
 }
 
