@@ -153,11 +153,11 @@ warp() {
 	read -p "请输入选项:" warpNumberInput
 	case "$warpNumberInput" in
 		1) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/misakawarp.sh && bash misakawarp.sh ;;
-        2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
-        3) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
-        4) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
-        5) bash <(curl -fsSL git.io/warp.sh) ;;
-        0) menu ;;
+        	2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
+        	3) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
+        	4) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
+        	5) bash <(curl -fsSL git.io/warp.sh) ;;
+        	0) menu ;;
 	esac
 }
 
@@ -263,11 +263,11 @@ vpsBench() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page3NumberInput
 	case "$page3NumberInput" in
-        1) bash <(curl -Lso- https://cdn.jsdelivr.net/gh/Misaka-blog/misakabench@master/misakabench.sh) ;;
-        2) wget -qO- bench.sh | bash ;;
-        3) wget -qO- --no-check-certificate https://raw.githubusercontents.com/oooldking/script/master/superbench.sh | bash ;;
-        4) curl -fsL https://ilemonra.in/LemonBenchIntl | bash -s fast ;;
-        0) menu ;;
+        	1) bash <(curl -Lso- https://cdn.jsdelivr.net/gh/Misaka-blog/misakabench@master/misakabench.sh) ;;
+        	2) wget -qO- bench.sh | bash ;;
+        	3) wget -qO- --no-check-certificate https://raw.githubusercontents.com/oooldking/script/master/superbench.sh | bash ;;
+        	4) curl -fsL https://ilemonra.in/LemonBenchIntl | bash -s fast ;;
+        	0) menu ;;
 	esac
 }
 
@@ -282,7 +282,7 @@ speedTest() {
 # 第五页
 nezha() {
 	curl -L https://raw.githubusercontents.com/naiba/nezha/master/script/install.sh -o nezha.sh
-    chmod +x nezha.sh
+	chmod +x nezha.sh
 	sudo ./nezha.sh
 }
 
@@ -297,9 +297,9 @@ serverstatus() {
 	echo "                            "
 	read -p "请输入选项:" menuNumberInput1
 	case "$menuNumberInput1" in
-        1) bash status.sh s ;;
-        2) bash status.sh c ;;
-        0) menu ;;
+        	1) bash status.sh s ;;
+        	2) bash status.sh c ;;
+        	0) menu ;;
 	esac
 }
 
@@ -345,14 +345,14 @@ menu() {
 	echo "                            "
 	read -p "请输入选项:" menuNumberInput
 	case "$menuNumberInput" in
-        1) page1 ;;
-        2) page2 ;;
-        3) page3 ;;
-        4) page4 ;;
-        5) page5 ;;
-        6) ddsystem ;;
-        9) wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/MisakaLinuxToolbox@master/MisakaToolbox.sh && chmod -R 777 MisakaToolbox.sh && bash MisakaToolbox.sh ;;
-        0) exit 0 ;;
+        	1) page1 ;;
+        	2) page2 ;;
+        	3) page3 ;;
+        	4) page4 ;;
+        	5) page5 ;;
+        	6) ddsystem ;;
+        	9) wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/MisakaLinuxToolbox@master/MisakaToolbox.sh && chmod -R 777 MisakaToolbox.sh && bash MisakaToolbox.sh ;;
+        	0) exit 0 ;;
 	esac
 }
 
@@ -378,21 +378,21 @@ page1() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page1NumberInput
 	case "$page1NumberInput" in
-        1) oraclefirewall ;;
-        2) open_ports ;;
-        3) euservDig9 ;;
-        4) rootLogin ;;
-        5) screenManager ;;
-        6) bbr ;;
-        7) dns64server ;;
-        8) warp ;;
-        9) dockerInstall ;;
-        10) acmesh ;;
-        11) cfArgoTunnel ;;
-	12) ngrokScript ;;
-	13) lxcovztun ;;
-	14) bash <(curl -sSL https://cdn.jsdelivr.net/gh/SuperManito/LinuxMirrors@main/ChangeMirrors.sh) ;;
-        0) menu ;;
+        	1) oraclefirewall ;;
+        	2) open_ports ;;
+        	3) euservDig9 ;;
+        	4) rootLogin ;;
+        	5) screenManager ;;
+        	6) bbr ;;
+        	7) dns64server ;;
+        	8) warp ;;
+        	9) dockerInstall ;;
+        	10) acmesh ;;
+        	11) cfArgoTunnel ;;
+		12) ngrokScript ;;
+		13) lxcovztun ;;
+		14) bash <(curl -sSL https://cdn.jsdelivr.net/gh/SuperManito/LinuxMirrors@main/ChangeMirrors.sh) ;;
+        	0) menu ;;
 	esac
 }
 
