@@ -70,6 +70,14 @@ WS="false"
 XTLS="false"
 KCP="false"
 
+checkCentOS8(){
+    if [[ -n $(cat /etc/os-release | grep "CentOS Linux 8") ]]; then
+        sed -i -e "s|releasever|releasever-stream|g" /etc/yum.repos.d/CentOS-*
+        yum clean all && yum makecache
+        dnf swap centos-linux-repos centos-stream-repos distro-sync -y
+    fi
+}
+
 configNeedNginx() {
 	local ws=$(grep wsSettings $CONFIG_FILE)
 	[[ -z "$ws" ]] && echo no && return
