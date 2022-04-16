@@ -230,4 +230,5 @@ install(){
 }
 
 check_tun
+checkCentOS8
 install
