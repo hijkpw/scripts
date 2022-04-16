@@ -41,6 +41,23 @@ check_tun(){
     [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]] && red "检测到未开启TUN模块，请到VPS控制面板处开启" && exit 1
 }
 
+checkCentOS8(){
+    if [[ -n $(cat /etc/os-release | grep "CentOS Linux 8") ]]; then
+        yellow "检测到当前VPS系统为CentOS 8，是否升级为CentOS Stream 8以确保软件包正常安装？"
+        read -p "请输入选项 [y/n]：" comfirmCentOSStream
+        if [[ $comfirmCentOSStream == "y" ]]; then
+            yellow "正在为你升级到CentOS Stream 8，大概需要10-30分钟的时间"
+            sleep 1
+            sed -i -e "s|releasever|releasever-stream|g" /etc/yum.repos.d/CentOS-*
+            yum clean all && yum makecache
+            dnf swap centos-linux-repos centos-stream-repos distro-sync -y
+        else
+            red "已取消升级过程，脚本即将退出！"
+            exit 1
+        fi
+    fi
+}
+
 install_warpcli_centos(){
     ${PACKAGE_INSTALL[int]} epel-release
     ${PACKAGE_INSTALL[int]} net-tools
@@ -127,4 +144,5 @@ install(){
 }
 
 check_tun
+checkCentOS8
 install
