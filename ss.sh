@@ -96,7 +96,7 @@ statusText() {
 getData() {
     echo ""
     read -p " 请设置SS的密码（不输入则随机生成）:" PASSWORD
-    [[ -z "$PASSWORD" ]] && PASSWORD=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
+    [[ -z "$PASSWORD" ]] && PASSWORD=`date +%s%N | md5sum | cut -c 1-16`
     echo ""
     colorEcho $BLUE " 密码： $PASSWORD"
 
