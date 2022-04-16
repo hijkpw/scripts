@@ -72,6 +72,8 @@ KCP="false"
 
 checkCentOS8(){
     if [[ -n $(cat /etc/os-release | grep "CentOS Linux 8") ]]; then
+        yellow "检测到你的VPS系统为CentOS 8，正在为你升级到CentOS Stream 8，大概需要10-30分钟的时间"
+        sleep 1
         sed -i -e "s|releasever|releasever-stream|g" /etc/yum.repos.d/CentOS-*
         yum clean all && yum makecache
         dnf swap centos-linux-repos centos-stream-repos distro-sync -y
