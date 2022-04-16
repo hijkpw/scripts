@@ -70,7 +70,7 @@ WS="false"
 XTLS="false"
 KCP="false"
 
-checkCentOS8(){
+checkCentOS8() {
 	if [[ -n $(cat /etc/os-release | grep "CentOS Linux 8") ]]; then
 		yellow "检测到当前VPS系统为CentOS 8，是否升级为CentOS Stream 8以确保软件包正常安装？"
 		read -p "请输入选项 [y/n]：" comfirmCentOSStream
@@ -80,9 +80,9 @@ checkCentOS8(){
 			sed -i -e "s|releasever|releasever-stream|g" /etc/yum.repos.d/CentOS-*
 			yum clean all && yum makecache
 			dnf swap centos-linux-repos centos-stream-repos distro-sync -y
-        else
-            red "已取消升级过程，脚本即将退出！"
-            exit 1
+		else
+			red "已取消升级过程，脚本即将退出！"
+			exit 1
 		fi
 	fi
 }
