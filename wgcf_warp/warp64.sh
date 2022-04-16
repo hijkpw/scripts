@@ -63,8 +63,8 @@ checkCentOS8(){
         else
             red "已取消升级过程，脚本即将退出！"
             exit 1
-		fi
-	fi
+        fi
+    fi
 }
 
 install_wireguard_centos(){
