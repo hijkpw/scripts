@@ -72,11 +72,15 @@ KCP="false"
 
 checkCentOS8(){
     if [[ -n $(cat /etc/os-release | grep "CentOS Linux 8") ]]; then
-        yellow "检测到你的VPS系统为CentOS 8，正在为你升级到CentOS Stream 8，大概需要10-30分钟的时间"
-        sleep 1
-        sed -i -e "s|releasever|releasever-stream|g" /etc/yum.repos.d/CentOS-*
-        yum clean all && yum makecache
-        dnf swap centos-linux-repos centos-stream-repos distro-sync -y
+        yellow "检测到当前VPS系统为CentOS 8，是否升级为CentOS Stream 8以确保软件包正常安装？"
+        read -p "请输入选项 [y/n]：" comfirmCentOSStream
+        if [[ $comfirmCentOSStream == "y" ]]; then
+            yellow "正在为你升级到CentOS Stream 8，大概需要10-30分钟的时间"
+            sleep 1
+            sed -i -e "s|releasever|releasever-stream|g" /etc/yum.repos.d/CentOS-*
+            yum clean all && yum makecache
+            dnf swap centos-linux-repos centos-stream-repos distro-sync -y
+        fi
     fi
 }
 
@@ -382,8 +386,7 @@ module_hotfixes=true' >/etc/yum.repos.d/nginx.repo
 			red "Nginx安装失败！"
 			green "建议如下："
 			yellow "1. 检查VPS系统的网络设置和软件源设置，强烈建议使用系统官方软件源！"
-			yellow "2. 你可能用的是CentOS 8操作系统，请重置系统为CentOS 7后再安装本脚本"
-			yellow "3. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
+			yellow "2. 脚本可能跟不上时代，建议截图发布到GitHub Issues或TG群询问"
 			exit 1
 		fi
 		systemctl enable nginx
@@ -1262,6 +1265,7 @@ configXray() {
 
 install() {
 	getData
+    checkCentOS8
 	${PACKAGE_UPDATE[int]}
 	${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl net-tools
 	if [[ $SYSTEM != "CentOS" ]]; then
