@@ -2,7 +2,7 @@
 
 # 全局变量
 ver="2.1.7"
-changeLog="wARP处新增Misaka-WARP脚本"
+changeLog="WARP处新增Misaka-WARP脚本"
 arch=$(uname -m)
 virt=$(systemd-detect-virt)
 kernelVer=$(uname -r)
@@ -153,11 +153,11 @@ warp() {
 	read -p "请输入选项:" warpNumberInput
 	case "$warpNumberInput" in
 		1) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/misakawarp.sh && bash misakawarp.sh ;;
-        2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
-        3) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
-        4) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
-        5) bash <(curl -fsSL git.io/warp.sh) ;;
-        0) menu ;;
+        	2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
+        	3) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
+        	4) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
+        	5) bash <(curl -fsSL git.io/warp.sh) ;;
+        	0) menu ;;
 	esac
 }
 
@@ -263,11 +263,11 @@ vpsBench() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page3NumberInput
 	case "$page3NumberInput" in
-        1) bash <(curl -Lso- https://cdn.jsdelivr.net/gh/Misaka-blog/misakabench@master/misakabench.sh) ;;
-        2) wget -qO- bench.sh | bash ;;
-        3) wget -qO- --no-check-certificate https://raw.githubusercontents.com/oooldking/script/master/superbench.sh | bash ;;
-        4) curl -fsL https://ilemonra.in/LemonBenchIntl | bash -s fast ;;
-        0) menu ;;
+        	1) bash <(curl -Lso- https://cdn.jsdelivr.net/gh/Misaka-blog/misakabench@master/misakabench.sh) ;;
+        	2) wget -qO- bench.sh | bash ;;
+        	3) wget -qO- --no-check-certificate https://raw.githubusercontents.com/oooldking/script/master/superbench.sh | bash ;;
+        	4) curl -fsL https://ilemonra.in/LemonBenchIntl | bash -s fast ;;
+        	0) menu ;;
 	esac
 }
 
@@ -282,7 +282,7 @@ speedTest() {
 # 第五页
 nezha() {
 	curl -L https://raw.githubusercontents.com/naiba/nezha/master/script/install.sh -o nezha.sh
-    chmod +x nezha.sh
+	chmod +x nezha.sh
 	sudo ./nezha.sh
 }
 
@@ -297,9 +297,9 @@ serverstatus() {
 	echo "                            "
 	read -p "请输入选项:" menuNumberInput1
 	case "$menuNumberInput1" in
-        1) bash status.sh s ;;
-        2) bash status.sh c ;;
-        0) menu ;;
+        	1) bash status.sh s ;;
+        	2) bash status.sh c ;;
+        	0) menu ;;
 	esac
 }
 
@@ -328,8 +328,8 @@ menu() {
 	yellow "虚拟化架构：$virt"
 	yellow "操作系统：$CMD"
 	yellow "内核版本：$kernelVer"
-	yellow "IPv4地址：$IP4"
-	yellow "IPv6地址：$IP6"
+	yellow "公网IPv4地址：$IP4"
+	yellow "公网IPv6地址：$IP6"
 	echo "                            "
 	green "下面是脚本分类，请选择对应的分类后进入到相对应的菜单中"
 	echo "                            "
@@ -338,21 +338,21 @@ menu() {
 	echo "3. 节点相关"
 	echo "4. VPS测试"
 	echo "5. VPS探针"
-	[ ${virt} == "kvm" ] && echo "6. VPS DD系统"
+	[ ${virt} == "kvm" ] && echo "6. 更换VPS系统(DD系统)"
 	echo "                            "
-	echo "9. 更新脚本"
-	echo "0. 退出脚本"
+	echo "9. 更新工具箱"
+	echo "0. 退出工具箱"
 	echo "                            "
 	read -p "请输入选项:" menuNumberInput
 	case "$menuNumberInput" in
-        1) page1 ;;
-        2) page2 ;;
-        3) page3 ;;
-        4) page4 ;;
-        5) page5 ;;
-        6) ddsystem ;;
-        9) wget -N https://gitlab.com/misakano7545/MisakaLinuxToolbox/-/raw/master/MisakaToolbox.sh && chmod -R 777 MisakaToolbox.sh && bash MisakaToolbox.sh ;;
-        0) exit 0 ;;
+        	1) page1 ;;
+        	2) page2 ;;
+        	3) page3 ;;
+        	4) page4 ;;
+        	5) page5 ;;
+        	6) ddsystem ;;
+        	9) wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/MisakaLinuxToolbox@master/MisakaToolbox.sh && chmod -R 777 MisakaToolbox.sh && bash MisakaToolbox.sh ;;
+        	0) exit 0 ;;
 	esac
 }
 
@@ -361,7 +361,7 @@ page1() {
 	green "请选择你接下来的操作"
 	echo "                            "
 	echo "1. Oracle Cloud原生系统关闭防火墙"
-    echo "2. 开启VPS中所有的网络端口"
+        echo "2. 开启VPS中所有的网络端口"
 	echo "3. 德鸡DiG9正常访问网络解决方案"
 	echo "4. 修改登录方式为 root + 密码 登录"
 	echo "5. Screen 后台任务管理"
@@ -373,23 +373,26 @@ page1() {
 	echo "11. CloudFlare Argo Tunnel一键脚本"
 	echo "12. Ngrok 内网穿透一键脚本"
 	echo "13. LXC/OVZ VPS打开TUN模块"
+	echo "14. 更换Linux软件源"
 	echo "                            "
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page1NumberInput
 	case "$page1NumberInput" in
-        1) oraclefirewall ;;
-        2) open_ports ;;
-        3) euservDig9 ;;
-        4) rootLogin ;;
-        5) screenManager ;;
-        6) bbr ;;
-        7) dns64server ;;
-        8) warp ;;
-        9) dockerInstall ;;
-        10) acmesh ;;
-        11) cfArgoTunnel ;;
+        	1) oraclefirewall ;;
+        	2) open_ports ;;
+        	3) euservDig9 ;;
+        	4) rootLogin ;;
+        	5) screenManager ;;
+        	6) bbr ;;
+        	7) dns64server ;;
+        	8) warp ;;
+        	9) dockerInstall ;;
+        	10) acmesh ;;
+        	11) cfArgoTunnel ;;
 		12) ngrokScript ;;
-        0) menu ;;
+		13) lxcovztun ;;
+		14) bash <(curl -sSL https://cdn.jsdelivr.net/gh/SuperManito/LinuxMirrors@main/ChangeMirrors.sh) ;;
+        	0) menu ;;
 	esac
 }
 
@@ -397,9 +400,9 @@ page2() {
 	echo "                            "
 	green "请选择你准备安装的面板"
 	echo "                            "
-	echo "1. 安装宝塔面板"
+	echo "1. 安装aapanel面板"
 	echo "2. 安装x-ui面板"
-	echo "3. 安装aria2面板"
+	echo "3. 安装aria2(面板为远程链接)"
 	echo "4. 安装CyberPanel面板"
 	echo "5. 安装青龙面板"
 	echo "6. 安装Trojan面板"
@@ -408,14 +411,14 @@ page2() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page2NumberInput
 	case "$page2NumberInput" in
-        1) bt ;;
-        2) xui ;;
-        3) aria2 ;;
-        4) cyberpanel ;;
-        5) qlPanel ;;
-        6) trojanpanel ;;
-        7) wget -N --no-check-certificate https://raw.githubusercontents.com/FunctionClub/V2ray.Fun/master/install.sh && bash install.sh ;;
-        0) menu ;;
+        	1) bt ;;
+        	2) xui ;;
+        	3) aria2 ;;
+        	4) cyberpanel ;;
+        	5) qlPanel ;;
+        	6) trojanpanel ;;
+        	7) wget -N --no-check-certificate https://raw.githubusercontents.com/FunctionClub/V2ray.Fun/master/install.sh && bash install.sh ;;
+        	0) menu ;;
 	esac
 }
 
@@ -432,12 +435,12 @@ page3() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page3NumberInput
 	case "$page3NumberInput" in
-        1) macka ;;
-        2) boy233 ;;
-        3) misakaXray ;;
-        4) tgMTProxy ;;
-        5) shadowsocks ;;
-        0) menu ;;
+        	1) macka ;;
+        	2) boy233 ;;
+        	3) misakaXray ;;
+        	4) tgMTProxy ;;
+        	5) shadowsocks ;;
+        	0) menu ;;
 	esac
 }
 
@@ -452,10 +455,10 @@ page4() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page4NumberInput
 	case "$page4NumberInput" in
-        1) vpsBench ;;
-        2) mediaUnblockTest ;;
-        3) speedTest ;;
-        0) menu ;;
+        	1) vpsBench ;;
+        	2) mediaUnblockTest ;;
+        	3) speedTest ;;
+        	0) menu ;;
 	esac
 }
 
@@ -469,9 +472,9 @@ page5() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page5NumberInput
 	case "$page5NumberInput" in
-        1) nezha ;;
-        2) serverstatus ;;
-        0) menu ;;
+        	1) nezha ;;
+        	2) serverstatus ;;
+        	0) menu ;;
 	esac
 }
 
