@@ -42,29 +42,14 @@ check_tun(){
     TUN=$(cat /dev/net/tun 2>&1 | tr '[:upper:]' '[:lower:]')
     if [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]]; then
         if [[ $vpsvirt == "openvz" ]]; then
-            yellow "检测到VPS虚拟化架构为OpenVZ，且未开启TUN模块。正在尝试开启TUN模块"
-            mkdir net
-            mknod net/tun c 10 200
-            chmod 0666 net/tun
-            if [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]]; then
-                red "尝试开启TUN模块失败，请到VPS控制面板处开启" 
-                exit 1
-            fi
-            cat <<EOF > /root/tun.sh
-#!/bin/bash
-cd /dev
-mkdir net
-mknod net/tun c 10 200
-chmod 0666 net/tun
-EOF
-        chmod +x /root/tun.sh
-        grep -qE "^ *@reboot root bash /root/tun.sh >/dev/null 2>&1" /etc/crontab || echo "@reboot root bash /root/tun.sh >/dev/null 2>&1" >> /etc/crontab
+            wget -N https://raw.githubusercontents.com/Misaka-blog/tun-script/master/tun.sh && bash tun.sh
         else
             red "检测到未开启TUN模块，请到VPS控制面板处开启" 
             exit 1
         fi
     fi
 }
+
 install_wireguard_centos(){
     ${PACKAGE_INSTALL[int]} epel-release
     ${PACKAGE_INSTALL[int]} net-tools wireguard-tools iptables
