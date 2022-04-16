@@ -1261,11 +1261,11 @@ install() {
 		${PACKAGE_INSTALL[int]} libssl-dev g++
 	fi
 	[[ -z $(type -P unzip) ]] && red "unzip安装失败，请检查网络" && exit 1
-	[[ $TLS == "true" || $XTLS == "true" ]] && installNginx
+	installNginx
 	setFirewall
 	[[ $TLS == "true" || $XTLS == "true" ]] && getCert
 	# configNginx
-	[[ $TLS == "true" || $XTLS == "true" ]] && configNginx
+	configNginx
 	yellow "安装Xray..."
 	getVersion
 	RETVAL="$?"
