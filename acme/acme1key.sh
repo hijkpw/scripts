@@ -79,7 +79,7 @@ getSingleCert(){
     if [[ -n $(echo $domainIP | grep nginx) ]]; then
         domainIP=$(curl -s ipget.net/?ip="$domain")
         if [[ $WARPv4Status =~ on|plus ]] || [[ $WARPv6Status =~ on|plus ]]; then
-            if [[ echo $realip | grep ":" ]]; then
+            if [[ -n $(echo $realip | grep ":") ]]; then
                 bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --listen-v6
             else
                 bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt
