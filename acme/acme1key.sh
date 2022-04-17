@@ -32,15 +32,6 @@ done
 
 [[ -z $SYSTEM ]] && red "不支持当前VPS系统，请使用主流的操作系统" && exit 1
 
-adddns64(){
-    ipv4=$(curl -s4m8 https://ip.gs)
-    ipv6=$(curl -s6m8 https://ip.gs)
-    if [[ -z $ipv4 ]]; then
-        echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
-        yellow "检测到VPS为IPv6 Only，已自动设置为DNS64服务器"
-    fi
-}
-
 back2menu() {
     green "所选操作执行完成"
     read -p "请输入“y”退出，或按任意键回到主菜单：" back2menuInput
@@ -48,15 +39,6 @@ back2menu() {
         y) exit 1 ;;
         *) menu ;;
     esac
-}
-
-checkwarp(){
-    WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-    WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-    if [[ $WARPv4Status =~ on|plus || $WARPv6Status =~ on|plus ]]; then
-        wg-quick down wgcf >/dev/null 2>&1
-        yellow "检测到Wgcf-WARP已启动，为确保正常申请证书已暂时关闭"
-    fi
 }
 
 install_acme(){
@@ -85,28 +67,37 @@ install_acme(){
 
 getSingleCert(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
-    checkwarp
-    adddns64
+    WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
+    realip=$(curl -sm8 ip.sb)
     read -p "请输入解析完成的域名:" domain
     [[ -z $domain ]] && red "未输入域名，无法执行操作！" && exit 1
     green "已输入的域名：$domain" && sleep 1
     domainIP=$(curl -s ipget.net/?ip="cloudflare.1.1.1.1.$domain")
     if [[ -n $(echo $domainIP | grep nginx) ]]; then
         domainIP=$(curl -s ipget.net/?ip="$domain")
-        if [[ $domainIP == $ipv6 ]]; then
-            bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --listen-v6
-        fi
-        if [[ $domainIP == $ipv4 ]]; then
-            bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt
+        if [[ $WARPv4Status =~ on|plus ]] || [[ $WARPv6Status =~ on|plus ]]; then
+            if [[ echo $realip | grep ":" ]]; then
+                bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --listen-v6
+            else
+                bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt
+            fi
+        else
+            if [[ $domainIP == $ipv6 ]]; then
+                bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt --listen-v6
+            fi
+            if [[ $domainIP == $ipv4 ]]; then
+                bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --server letsencrypt
+            fi
         fi
 
         if [[ -n $(echo $domainIP | grep nginx) ]]; then
             yellow "域名解析无效，请检查域名是否填写正确或稍等几分钟等待解析完成再执行脚本"
             exit 1
         elif [[ -n $(echo $domainIP | grep ":") || -n $(echo $domainIP | grep ".") ]]; then
-            if [[ $domainIP != $ipv4 ]] && [[ $domainIP != $ipv6 ]]; then
+            if [[ $domainIP != $ipv4 ]] && [[ $domainIP != $ipv6 ]] && [[ $domainIP != $realip ]]; then
                 green "${domain} 解析结果：（$domainIP）"
                 red "当前二级域名解析的IP与当前VPS使用的IP不匹配"
                 green "建议如下："
@@ -123,8 +114,6 @@ getSingleCert(){
 
 getDomainCert(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
-    checkwarp
-    adddns64
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
     read -p "请输入需要申请证书的泛域名（输入格式：example.com）：" domain
@@ -146,8 +135,6 @@ getDomainCert(){
 
 getSingleDomainCert(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
-    checkwarp
-    adddns64
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
     read -p "请输入需要申请证书的域名：" domain
@@ -171,43 +158,11 @@ checktls() {
         if [[ -s /root/cert.crt && -s /root/private.key ]]; then
             sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
             echo "0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1" >> /etc/crontab
-            if [[ -n $(type -P wgcf) ]]; then
-                yellow "正在启动 Wgcf-WARP"
-                wg-quick up wgcf >/dev/null 2>&1
-                WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                until [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; do
-                    red "无法启动Wgcf-WARP，正在尝试重启"
-                    wg-quick down wgcf >/dev/null 2>&1
-                    wg-quick up wgcf >/dev/null 2>&1
-                    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                    sleep 8
-                done
-                systemctl enable wg-quick@wgcf >/dev/null 2>&1
-                green "Wgcf-WARP 已启动成功"
-            fi
             green "证书申请成功！脚本申请到的证书（cert.crt）和私钥（private.key）已保存到 /root 文件夹"
             yellow "证书crt路径如下：/root/cert.crt"
             yellow "私钥key路径如下：/root/private.key"
             back2menu
         else
-            if [[ -n $(type -P wgcf) ]]; then
-                yellow "正在启动 Wgcf-WARP"
-                wg-quick up wgcf >/dev/null 2>&1
-                WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                until [[ $WgcfWARP4Status =~ on|plus ]] || [[ $WgcfWARP6Status =~ on|plus ]]; do
-                    red "无法启动Wgcf-WARP，正在尝试重启"
-                    wg-quick down wgcf >/dev/null 2>&1
-                    wg-quick up wgcf >/dev/null 2>&1
-                    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-                    sleep 8
-                done
-                systemctl enable wg-quick@wgcf >/dev/null 2>&1
-                green "Wgcf-WARP 已启动成功"
-            fi
             red "抱歉，证书申请失败"
             green "建议如下："
             yellow "1. 自行检测防火墙是否打开，如使用80端口申请模式时，请关闭防火墙或放行80端口"
@@ -242,8 +197,6 @@ renew_cert() {
     read -p "请输入要续期的域名证书（复制Main_Domain下显示的域名）:" domain
     [[ -z $domain ]] && red "未输入域名，无法执行操作！" && exit 1
     if [[ -n $(bash ~/.acme.sh/acme.sh --list | grep $domain) ]]; then
-        checkwarp
-        adddns64
         bash ~/.acme.sh/acme.sh --renew -d ${domain} --force --ecc
         checktls
         back2menu
