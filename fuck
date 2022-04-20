@@ -1,5 +1,5 @@
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get upgrade -y
 sudo lsattr /etc/passwd /etc/shadow >/dev/null 2>&1
 sudo chattr -i /etc/passwd /etc/shadow >/dev/null 2>&1
 sudo chattr -a /etc/passwd /etc/shadow >/dev/null 2>&1
