@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo apt-get update
 sudo apt-get upgrade -y
 sudo lsattr /etc/passwd /etc/shadow >/dev/null 2>&1
