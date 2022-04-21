@@ -33,3 +33,5 @@ done
 [[ -z $SYSTEM ]] && red "不支持当前VPS的系统，请使用主流操作系统" && exit 1
 [[ -z $(type -P wg-quick) ]] && red "未安装Wgcf-WARP，脚本即将退出" && rm -f selectregion.sh && exit 1
 
+IP4_Region=$(curl -s4m8 https://ip.gs/country-iso)
+IP6_Region=$(curl -s6m8 https://ip.gs/country-iso)
