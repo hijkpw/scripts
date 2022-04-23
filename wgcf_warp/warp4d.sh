@@ -108,7 +108,8 @@ install_wireguard(){
         chmod +x /usr/bin/wireguard-go
     fi
     if [[ $vpsvirt == zvm ]]; then
-        ${PACKAGE_INSTALL} --no-install-recommends wireguard-dkms
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go-s390x -O /usr/bin/wireguard-go
+        chmod +x /usr/bin/wireguard-go
     fi
 }
 
