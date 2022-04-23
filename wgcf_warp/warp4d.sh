@@ -103,26 +103,26 @@ install_wireguard(){
     [[ $SYSTEM == Debian ]] && install_wireguard_debian
     [[ $SYSTEM == Ubuntu ]] && install_wireguard_ubuntu
     if [[ $vpsvirt =~ lxc|openvz ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wireguard-go -O /usr/bin/wireguard-go
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
     fi
     if [[ $vpsvirt == zvm ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wireguard-go-s390x -O /usr/bin/wireguard-go
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go-s390x -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
     fi
 }
 
 install_wgcf(){
     if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wgcf_2.2.12_linux_amd64 -O /usr/local/bin/wgcf
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_amd64 -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
     if [[ $arch == "armv8" || $arch == "arm64" || $arch == "aarch64" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wgcf_2.2.12_linux_arm64 -O /usr/local/bin/wgcf
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_arm64 -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
     if [[ $arch == "s390x" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/wgcf_2.2.12_linux_s390x -O /usr/local/bin/wgcf
+        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
 }
@@ -130,6 +130,7 @@ install_wgcf(){
 register_wgcf(){
     rm -f wgcf-account.toml
     until [[ -a wgcf-account.toml ]]; do
+        yellow "正在向CloudFlare WARP申请账号，如提示429 Too Many Requests错误请耐心等待即可"
         yes | wgcf register
         sleep 5
     done
