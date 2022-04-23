@@ -71,33 +71,6 @@ ${PACKAGE_UPDATE[int]}
 [[ -z $(type -P curl) ]] && ${PACKAGE_INSTALL[int]} curl
 [[ -z $(type -P tar) ]] && ${PACKAGE_INSTALL[int]} tar
 
-#This function will be called when user installed x-ui out of sercurity
-config_after_install() {
-    yellow "出于安全考虑，安装/更新完成后需要强制修改端口与账户密码"
-    read -p "确认是否继续?[y/n]": config_confirm
-    if [[ x"${config_confirm}" == x"y" || x"${config_confirm}" == x"Y" ]]; then
-        read -p "请设置您的账户名:" config_account
-        read -p "请设置您的账户密码:" config_password
-        read -p "请设置面板访问端口:" config_port
-        yellow "请核对面板登录信息是否正确："
-        yellow "您的账户名将设定为:${config_account}"
-        yellow "您的账户密码将设定为:${config_password}"
-        yellow "您的面板访问端口将设定为:${config_port}"
-        read -p "确认设定完成？[y/n]": config_confirm
-        if [[ x"${config_confirm}" == x"y" || x"${config_confirm}" == x"Y" ]]; then
-            yellow "确认设定,设定中"
-            /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password}
-            green "账户密码设定完成"
-            /usr/local/x-ui/x-ui setting -port ${config_port}
-            green "面板端口设定完成"
-        else
-            red "已取消,所有设置项均为默认设置,请及时修改"
-        fi
-    else
-        red "已取消,所有设置项均为默认设置,请及时修改"
-    fi
-}
-
 checkCentOS8(){
     if [[ -n $(cat /etc/os-release | grep "CentOS Linux 8") ]]; then
         yellow "检测到当前VPS系统为CentOS 8，是否升级为CentOS Stream 8以确保软件包正常安装？"
@@ -115,9 +88,32 @@ checkCentOS8(){
     fi
 }
 
+config_after_install() {
+    yellow "出于安全考虑，安装/更新完成后需要强制修改端口与账户密码"
+    read -p "确认是否继续?[y/n]": config_confirm
+    if [[ x"${config_confirm}" == x"y" || x"${config_confirm}" == x"Y" ]]; then
+        read -p "请设置您的账户名:" config_account
+        read -p "请设置您的账户密码:" config_password
+        read -p "请设置面板访问端口:" config_port
+        yellow "请核对面板登录信息是否正确："
+        green "您的账户名将设定为:${config_account}"
+        green "您的账户密码将设定为:${config_password}"
+        green "您的面板访问端口将设定为:${config_port}"
+        read -p "确认设定完成？[y/n]": config_confirm
+        if [[ x"${config_confirm}" == x"y" || x"${config_confirm}" == x"Y" ]]; then
+            yellow "确认设定，正在设定中"
+            /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password}
+            /usr/local/x-ui/x-ui setting -port ${config_port}
+        else
+            red "已取消,所有设置项均为默认设置,请及时修改"
+        fi
+    else
+        red "已取消,所有设置项均为默认设置,请及时修改"
+    fi
+}
+
 install_x-ui() {
     systemctl stop x-ui
-    cd /usr/local/
     if [ $# == 0 ]; then
         last_version=$(curl -Ls "https://api.github.com/repos/Misaka-blog/x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$last_version" ]]; then
@@ -128,7 +124,7 @@ install_x-ui() {
         yellow "检测到 x-ui 最新版本：${last_version}，开始安装"
         wget -N --no-check-certificate -O /usr/local/x-ui-linux-${arch}.tar.gz https://github.com/Misaka-blog/x-ui/releases/download/${last_version}/x-ui-linux-${arch}.tar.gz
         if [[ $? -ne 0 ]]; then
-            red "下载 x-ui 失败，请确保你的服务器能够下载 Github 的文件"
+            red "下载 x-ui 失败，请确保你的服务器能够连接并下载 Github 的文件"
             rm -f install.sh
             exit 1
         fi
@@ -143,11 +139,10 @@ install_x-ui() {
             exit 1
         fi
     fi
-
     if [[ -e /usr/local/x-ui/ ]]; then
-        rm /usr/local/x-ui/ -rf
+        rm -rf /usr/local/x-ui/
     fi
-
+    cd /usr/local/
     tar zxvf x-ui-linux-${arch}.tar.gz
     rm x-ui-linux-${arch}.tar.gz -f
     cd x-ui
@@ -160,6 +155,8 @@ install_x-ui() {
     systemctl daemon-reload
     systemctl enable x-ui
     systemctl start x-ui
+    cd /root
+    rm -f install.sh
     green "x-ui v${last_version} 安装完成，面板已启动"
     echo -e ""
     echo -e "x-ui 管理脚本使用方法: "
@@ -177,7 +174,6 @@ install_x-ui() {
     echo -e "x-ui install      - 安装 x-ui 面板"
     echo -e "x-ui uninstall    - 卸载 x-ui 面板"
     echo -e "----------------------------------------------"
-    rm -f install.sh
 }
 
 checkCentOS8
