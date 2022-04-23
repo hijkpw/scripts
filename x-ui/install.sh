@@ -112,8 +112,7 @@ config_after_install() {
     fi
 }
 
-install_x-ui() {
-    systemctl stop x-ui
+download_x-ui(){
     if [ $# == 0 ]; then
         last_version=$(curl -Ls "https://api.github.com/repos/Misaka-blog/x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$last_version" ]]; then
@@ -139,9 +138,14 @@ install_x-ui() {
             exit 1
         fi
     fi
+}
+
+install_x-ui() {
+    systemctl stop x-ui
     if [[ -e /usr/local/x-ui/ ]]; then
         rm -rf /usr/local/x-ui/
     fi
+    download_x-ui
     cd /usr/local/
     tar zxvf x-ui-linux-${arch}.tar.gz
     rm x-ui-linux-${arch}.tar.gz -f
@@ -157,6 +161,10 @@ install_x-ui() {
     systemctl start x-ui
     cd /root
     rm -f install.sh
+    showInfo
+}
+
+showInfo(){
     green "x-ui v${last_version} 安装完成，面板已启动"
     echo -e ""
     echo -e "x-ui 管理脚本使用方法: "
