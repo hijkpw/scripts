@@ -65,7 +65,7 @@ install_acme(){
     back2menu
 }
 
-getSingleCert(){
+singleStandalone(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
     WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
     WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
@@ -112,7 +112,7 @@ getSingleCert(){
     checktls
 }
 
-getDomainCert(){
+dnsapiNTLD(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
@@ -133,7 +133,7 @@ getDomainCert(){
     checktls
 }
 
-getSingleDomainCert(){
+dnsapiSingle(){
     [[ -z $(~/.acme.sh/acme.sh -v 2>/dev/null) ]] && red "未安装acme.sh，无法执行操作" && exit 1
     ipv4=$(curl -s4m8 https://ip.gs)
     ipv6=$(curl -s6m8 https://ip.gs)
@@ -239,9 +239,9 @@ menu() {
     read -p "请输入数字:" NumberInput
     case "$NumberInput" in
         1) install_acme ;;
-        2) getSingleCert ;;
-        3) getSingleDomainCert ;;
-        4) getDomainCert ;;
+        2) singleStandalone ;;
+        3) dnsapiSingle ;;
+        4) dnsapiNTLD ;;
         5) revoke_cert ;;
         6) renew_cert ;;
         7) uninstall ;;
