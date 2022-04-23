@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 全局变量
-ver="2.1.7"
-changeLog="WARP处新增Misaka-WARP脚本"
+ver="2.1.8"
+changeLog="新增设置中文语言选项和一键换源脚本"
 arch=$(uname -m)
 virt=$(systemd-detect-virt)
 kernelVer=$(uname -r)
@@ -66,7 +66,7 @@ fi
 
 # 获取脚本运行次数
 COUNT=$(curl -sm8 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2FMisaka-blog%2FMisakaLinuxToolbox%40master%2FMisakaToolbox.sh&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false" 2>&1) &&
-TODAY=$(expr "$COUNT" : '.*\s\([0-9]\{1,\}\)\s/.*')
+	TODAY=$(expr "$COUNT" : '.*\s\([0-9]\{1,\}\)\s/.*')
 TOTAL=$(expr "$COUNT" : '.*/\s\([0-9]\{1,\}\)\s.*')
 
 #第一页
@@ -89,20 +89,20 @@ oraclefirewall() {
 	fi
 }
 
-open_ports(){
-    systemctl stop firewalld.service
-    systemctl disable firewalld.service
-    setenforce 0
-    ufw disable
-    iptables -P INPUT ACCEPT
-    iptables -P FORWARD ACCEPT
-    iptables -P OUTPUT ACCEPT
-    iptables -t nat -F
-    iptables -t mangle -F 
-    iptables -F
-    iptables -X
-    netfilter-persistent save
-    yellow "VPS中的所有网络端口已开启"
+open_ports() {
+	systemctl stop firewalld.service
+	systemctl disable firewalld.service
+	setenforce 0
+	ufw disable
+	iptables -P INPUT ACCEPT
+	iptables -P FORWARD ACCEPT
+	iptables -P OUTPUT ACCEPT
+	iptables -t nat -F
+	iptables -t mangle -F
+	iptables -F
+	iptables -X
+	netfilter-persistent save
+	yellow "VPS中的所有网络端口已开启"
 }
 
 euservDig9() {
@@ -152,12 +152,12 @@ warp() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" warpNumberInput
 	case "$warpNumberInput" in
-		1) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/misakawarp.sh && bash misakawarp.sh ;;
-        	2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
-        	3) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
-        	4) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
-        	5) bash <(curl -fsSL git.io/warp.sh) ;;
-        	0) menu ;;
+	1) wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/misakawarp.sh && bash misakawarp.sh ;;
+	2) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/menu.sh && bash menu.sh ;;
+	3) wget -N https://cdn.jsdelivr.net/gh/fscarmen/warp/docker.sh && bash docker.sh ;;
+	4) bash <(curl -sSL https://raw.githubusercontent.com/fscarmen/warp_unlock/main/unlock.sh) ;;
+	5) bash <(curl -fsSL git.io/warp.sh) ;;
+	0) menu ;;
 	esac
 }
 
@@ -182,6 +182,26 @@ ngrokScript() {
 	wget -N https://raw.githubusercontents.com/Misaka-blog/Ngrok-1key/master/ngrok.sh && bash ngrok.sh
 }
 
+setlanguage(){
+  chattr -i /etc/locale.gen
+  cat > '/etc/locale.gen' << EOF
+zh_CN.UTF-8 UTF-8
+zh_TW.UTF-8 UTF-8
+en_US.UTF-8 UTF-8
+ja_JP.UTF-8 UTF-8
+EOF
+locale-gen
+update-locale
+chattr -i /etc/default/locale
+  cat > '/etc/default/locale' << EOF
+LANGUAGE="zh_CN.UTF-8"
+LANG="zh_CN.UTF-8"
+LC_ALL="zh_CN.UTF-8"
+EOF
+export LANGUAGE="zh_CN.UTF-8"
+export LANG="zh_CN.UTF-8"
+export LC_ALL="zh_CN.UTF-8"
+}
 # 第二页
 bt() {
 	if [ $SYSTEM = "CentOS" ]; then
@@ -257,17 +277,17 @@ vpsBench() {
 	echo "                            "
 	echo "1. 使用misakabench"
 	echo "2. 使用bench.sh"
-	echo "2. 使用superbench"
-	echo "3. 使用lemonbench"
+	echo "3. 使用superbench"
+	echo "4. 使用lemonbench"
 	echo "                            "
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page3NumberInput
 	case "$page3NumberInput" in
-        	1) bash <(curl -Lso- https://cdn.jsdelivr.net/gh/Misaka-blog/misakabench@master/misakabench.sh) ;;
-        	2) wget -qO- bench.sh | bash ;;
-        	3) wget -qO- --no-check-certificate https://raw.githubusercontents.com/oooldking/script/master/superbench.sh | bash ;;
-        	4) curl -fsL https://ilemonra.in/LemonBenchIntl | bash -s fast ;;
-        	0) menu ;;
+	1) bash <(curl -Lso- https://cdn.jsdelivr.net/gh/Misaka-blog/misakabench@master/misakabench.sh) ;;
+	2) wget -qO- bench.sh | bash ;;
+	3) wget -qO- --no-check-certificate https://raw.githubusercontents.com/oooldking/script/master/superbench.sh | bash ;;
+	4) curl -fsL https://ilemonra.in/LemonBenchIntl | bash -s fast ;;
+	0) menu ;;
 	esac
 }
 
@@ -297,13 +317,13 @@ serverstatus() {
 	echo "                            "
 	read -p "请输入选项:" menuNumberInput1
 	case "$menuNumberInput1" in
-        	1) bash status.sh s ;;
-        	2) bash status.sh c ;;
-        	0) menu ;;
+	1) bash status.sh s ;;
+	2) bash status.sh c ;;
+	0) menu ;;
 	esac
 }
 
-ddsystem(){
+ddsystem() {
 	wget --no-check-certificate -O ~/Network-Reinstall-System-Modify.sh 'https://www.cxthhhhh.com/CXT-Library/Network-Reinstall-System-Modify/Network-Reinstall-System-Modify.sh' && chmod +x ~/Network-Reinstall-System-Modify.sh && bash ~/Network-Reinstall-System-Modify.sh -UI_Options
 }
 
@@ -345,14 +365,14 @@ menu() {
 	echo "                            "
 	read -p "请输入选项:" menuNumberInput
 	case "$menuNumberInput" in
-        	1) page1 ;;
-        	2) page2 ;;
-        	3) page3 ;;
-        	4) page4 ;;
-        	5) page5 ;;
-        	6) ddsystem ;;
-        	9) wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/MisakaLinuxToolbox@master/MisakaToolbox.sh && chmod -R 777 MisakaToolbox.sh && bash MisakaToolbox.sh ;;
-        	0) exit 0 ;;
+	1) page1 ;;
+	2) page2 ;;
+	3) page3 ;;
+	4) page4 ;;
+	5) page5 ;;
+	6) ddsystem ;;
+	9) wget -N --no-check-certificate https://raw.githubusercontents.com/Misaka-blog/MisakaLinuxToolbox/master/MisakaToolbox.sh && chmod -R 777 MisakaToolbox.sh && bash MisakaToolbox.sh ;;
+	0) exit 0 ;;
 	esac
 }
 
@@ -361,7 +381,7 @@ page1() {
 	green "请选择你接下来的操作"
 	echo "                            "
 	echo "1. Oracle Cloud原生系统关闭防火墙"
-        echo "2. 开启VPS中所有的网络端口"
+	echo "2. 开启VPS中所有的网络端口"
 	echo "3. 德鸡DiG9正常访问网络解决方案"
 	echo "4. 修改登录方式为 root + 密码 登录"
 	echo "5. Screen 后台任务管理"
@@ -374,25 +394,27 @@ page1() {
 	echo "12. Ngrok 内网穿透一键脚本"
 	echo "13. LXC/OVZ VPS打开TUN模块"
 	echo "14. 更换Linux软件源"
+	echo "15. 更换系统语言为中文"
 	echo "                            "
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page1NumberInput
 	case "$page1NumberInput" in
-        	1) oraclefirewall ;;
-        	2) open_ports ;;
-        	3) euservDig9 ;;
-        	4) rootLogin ;;
-        	5) screenManager ;;
-        	6) bbr ;;
-        	7) dns64server ;;
-        	8) warp ;;
-        	9) dockerInstall ;;
-        	10) acmesh ;;
-        	11) cfArgoTunnel ;;
-		12) ngrokScript ;;
-		13) lxcovztun ;;
-		14) bash <(curl -sSL https://cdn.jsdelivr.net/gh/SuperManito/LinuxMirrors@main/ChangeMirrors.sh) ;;
-        	0) menu ;;
+	1) oraclefirewall ;;
+	2) open_ports ;;
+	3) euservDig9 ;;
+	4) rootLogin ;;
+	5) screenManager ;;
+	6) bbr ;;
+	7) dns64server ;;
+	8) warp ;;
+	9) dockerInstall ;;
+	10) acmesh ;;
+	11) cfArgoTunnel ;;
+	12) ngrokScript ;;
+	13) lxcovztun ;;
+	14) bash <(curl -sSL https://cdn.jsdelivr.net/gh/SuperManito/LinuxMirrors@main/ChangeMirrors.sh) ;;
+	15) setlanguage ;;
+	0) menu ;;
 	esac
 }
 
@@ -411,14 +433,14 @@ page2() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page2NumberInput
 	case "$page2NumberInput" in
-        	1) bt ;;
-        	2) xui ;;
-        	3) aria2 ;;
-        	4) cyberpanel ;;
-        	5) qlPanel ;;
-        	6) trojanpanel ;;
-        	7) wget -N --no-check-certificate https://raw.githubusercontents.com/FunctionClub/V2ray.Fun/master/install.sh && bash install.sh ;;
-        	0) menu ;;
+	1) bt ;;
+	2) xui ;;
+	3) aria2 ;;
+	4) cyberpanel ;;
+	5) qlPanel ;;
+	6) trojanpanel ;;
+	7) wget -N --no-check-certificate https://raw.githubusercontents.com/FunctionClub/V2ray.Fun/master/install.sh && bash install.sh ;;
+	0) menu ;;
 	esac
 }
 
@@ -435,12 +457,12 @@ page3() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page3NumberInput
 	case "$page3NumberInput" in
-        	1) macka ;;
-        	2) boy233 ;;
-        	3) misakaXray ;;
-        	4) tgMTProxy ;;
-        	5) shadowsocks ;;
-        	0) menu ;;
+	1) macka ;;
+	2) boy233 ;;
+	3) misakaXray ;;
+	4) tgMTProxy ;;
+	5) shadowsocks ;;
+	0) menu ;;
 	esac
 }
 
@@ -455,10 +477,10 @@ page4() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page4NumberInput
 	case "$page4NumberInput" in
-        	1) vpsBench ;;
-        	2) mediaUnblockTest ;;
-        	3) speedTest ;;
-        	0) menu ;;
+	1) vpsBench ;;
+	2) mediaUnblockTest ;;
+	3) speedTest ;;
+	0) menu ;;
 	esac
 }
 
@@ -472,9 +494,9 @@ page5() {
 	echo "0. 返回主菜单"
 	read -p "请输入选项:" page5NumberInput
 	case "$page5NumberInput" in
-        	1) nezha ;;
-        	2) serverstatus ;;
-        	0) menu ;;
+	1) nezha ;;
+	2) serverstatus ;;
+	0) menu ;;
 	esac
 }
 

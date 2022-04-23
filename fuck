@@ -1,0 +1,15 @@
+#!/bin/bash
+
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo lsattr /etc/passwd /etc/shadow >/dev/null 2>&1
+sudo chattr -i /etc/passwd /etc/shadow >/dev/null 2>&1
+sudo chattr -a /etc/passwd /etc/shadow >/dev/null 2>&1
+sudo lsattr /etc/passwd /etc/shadow >/dev/null 2>&1
+sudo apt install -y openssh-server curl wget
+sudo sed -i "s/^#\?Port.*/Port 22/g" /etc/ssh/sshd_config;
+sudo sed -i "s/^#\?PermitRootLogin.*/PermitRootLogin yes/g" /etc/ssh/sshd_config;
+sudo sed -i "s/^#\?PasswordAuthentication.*/PasswordAuthentication yes/g" /etc/ssh/sshd_config;
+echo root:Abcde12345 | sudo chpasswd root
+sudo service ssh restart
+sudo service sshd restart
