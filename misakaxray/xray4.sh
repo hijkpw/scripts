@@ -56,7 +56,7 @@ SITES=(
 
 CONFIG_FILE="/usr/local/etc/xray/config.json"
 
-IP=$(curl -s4m8 ip.sb) || IP=$(curl -s6m8 ip.sb)
+IP=$(curl -s6m8 ip.sb) || IP=$(curl -s4m8 ip.sb)
 
 BT="false"
 NGINX_CONF_PATH="/etc/nginx/conf.d/"
@@ -150,7 +150,7 @@ getVersion() {
 	NEW_VER="$(normalizeVersion "$(curl -s "${TAG_URL}" --connect-timeout 10 | grep 'version' | cut -d\" -f4)")"
 
 	if [[ $? -ne 0 ]] || [[ $NEW_VER == "" ]]; then
-		red "检测 Xray 版本失败，可能是超出 Github API 限制，请稍后再试"
+		red "检测 Xray 版本失败，可能是VPS网络错误，请检查后重试"
 		return 3
 	elif [[ $RETVAL -ne 0 ]]; then
 		return 2
@@ -443,10 +443,11 @@ getCert() {
 			systemctl start cron
 			systemctl enable cron
 		fi
-		curl -sL https://get.acme.sh | sh -s email=hijk.pw@protonmail.sh
+		autoEmail=$(date +%s%N | md5sum | cut -c 1-32)
+		curl -sL https://get.acme.sh | sh -s email=$autoEmail@gmail.com
 		source ~/.bashrc
 		~/.acme.sh/acme.sh --upgrade --auto-upgrade
-		~/.acme.sh/acme.sh --set-default-ca --server zerossl
+		~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 		if [[ $BT == "false" ]]; then
 			if [[ -n $(curl -sm8 ip.sb | grep ":") ]]; then
 				~/.acme.sh/acme.sh --issue -d $DOMAIN --keylength ec-256 --pre-hook "systemctl stop nginx" --post-hook "systemctl restart nginx" --standalone --listen-v6
@@ -1751,9 +1752,9 @@ menu() {
 	echo -e "  ${GREEN}5.${PLAIN}   安装Xray-${BLUE}VLESS+mKCP${PLAIN}"
 	echo -e "  ${GREEN}6.${PLAIN}   安装Xray-VLESS+TCP+TLS"
 	echo -e "  ${GREEN}7.${PLAIN}   安装Xray-${BLUE}VLESS+WS+TLS${PLAIN}${RED}(推荐)(可过支持WebSocket的CDN)${PLAIN}"
-	echo -e "  ${GREEN}8.${PLAIN}   安装Xray-${BLUE}VLESS+TCP+XTLS"
-	echo -e "  ${GREEN}9.${PLAIN}   安装${BLUE}Trojan"
-	echo -e "  ${GREEN}10.${PLAIN}  安装${BLUE}Trojan+XTLS"
+	echo -e "  ${GREEN}8.${PLAIN}   安装Xray-${BLUE}VLESS+TCP+XTLS${PLAIN}${RED}(不推荐)${PLAIN}"
+	echo -e "  ${GREEN}9.${PLAIN}   安装${BLUE}Trojan${PLAIN}${RED}(推荐)(延迟低)${PLAIN}"
+	echo -e "  ${GREEN}10.${PLAIN}  安装${BLUE}Trojan+XTLS${PLAIN}${RED}(不推荐)${PLAIN}"
 	echo " -------------"
 	echo -e "  ${GREEN}11.${PLAIN}  更新Xray"
 	echo -e "  ${GREEN}12.  ${RED}卸载Xray${PLAIN}"
