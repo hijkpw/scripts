@@ -86,7 +86,8 @@ install_wireguard_debian(){
     ${PACKAGE_INSTALL} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
     if [ "$main" -lt 5 ] || [ "$minor" -lt 6 ]; then
         if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
-            ${PACKAGE_INSTALL} --no-install-recommends linux-headers-$(uname -r);apt -y --no-install-recommends install wireguard-dkms
+            ${PACKAGE_INSTALL} --no-install-recommends linux-headers-$(uname -r)
+            ${PACKAGE_INSTALL} --no-install-recommends wireguard-dkms
         fi
     fi
 }
