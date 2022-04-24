@@ -23,7 +23,7 @@
 			}
 		},
 		{
-			"tag": "warp",
+			"tag": "socks5-warp",
 			"protocol": "socks",
 			"settings": {
 				"servers": [{
@@ -42,7 +42,7 @@
 			},
 			{
 				"type": "field",
-				"outboundTag": "warp",
+				"outboundTag": "socks5-warp",
 				"domain": [""]
 			},
 			{
