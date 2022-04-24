@@ -1,23 +1,55 @@
 {
-    "inbounds": [{
-      "port": "$PORT",
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "id": "$uuid",
-            "level": 1,
-            "alterId": 0
-          }
-        ]
-      }
-    }],
-    "outbounds": [{
-      "protocol": "freedom",
-      "settings": {}
-    },{
-      "protocol": "blackhole",
-      "settings": {},
-      "tag": "blocked"
-    }]
+	"inbounds": [{
+		"port": "$PORT",
+		"protocol": "vmess",
+		"settings": {
+			"clients": [{
+				"id": "$uuid",
+				"level": 1,
+				"alterId": 0
+			}]
+		}
+	}],
+	"outbounds": [{
+			"tag": "IP4-out",
+			"protocol": "freedom",
+			"settings": {}
+		},
+		{
+			"tag": "IP6-out",
+			"protocol": "freedom",
+			"settings": {
+				"domainStrategy": "UseIPv6"
+			}
+		},
+		{
+			"tag": "socks5-warp",
+			"protocol": "socks",
+			"settings": {
+				"servers": [{
+					"address": "127.0.0.1",
+					"port": 40000
+				}]
+			}
+		}
+	],
+	"routing": {
+		"domainStrategy": "AsIs",
+		"rules": [{
+				"type": "field",
+				"outboundTag": "IP6-out",
+				"domain": [""]
+			},
+			{
+				"type": "field",
+				"outboundTag": "socks5-warp",
+				"domain": [""]
+			},
+			{
+				"type": "field",
+				"outboundTag": "IP4-out",
+				"network": "udp,tcp"
+			}
+		]
+	}
 }
