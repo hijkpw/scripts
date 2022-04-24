@@ -1745,7 +1745,7 @@ menu() {
 	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
 	echo "#############################################################"
 	echo -e "  "
-	echo -e "  ${GREEN}1.${PLAIN}   安装Xray-VMESS${PLAIN}${RED}(不推荐)${PLAIN}"
+	echo -e "  ${GREEN}1.${PLAIN}   安装Xray-VMESS+TCP${PLAIN}${RED}(不推荐)${PLAIN}"
 	echo -e "  ${GREEN}2.${PLAIN}   安装Xray-${BLUE}VMESS+mKCP${PLAIN}"
 	echo -e "  ${GREEN}3.${PLAIN}   安装Xray-VMESS+TCP+TLS"
 	echo -e "  ${GREEN}4.${PLAIN}   安装Xray-${BLUE}VMESS+WS+TLS${PLAIN}${RED}(推荐)(可过支持WebSocket的CDN)${PLAIN}"
