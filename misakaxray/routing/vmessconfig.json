@@ -1,0 +1,23 @@
+{
+    "inbounds": [{
+      "port": "$PORT",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "$uuid",
+            "level": 1,
+            "alterId": 0
+          }
+        ]
+      }
+    }],
+    "outbounds": [{
+      "protocol": "freedom",
+      "settings": {}
+    },{
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "blocked"
+    }]
+}
