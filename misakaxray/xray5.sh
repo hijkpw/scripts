@@ -1269,7 +1269,7 @@ configXray() {
 
 install() {
 	getData
-    checkCentOS8
+	checkCentOS8
 	${PACKAGE_UPDATE[int]}
 	${PACKAGE_INSTALL[int]} wget curl sudo vim unzip tar gcc openssl net-tools
 	if [[ $SYSTEM != "CentOS" ]]; then
@@ -1655,17 +1655,17 @@ showLog() {
 	journalctl -xen -u xray --no-pager
 }
 
-warpmenu(){
+warpmenu() {
 	wget -N https://raw.githubusercontents.com/Misaka-blog/Misaka-WARP-Script/master/misakawarp.sh && bash misakawarp.sh
 }
 
-setdns64(){
+setdns64() {
 	if [[ -n $(curl -s6m8 https://ip.gs) ]]; then
-		echo -e nameserver 2a01:4f8:c2c:123f::1 > /etc/resolv.conf
+		echo -e nameserver 2a01:4f8:c2c:123f::1 >/etc/resolv.conf
 	fi
 }
 
-system_optimize(){
+system_optimize() {
 	if [ ! -f "/etc/sysctl.conf" ]; then
 		touch /etc/sysctl.conf
 	fi
@@ -1720,7 +1720,7 @@ system_optimize(){
 	fi
 }
 
-open_ports(){
+open_ports() {
 	systemctl stop firewalld.service
 	systemctl disable firewalld.service
 	setenforce 0
@@ -1729,11 +1729,45 @@ open_ports(){
 	iptables -P FORWARD ACCEPT
 	iptables -P OUTPUT ACCEPT
 	iptables -t nat -F
-	iptables -t mangle -F 
+	iptables -t mangle -F
 	iptables -F
 	iptables -X
 	netfilter-persistent save
 	yellow "VPS中的所有网络端口已开启"
+}
+
+#禁用IPv6
+closeipv6() {
+	clear
+	sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+	sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+	sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+	sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
+	sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
+	sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
+
+	echo "net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1" >>/etc/sysctl.d/99-sysctl.conf
+	sysctl --system
+	green "禁用IPv6结束，可能需要重启！"
+}
+
+#开启IPv6
+openipv6() {
+	clear
+	sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+	sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+	sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+	sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
+	sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
+	sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
+
+	echo "net.ipv6.conf.all.disable_ipv6 = 0
+net.ipv6.conf.default.disable_ipv6 = 0
+net.ipv6.conf.lo.disable_ipv6 = 0" >>/etc/sysctl.d/99-sysctl.conf
+	sysctl --system
+	green "开启IPv6结束，可能需要重启！"
 }
 
 menu() {
@@ -1745,7 +1779,7 @@ menu() {
 	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
 	echo "#############################################################"
 	echo -e "  "
-	echo -e "  ${GREEN}1.${PLAIN}   安装Xray-VMESS+TCP${PLAIN}${RED}(不推荐)${PLAIN}"
+	echo -e "  ${GREEN}1.${PLAIN}   安装Xray-VMESS${PLAIN}${RED}(不推荐)${PLAIN}"
 	echo -e "  ${GREEN}2.${PLAIN}   安装Xray-${BLUE}VMESS+mKCP${PLAIN}"
 	echo -e "  ${GREEN}3.${PLAIN}   安装Xray-VMESS+TCP+TLS"
 	echo -e "  ${GREEN}4.${PLAIN}   安装Xray-${BLUE}VMESS+WS+TLS${PLAIN}${RED}(推荐)(可过支持WebSocket的CDN)${PLAIN}"
@@ -1770,13 +1804,15 @@ menu() {
 	echo -e "  ${GREEN}19.${PLAIN}  设置DNS64服务器"
 	echo -e "  ${GREEN}20.${PLAIN}  VPS系统优化"
 	echo -e "  ${GREEN}21.${PLAIN}  放开VPS的所有端口"
+	echo -e "  ${GREEN}22.${PLAIN}  开启IPv6"
+	echo -e "  ${GREEN}23.${PLAIN}  禁用IPv6"
 	echo " -------------"
 	echo -e "  ${GREEN}0.${PLAIN}   退出"
 	echo -n " 当前Xray状态："
 	statusText
 	echo
 
-	read -p "请选择操作[0-21]：" answer
+	read -p "请选择操作[0-23]：" answer
 	case $answer in
 		0) exit 1 ;;
 		1) install ;;
@@ -1800,6 +1836,8 @@ menu() {
 		19) setdns64 ;;
 		20) system_optimize ;;
 		21) open_ports ;;
+		22) openipv6 ;;
+		23) closeipv6 ;;
 		*) red "请选择正确的操作！" && exit 1 ;;
 	esac
 }
