@@ -1,55 +1,67 @@
 {
-	"inbounds": [{
-		"port": 47254,
-		"protocol": "vmess",
+	"inbounds": [
+	  {
+		"port": 47254, 
+		"protocol": "vmess", 
 		"settings": {
-			"clients": [{
-				"id": "69a67e87-89e8-40f7-9292-c929e1bc64d3",
-				"level": 1,
-				"alterId": 0
-			}]
-		}
-	}],
-	"outbounds": [{
-			"tag": "IP4-out",
-			"protocol": "freedom",
-			"settings": {}
-		},
-		{
-			"tag": "IP6-out",
-			"protocol": "freedom",
-			"settings": {
-				"domainStrategy": "UseIPv6"
+		  "clients": [
+			{
+			  "id": "69a67e87-89e8-40f7-9292-c929e1bc64d3", 
+			  "level": 1, 
+			  "alterId": 0
 			}
-		},
-		{
-			"tag": "socks5-warp",
-			"protocol": "socks",
-			"settings": {
-				"servers": [{
-					"address": "127.0.0.1",
-					"port": 40000
-				}]
-			}
+		  ]
 		}
-	],
+	  }
+	], 
+	"outbounds": [
+	  {
+		"tag": "IP4-out", 
+		"protocol": "freedom", 
+		"settings": { }
+	  }, 
+	  {
+		"tag": "IP6-out", 
+		"protocol": "freedom", 
+		"settings": {
+		  "domainStrategy": "UseIPv6"
+		}
+	  }, 
+	  {
+		"tag": "socks5-warp", 
+		"protocol": "socks", 
+		"settings": {
+		  "servers": [
+			{
+			  "address": "127.0.0.1", 
+			  "port": 40000
+			}
+		  ]
+		}
+	  }
+	], 
 	"routing": {
-		"domainStrategy": "AsIs",
-		"rules": [{
-				"type": "field",
-				"outboundTag": "IP6-out",
-				"domain": [""]
-			},
-			{
-				"type": "field",
-				"outboundTag": "socks5-warp",
-				"domain": [""]
-			},
-			{
-				"type": "field",
-				"outboundTag": "IP4-out",
-				"network": "udp,tcp"
-			}
-		]
+	  "domainStrategy": "AsIs", 
+	  "rules": [
+		{
+		  "type": "field", 
+		  "outboundTag": "IP6-out", 
+		  "domain": [
+			""
+		  ]
+		}, 
+		{
+		  "type": "field", 
+		  "outboundTag": "socks5-warp", 
+		  "domain": [
+			""
+		  ]
+		}, 
+		{
+		  "type": "field", 
+		  "outboundTag": "IP4-out", 
+		  "network": "udp,tcp"
+		}
+	  ]
 	}
-}
+  }
