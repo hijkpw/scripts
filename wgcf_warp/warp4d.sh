@@ -42,7 +42,7 @@ check_tun(){
     TUN=$(cat /dev/net/tun 2>&1 | tr '[:upper:]' '[:lower:]')
     if [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]]; then
         if [[ $vpsvirt == "openvz" ]]; then
-            wget -N https://raw.githubusercontents.com/Misaka-blog/tun-script/master/tun.sh && bash tun.sh
+            wget -N --no-check-certificate https://raw.githubusercontents.com/Misaka-blog/tun-script/master/tun.sh && bash tun.sh
         else
             red "检测到未开启TUN模块，请到VPS控制面板处开启" 
             exit 1
@@ -86,8 +86,7 @@ install_wireguard_debian(){
     ${PACKAGE_INSTALL} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
     if [ "$main" -lt 5 ] || [ "$minor" -lt 6 ]; then
         if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
-            ${PACKAGE_INSTALL} --no-install-recommends linux-headers-$(uname -r)
-            ${PACKAGE_INSTALL} --no-install-recommends wireguard-dkms
+            ${PACKAGE_INSTALL} --no-install-recommends linux-headers-$(uname -r);apt -y --no-install-recommends install wireguard-dkms
         fi
     fi
 }
@@ -104,26 +103,26 @@ install_wireguard(){
     [[ $SYSTEM == Debian ]] && install_wireguard_debian
     [[ $SYSTEM == Ubuntu ]] && install_wireguard_ubuntu
     if [[ $vpsvirt =~ lxc|openvz ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go -O /usr/bin/wireguard-go
+        wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
     fi
     if [[ $vpsvirt == zvm ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go-s390x -O /usr/bin/wireguard-go
+        wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go-s390x -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
     fi
 }
 
 install_wgcf(){
     if [[ $arch == "amd64" || $arch == "x86_64" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_amd64 -O /usr/local/bin/wgcf
+        wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_amd64 -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
     if [[ $arch == "armv8" || $arch == "arm64" || $arch == "aarch64" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_arm64 -O /usr/local/bin/wgcf
+        wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_arm64 -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
     if [[ $arch == "s390x" ]]; then
-        wget -N https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf
+        wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf
         chmod +x /usr/local/bin/wgcf
     fi
 }
@@ -194,7 +193,7 @@ get_best_mtu(){
 }
 
 cpto_wireguard(){
-    mkdir /etc/wireguard >/dev/null 2>&1
+    [[ $SYSTEM == "CentOS" ]] && mkdir /etc/wireguard >/dev/null 2>&1
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
 }
