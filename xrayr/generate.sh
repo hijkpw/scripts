@@ -1,6 +1,11 @@
 #!/bin/bash
 # XrayR generate config beta 0.1
 
+read -p "请输入机场面板：" PanelType
+read -p "请输入机场网址：" ApiHost
+read -p "请输入面板对接API Key：" ApiKey
+read -p "请输入节点Node ID:" NodeID
+read -p "请输入节点类型：" NodeType
 cd /etc/XrayR
 mv config.yml config.yml.bak
 cat <<EOF > /etc/XrayR/config.yml
@@ -20,12 +25,12 @@ ConnetionConfig:
   BufferSize: 64 # The internal cache size of each connection, kB 
 Nodes:
   -
-    PanelType: "SSpanel" # Panel type: SSpanel, V2board, PMpanel, Proxypanel
+    PanelType: "$PanelType" # Panel type: SSpanel, V2board, PMpanel, Proxypanel
     ApiConfig:
-      ApiHost: "http://127.0.0.1:667"
-      ApiKey: "123"
-      NodeID: 41
-      NodeType: V2ray # Node type: V2ray, Shadowsocks, Trojan, Shadowsocks-Plugin
+      ApiHost: "$ApiHost"
+      ApiKey: "$ApiKey"
+      NodeID: $NodeID
+      NodeType: $NodeType # Node type: V2ray, Shadowsocks, Trojan, Shadowsocks-Plugin
       Timeout: 30 # Timeout for the api request
       EnableVless: false # Enable Vless for V2ray Type
       EnableXTLS: false # Enable XTLS for V2ray and Trojan
