@@ -348,6 +348,10 @@ show_XrayR_version() {
     fi
 }
 
+generate_config_file{
+    echo -e "${yellow}配置文件生成向导${plain}"
+}
+
 show_usage() {
     echo "XrayR 管理脚本使用方法: "
     echo "------------------------------------------"
