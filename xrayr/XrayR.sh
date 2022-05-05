@@ -395,68 +395,40 @@ show_menu() {
     echo && read -p "请输入选择 [0-13]: " num
 
     case "${num}" in
-        0) config
-        ;;
-        1) check_uninstall && install
-        ;;
-        2) check_install && update
-        ;;
-        3) check_install && uninstall
-        ;;
-        4) check_install && start
-        ;;
-        5) check_install && stop
-        ;;
-        6) check_install && restart
-        ;;
-        7) check_install && status
-        ;;
-        8) check_install && show_log
-        ;;
-        9) check_install && enable
-        ;;
-        10) check_install && disable
-        ;;
-        11) install_bbr
-        ;;
-        12) check_install && show_XrayR_version
-        ;;
-        13) update_shell
-        ;;
-        *) echo -e "${red}请输入正确的数字 [0-12]${plain}"
-        ;;
+        0) config ;;
+        1) check_uninstall && install ;;
+        2) check_install && update ;;
+        3) check_install && uninstall ;;
+        4) check_install && start ;;
+        5) check_install && stop ;;
+        6) check_install && restart ;;
+        7) check_install && status ;;
+        8) check_install && show_log ;;
+        9) check_install && enable ;;
+        10) check_install && disable ;;
+        11) install_bbr ;;
+        12) check_install && show_XrayR_version ;;
+        13) update_shell ;;
+        *) echo -e "${red}请输入正确的数字 [0-13]${plain}" ;;
     esac
 }
 
 
 if [[ $# > 0 ]]; then
     case $1 in
-        "start") check_install 0 && start 0
-        ;;
-        "stop") check_install 0 && stop 0
-        ;;
-        "restart") check_install 0 && restart 0
-        ;;
-        "status") check_install 0 && status 0
-        ;;
-        "enable") check_install 0 && enable 0
-        ;;
-        "disable") check_install 0 && disable 0
-        ;;
-        "log") check_install 0 && show_log 0
-        ;;
-        "update") check_install 0 && update 0 $2
-        ;;
-        "config") config $*
-        ;;
-        "install") check_uninstall 0 && install 0
-        ;;
-        "uninstall") check_install 0 && uninstall 0
-        ;;
-        "version") check_install 0 && show_XrayR_version 0
-        ;;
-        "update_shell") update_shell
-        ;;
+        "start") check_install 0 && start 0 ;;
+        "stop") check_install 0 && stop 0 ;;
+        "restart") check_install 0 && restart 0 ;;
+        "status") check_install 0 && status 0 ;;
+        "enable") check_install 0 && enable 0 ;;
+        "disable") check_install 0 && disable 0 ;;
+        "log") check_install 0 && show_log 0 ;;
+        "update") check_install 0 && update 0 $2 ;;
+        "config") config $* ;;
+        "install") check_uninstall 0 && install 0 ;;
+        "uninstall") check_install 0 && uninstall 0 ;;
+        "version") check_install 0 && show_XrayR_version 0 ;;
+        "update_shell") update_shell ;;
         *) show_usage
     esac
 else
