@@ -467,10 +467,11 @@ show_menu() {
  ${green}11.${plain} 一键安装 bbr (最新内核)
  ${green}12.${plain} 查看 XrayR 版本 
  ${green}13.${plain} 升级维护脚本
+ ${green}14.${plain} 生成 XrayR 配置文件
  "
  #后续更新可加入上方字符串中
     show_status
-    echo && read -p "请输入选择 [0-13]: " num
+    echo && read -p "请输入选择 [0-14]: " num
 
     case "${num}" in
         0) config ;;
@@ -487,7 +488,8 @@ show_menu() {
         11) install_bbr ;;
         12) check_install && show_XrayR_version ;;
         13) update_shell ;;
-        *) echo -e "${red}请输入正确的数字 [0-13]${plain}" ;;
+        14) generate_config ;;
+        *) echo -e "${red}请输入正确的数字 [0-14]${plain}" ;;
     esac
 }
 
