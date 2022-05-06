@@ -436,7 +436,7 @@ Nodes:
         CertFile: /etc/XrayR/cert/node1.test.com.cert # Provided if the CertMode is file
         KeyFile: /etc/XrayR/cert/node1.test.com.key
         Provider: alidns # DNS cert provider, Get the full support list here: https://go-acme.github.io/lego/dns/
-        Email: test@me.com
+        Email: $CF_API_EMAIL # Email for cert
         DNSEnv: # DNS ENV option used by DNS provider
           CF_API_EMAIL: $CF_API_EMAIL
           CF_API_KEY: $CF_API_KEY
