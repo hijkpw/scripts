@@ -61,11 +61,11 @@ checkCentOS8(){
 
 archAffix(){
     case "$(uname -m)" in
-        i686|i386) echo '386' ;;
-        x86_64|amd64) echo 'amd64' ;;
+        i686 | i386) echo '386' ;;
+        x86_64 | amd64) echo 'amd64' ;;
         armv5tel) echo 'arm-5' ;;
-        armv7|armv7l) echo 'arm-7' ;;
-        armv8|aarch64) echo 'arm64' ;;
+        armv7 | armv7l) echo 'arm-7' ;;
+        armv8 | aarch64) echo 'arm64' ;;
         s390x) echo 's390x' ;;
         *) red " 不支持的CPU架构！" && exit 1 ;;
     esac
