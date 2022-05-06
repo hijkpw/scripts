@@ -438,10 +438,10 @@ Nodes:
         Provider: alidns # DNS cert provider, Get the full support list here: https://go-acme.github.io/lego/dns/
         Email: test@me.com
         DNSEnv: # DNS ENV option used by DNS provider
-          CF_API_EMAIL:
-          CF_API_KEY:
-          CF_DNS_API_TOKEN:
-          CF_ZONE_API_TOKEN:
+          CF_API_EMAIL: $CF_API_EMAIL
+          CF_API_KEY: $CF_API_KEY
+          CF_DNS_API_TOKEN: $CF_DNS_API_TOKEN
+          CF_ZONE_API_TOKEN: $CF_ZONE_API_TOKEN
 EOF
         echo -e "${green}配置文件生成完成，正在重新启动 XrayR 服务${plain}"
         xrayr restart
