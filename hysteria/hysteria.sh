@@ -80,6 +80,10 @@ downloadHysteria() {
 
 }
 
+installHysteria() {
+
+}
+
 getConfig() {
     
 }
