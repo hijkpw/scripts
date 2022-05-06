@@ -512,7 +512,7 @@ show_menu() {
         11) install_bbr ;;
         12) check_install && show_XrayR_version ;;
         13) update_shell ;;
-        14) generate_config ;;
+        14) generate_config_file ;;
         *) echo -e "${red}请输入正确的数字 [0-14]${plain}" ;;
     esac
 }
