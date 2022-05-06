@@ -74,6 +74,10 @@ archAffix(){
     return 0
 }
 
+downloadHysteria() {
+
+}
+
 getConfig() {
     
 }
