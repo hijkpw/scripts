@@ -69,3 +69,15 @@ archAffix(){
     esac
     return 0
 }
+
+getConfig() {
+    
+}
+
+showConfig() {
+
+}
+
+menu() {
+
+}
