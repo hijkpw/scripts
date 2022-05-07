@@ -12,6 +12,12 @@ yellow() {
     echo -e "\033[33m\033[01m$1\033[0m"
 }
 
+RED="\033[31m"      # Error message
+GREEN="\033[32m"    # Success message
+YELLOW="\033[33m"   # Warning message
+BLUE="\033[36m"     # Info message
+PLAIN='\033[0m'
+
 # 判断系统及定义系统安装依赖方式
 REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'")
 RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS")
@@ -134,5 +140,26 @@ installHysteria() {
 }
 
 menu() {
+    clear
+    echo "#############################################################"
+    echo -e "#              ${RED} Hysieria  一键安装脚本${PLAIN}                #"
+    echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                     #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://owo.misaka.rest                               #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://owo.misaka.rest                                     #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                               #"
+    echo "#############################################################"
+    echo ""
 
+    echo -e "  ${GREEN}1.${PLAIN}  安装Hysieria "
+    echo -e "  ${GREEN}2.${PLAIN}  更新Hysieria "
+    echo -e "  ${GREEN}3.  ${RED}卸载Hysieria ${PLAIN}"
+    echo " -------------"
+    echo -e "  ${GREEN}4.${PLAIN}  启动Hysieria "
+    echo -e "  ${GREEN}5.${PLAIN}  重启Hysieria "
+    echo -e "  ${GREEN}6.${PLAIN}  停止Hysieria "
+    echo " -------------"
+    echo -e "  ${GREEN}0.${PLAIN} 退出"
+    echo ""
+    
+    read -p " 请选择操作[0-6]：" answer
 }
