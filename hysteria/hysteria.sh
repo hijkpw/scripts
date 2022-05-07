@@ -111,6 +111,8 @@ downloadHysteria() {
 }
 
 makeConfig() {
+    read -p "请输入 Hysteria 的连接端口（默认：1080）：" PORT
+    [[ -z $PORT ]] && PORT=1080
     cat <<EOF > /root/Hysteria/config.json
 {
     "listen": ":$PORT",
