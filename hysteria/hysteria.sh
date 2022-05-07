@@ -100,7 +100,7 @@ downloadHysteria() {
 makeConfig() {
     cat <<EOF > /root/Hysteria/config.json
 {
-    "listen": ":port",
+    "listen": ":$PORT",
     "cert": "cert.pem",
     "key": "key.pem",
     "obfs": "password"
@@ -108,7 +108,7 @@ makeConfig() {
 EOF
     cat <<EOF > /root/server.json
 {
-    "listen": ":port",
+    "listen": ":$PORT",
     "cert": "cert.pem",
     "key": "key.pem",
     "obfs": "password"
@@ -116,7 +116,7 @@ EOF
 EOF
     cat <<EOF > /root/client.json
 {
-    "server": "ip:port",
+    "server": "$IP:$PORT",
     "obfs": "password",
     "insecure": true,
     "socks5": {
