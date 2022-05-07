@@ -86,7 +86,7 @@ install_base() {
     if [[ $SYSTEM != "CentOS" ]]; then
         ${PACKAGE_UPDATE[int]}
     fi
-    
+    ${PACKAGE_INSTALL[int]} wget curl sudo
 }
 
 downloadHysteria() {
@@ -133,10 +133,29 @@ EOF
     }
 }
 EOF
+cat <<'TEXT' > /etc/systemd/system/hysteria.service
+[Unit]
+Description=Hysiteria Server
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/Hysteria
+ExecStart=/root/Hysteria/hysteria server
+Restart=always
+TEXT
 }
 
 installHysteria() {
-    
+    checkCentOS8
+    install_base
+    downloadHysteria
+    makeConfig
+    systemctl enable hysteria
+    systemctl start hysteria
 }
 
 menu() {
@@ -162,6 +181,9 @@ menu() {
     echo ""
     
     read -p " 请选择操作[0-6]：" answer
+    case $answer in
+        1) installHysteria ;;
+    esac
 }
 
 menu
