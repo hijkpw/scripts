@@ -127,6 +127,8 @@ EOF
 {
     "server": "$IP:$PORT",
     "obfs": "password",
+    "up_mbps": 20,
+    "down_mbps": 100,
     "insecure": true,
     "socks5": {
         "listen": "127.0.0.1:1080"
@@ -206,6 +208,8 @@ installHysteria() {
         red "Hysteria 服务器安装失败"
     elif [[ -n $(service hysteria status 2>/dev/null | grep "active") ]]; then
         green "Hysteria 服务器安装成功"
+        yellow "服务器配置文件已保存到 /root/Hysteria/server.json"
+        yellow "客户端配置文件已保存到 /root/Hysteria/client.json"
     fi
 }
 
@@ -248,7 +252,7 @@ menu() {
     check_status
 
     echo "#############################################################"
-    echo -e "#                 ${RED} Hysieria  一键安装脚本${PLAIN}                   #"
+    echo -e "#                 ${RED} Hysteria  一键安装脚本${PLAIN}                   #"
     echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
     echo -e "# ${GREEN}网址${PLAIN}: https://owo.misaka.rest                             #"
     echo -e "# ${GREEN}论坛${PLAIN}: https://owo.misaka.rest                             #"
