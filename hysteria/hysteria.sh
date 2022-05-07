@@ -227,8 +227,20 @@ uninstall(){
     green "Hysteria 卸载完成！"
 }
 
+check_status(){
+    if [[ -n $(service hysteria status | grep "inactive") ]]; then
+        status="${RED}Hysteria 未启动！${PLAIN}"
+    elif [[ -n $(service hysteria status | grep "active") ]]; then
+        status="${GREEN}Hysteria 已启动！${PLAIN}"
+    else
+        status="${RED}未安装 Hysteria！${PLAIN}"
+    fi
+}
+
 menu() {
     clear
+    check_status
+
     echo "#############################################################"
     echo -e "#                 ${RED} Hysieria  一键安装脚本${PLAIN}                   #"
     echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
@@ -247,7 +259,8 @@ menu() {
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"
     echo ""
-    
+    echo "Hysteria 状态：$status"
+    echo ""
     read -p " 请选择操作[0-5]：" answer
     case $answer in
         1) installHysteria ;;
