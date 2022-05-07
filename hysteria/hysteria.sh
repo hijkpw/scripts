@@ -79,7 +79,7 @@ archAffix(){
 downloadHysteria() {
     last_version=$(curl -Ls "https://api.github.com/repos/HyNetwork/Hysteria/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     if [[ ! -n "$last_version" ]]; then
-        red "检测 Hysteria 版本失败，可能是超出 Github API 限制，请稍后再试，或手动指定 Hysteria 版本安装"
+        red "检测 Hysteria 版本失败，可能是超出 Github API 限制，请稍后再试"
         exit 1
     fi
     yellow "检测到 Hysteria 最新版本：${last_version}，开始安装"
