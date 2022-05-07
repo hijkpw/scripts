@@ -113,6 +113,8 @@ downloadHysteria() {
 makeConfig() {
     read -p "请输入 Hysteria 的连接端口（默认：40000）：" PORT
     [[ -z $PORT ]] && PORT=40000
+    read -p "请输入 Hysteria 的连接混淆密码（默认随机生成）：" OBFS
+    [[ -z $OBFS ]] && OBFS=$(date +%s%N | md5sum | cut -c 1-32)
     openssl ecparam -genkey -name prime256v1 -out /root/Hysteria/private.key
     openssl req -new -x509 -days 36500 -key /root/Hysteria/private.key -out /root/Hysteria/cert.crt -subj "/CN=www.bilibili.com"
     cat <<EOF > /root/Hysteria/server.json
@@ -120,13 +122,13 @@ makeConfig() {
     "listen": ":$PORT",
     "cert": "/root/Hysteria/cert.crt",
     "key": "/root/Hysteria/private.key",
-    "obfs": "password"
+    "obfs": "$OBFS"
 }
 EOF
     cat <<EOF > /root/Hysteria/client.json
 {
     "server": "$IP:$PORT",
-    "obfs": "password",
+    "obfs": "$OBFS",
     "up_mbps": 20,
     "down_mbps": 100,
     "insecure": true,
