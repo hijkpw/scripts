@@ -145,7 +145,7 @@ WantedBy=multi-user.target
 [Service]
 Type=simple
 WorkingDirectory=/root/Hysteria
-ExecStart=hysteria -c /root/Hysteria/server.json server
+ExecStart=/usr/bin/hysteria -c /root/Hysteria/server.json server
 Restart=always
 TEXT
 }
