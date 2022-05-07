@@ -161,26 +161,25 @@ installHysteria() {
 menu() {
     clear
     echo "#############################################################"
-    echo -e "#              ${RED} Hysieria  一键安装脚本${PLAIN}                #"
-    echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                     #"
-    echo -e "# ${GREEN}网址${PLAIN}: https://owo.misaka.rest                               #"
-    echo -e "# ${GREEN}论坛${PLAIN}: https://owo.misaka.rest                                     #"
-    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                               #"
+    echo -e "#                 ${RED} Hysieria  一键安装脚本${PLAIN}                   #"
+    echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://owo.misaka.rest                             #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://owo.misaka.rest                             #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
     echo "#############################################################"
     echo ""
 
     echo -e "  ${GREEN}1.${PLAIN}  安装Hysieria "
-    echo -e "  ${GREEN}2.${PLAIN}  更新Hysieria "
-    echo -e "  ${GREEN}3.  ${RED}卸载Hysieria ${PLAIN}"
+    echo -e "  ${GREEN}2.  ${RED}卸载Hysieria ${PLAIN}"
     echo " -------------"
-    echo -e "  ${GREEN}4.${PLAIN}  启动Hysieria "
-    echo -e "  ${GREEN}5.${PLAIN}  重启Hysieria "
-    echo -e "  ${GREEN}6.${PLAIN}  停止Hysieria "
+    echo -e "  ${GREEN}3.${PLAIN}  启动Hysieria "
+    echo -e "  ${GREEN}4.${PLAIN}  重启Hysieria "
+    echo -e "  ${GREEN}5.${PLAIN}  停止Hysieria "
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"
     echo ""
     
-    read -p " 请选择操作[0-6]：" answer
+    read -p " 请选择操作[0-5]：" answer
     case $answer in
         1) installHysteria ;;
     esac
