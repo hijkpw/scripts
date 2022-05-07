@@ -102,7 +102,7 @@ downloadHysteria() {
         exit 1
     fi
     yellow "检测到 Hysteria 最新版本：${last_version}，开始安装"
-    wget -N --no-check-certificate https://github.com/HyNetwork/Hysteria/releases/download/${last_version}/Hysteria-tun-linux-$(archAffix) -O /root/Hysteria/hysteria
+    wget -N --no-check-certificate https://github.com/HyNetwork/Hysteria/releases/download/${last_version}/Hysteria-tun-linux-$(archAffix) -O /usr/bin/hysteria
     if [[ $? -ne 0 ]]; then
         red "下载 Hysteria 失败，请确保你的服务器能够连接并下载 Github 的文件"
         exit 1
@@ -113,7 +113,7 @@ downloadHysteria() {
 makeConfig() {
     read -p "请输入 Hysteria 的连接端口（默认：1080）：" PORT
     [[ -z $PORT ]] && PORT=1080
-    cat <<EOF > /root/Hysteria/config.json
+    cat <<EOF > /root/Hysteria/server.json
 {
     "listen": ":$PORT",
     "cert": "cert.pem",
@@ -121,15 +121,7 @@ makeConfig() {
     "obfs": "password"
 }
 EOF
-    cat <<EOF > /root/server.json
-{
-    "listen": ":$PORT",
-    "cert": "cert.pem",
-    "key": "key.pem",
-    "obfs": "password"
-}
-EOF
-    cat <<EOF > /root/client.json
+    cat <<EOF > /root/Hysteria/client.json
 {
     "server": "$IP:$PORT",
     "obfs": "password",
@@ -153,7 +145,7 @@ WantedBy=multi-user.target
 [Service]
 Type=simple
 WorkingDirectory=/root/Hysteria
-ExecStart=/root/Hysteria/hysteria server
+ExecStart=hysteria -c /root/Hysteria/server.json server
 Restart=always
 TEXT
 }
