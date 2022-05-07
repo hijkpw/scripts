@@ -76,6 +76,13 @@ archAffix(){
     return 0
 }
 
+install_base() {
+    if [[ $SYSTEM != "CentOS" ]]; then
+        ${PACKAGE_UPDATE[int]}
+    fi
+    
+}
+
 downloadHysteria() {
     last_version=$(curl -Ls "https://api.github.com/repos/HyNetwork/Hysteria/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     if [[ ! -n "$last_version" ]]; then
