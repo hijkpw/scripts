@@ -1,0 +1,6 @@
+{
+    "listen": ":port",
+    "cert": "cert.pem",
+    "key": "key.pem",
+    "obfs": "password"
+}
