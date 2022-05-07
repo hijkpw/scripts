@@ -91,7 +91,8 @@ downloadHysteria() {
 }
 
 installHysteria() {
-
+    cat <<EOF > /root/Hysteria/config.json
+EOF
 }
 
 getConfig() {
