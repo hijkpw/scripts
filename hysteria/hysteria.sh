@@ -201,6 +201,12 @@ installHysteria() {
     makeConfig
     systemctl enable hysteria
     systemctl start hysteria
+    check_status
+    if [[ -n $(service hysteria status | grep "inactive") ]]; then
+        red "Hysteria 服务器安装失败"
+    elif [[ -n $(service hysteria status | grep "active") ]]; then
+        green "Hysteria 服务器安装成功"
+    fi
 }
 
 start_hysteria() {
