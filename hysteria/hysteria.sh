@@ -202,9 +202,9 @@ installHysteria() {
     systemctl enable hysteria
     systemctl start hysteria
     check_status
-    if [[ -n $(service hysteria status | grep "inactive") ]]; then
+    if [[ -n $(service hysteria status 2>/dev/null | grep "inactive") ]]; then
         red "Hysteria 服务器安装失败"
-    elif [[ -n $(service hysteria status | grep "active") ]]; then
+    elif [[ -n $(service hysteria status 2>/dev/null | grep "active") ]]; then
         green "Hysteria 服务器安装成功"
     fi
 }
@@ -234,9 +234,9 @@ uninstall(){
 }
 
 check_status(){
-    if [[ -n $(service hysteria status | grep "inactive") ]]; then
+    if [[ -n $(service hysteria status 2>/dev/null | grep "inactive") ]]; then
         status="${RED}Hysteria 未启动！${PLAIN}"
-    elif [[ -n $(service hysteria status | grep "active") ]]; then
+    elif [[ -n $(service hysteria status 2>/dev/null | grep "active") ]]; then
         status="${GREEN}Hysteria 已启动！${PLAIN}"
     else
         status="${RED}未安装 Hysteria！${PLAIN}"
