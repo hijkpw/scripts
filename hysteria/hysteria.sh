@@ -97,12 +97,39 @@ downloadHysteria() {
     fi
 }
 
-installHysteria() {
+makeConfig() {
     cat <<EOF > /root/Hysteria/config.json
+{
+    "listen": ":port",
+    "cert": "cert.pem",
+    "key": "key.pem",
+    "obfs": "password"
+}
+EOF
+    cat <<EOF > /root/server.json
+{
+    "listen": ":port",
+    "cert": "cert.pem",
+    "key": "key.pem",
+    "obfs": "password"
+}
+EOF
+    cat <<EOF > /root/client.json
+{
+    "server": "ip:port",
+    "obfs": "password",
+    "insecure": true,
+    "socks5": {
+        "listen": "127.0.0.1:1080"
+    },
+    "http": {
+        "listen": "127.0.0.1:1081"
+    }
+}
 EOF
 }
 
-getConfig() {
+installHysteria() {
     
 }
 
