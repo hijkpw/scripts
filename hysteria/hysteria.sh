@@ -265,7 +265,7 @@ menu() {
     echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"
     echo ""
-    echo "Hysteria 状态：$status"
+    echo -e "Hysteria 状态：$status"
     echo ""
     read -p " 请选择操作[0-5]：" answer
     case $answer in
