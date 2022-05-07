@@ -105,6 +105,7 @@ downloadHysteria() {
         red "下载 Hysteria 失败，请确保你的服务器能够连接并下载 Github 的文件"
         exit 1
     fi
+    chmod +x /root/Hysteria/hysteria
 }
 
 makeConfig() {
