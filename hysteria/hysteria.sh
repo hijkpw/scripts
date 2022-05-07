@@ -133,7 +133,7 @@ EOF
     }
 }
 EOF
-cat <<'TEXT' > /etc/systemd/system/hysteria.service
+    cat <<'TEXT' > /etc/systemd/system/hysteria.service
 [Unit]
 Description=Hysiteria Server
 After=network.target
