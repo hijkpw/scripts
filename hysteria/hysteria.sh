@@ -107,7 +107,7 @@ downloadHysteria() {
         red "下载 Hysteria 失败，请确保你的服务器能够连接并下载 Github 的文件"
         exit 1
     fi
-    chmod +x /root/Hysteria/hysteria
+    chmod +x /usr/bin/hysteria
 }
 
 makeConfig() {
@@ -178,6 +178,7 @@ uninstall(){
     systemctl stop hysteria
     systemctl disable hysteria
     rm -rf /root/Hysteria
+    rm -f /usr/bin/hysteria
     rm -f /etc/systemd/system/hysteria.service
     green "Hysteria 卸载完成！"
 }
