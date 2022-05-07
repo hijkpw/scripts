@@ -167,6 +167,29 @@ installHysteria() {
     systemctl start hysteria
 }
 
+start_hysteria() {
+    systemctl start hysteria
+    green "Hysteria 已启动！"
+}
+
+stop_hysteria() {
+    systemctl stop hysteria
+    green "Hysteria 已停止！"
+}
+
+restart(){
+    systemctl restart hysteria
+    green "Hysteria 已重启！"
+}
+
+uninstall(){
+    systemctl stop hysteria
+    systemctl disable hysteria
+    rm -rf /root/Hysteria
+    rm -f /etc/systemd/system/hysteria.service
+    green "Hysteria 卸载完成！"
+}
+
 menu() {
     clear
     echo "#############################################################"
@@ -191,6 +214,10 @@ menu() {
     read -p " 请选择操作[0-5]：" answer
     case $answer in
         1) installHysteria ;;
+        2) uninstall ;;
+        3) start_hysteria ;;
+        4) restart ;;
+        5) stop_hysteria ;;
     esac
 }
 
