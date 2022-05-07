@@ -77,13 +77,13 @@ archAffix(){
 }
 
 downloadHysteria() {
-    last_version=$(curl -Ls "https://api.github.com/repos/Misaka-blog/Hysteria/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    last_version=$(curl -Ls "https://api.github.com/repos/HyNetwork/Hysteria/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     if [[ ! -n "$last_version" ]]; then
         red "检测 Hysteria 版本失败，可能是超出 Github API 限制，请稍后再试，或手动指定 Hysteria 版本安装"
         exit 1
     fi
     yellow "检测到 Hysteria 最新版本：${last_version}，开始安装"
-    wget -N --no-check-certificate -O /usr/local/Hysteria-linux-${arch}.tar.gz https://github.com/Misaka-blog/Hysteria/releases/download/${last_version}/Hysteria-linux-${arch}.tar.gz
+    wget -N --no-check-certificate -O /root/Hysteria/Hysteria https://github.com/HyNetwork/Hysteria/releases/download/${last_version}/Hysteria-tun-linux-${archAffix}
     if [[ $? -ne 0 ]]; then
         red "下载 Hysteria 失败，请确保你的服务器能够连接并下载 Github 的文件"
         exit 1
