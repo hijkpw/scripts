@@ -133,10 +133,6 @@ installHysteria() {
     
 }
 
-showConfig() {
-
-}
-
 menu() {
 
 }
