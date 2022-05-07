@@ -113,8 +113,8 @@ downloadHysteria() {
 makeConfig() {
     read -p "请输入 Hysteria 的连接端口（默认：1080）：" PORT
     [[ -z $PORT ]] && PORT=1080
-    openssl req -new -x509 -days 36500 -key ca.key -out /root/Hysteria/cert.crt -Subj "/CN=www.bilibili.com"
     openssl ecparam -genkey -name prime256v1 -out /root/Hysteria/private.key
+    openssl req -new -x509 -days 36500 -key /root/Hysteria/private.key -out /root/Hysteria/cert.crt -Subj "/CN=www.bilibili.com"
     cat <<EOF > /root/Hysteria/server.json
 {
     "listen": ":$PORT",
