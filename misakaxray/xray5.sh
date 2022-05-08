@@ -1776,6 +1776,7 @@ menu() {
 	echo -e "#                     ${RED}Xray一键安装脚本${PLAIN}                      #"
 	echo -e "# ${GREEN}作者${PLAIN}: 网络跳越(hijk) & MisakaNo                           #"
 	echo -e "# ${GREEN}博客${PLAIN}: https://owo.misaka.rest                             #"
+	echo -e "# ${GREEN}论坛${PLAIN}: https://vpsgo.co                                    #"
 	echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
 	echo "#############################################################"
 	echo -e "  "
