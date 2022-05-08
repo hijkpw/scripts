@@ -325,7 +325,7 @@ menu() {
     echo ""
     echo -e "Hysteria 状态：$status"
     echo ""
-    read -p " 请选择操作[0-7]：" answer
+    read -p " 请选择操作[0-8]：" answer
     case $answer in
         1) installHysteria ;;
         2) uninstall ;;
