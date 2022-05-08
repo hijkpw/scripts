@@ -250,6 +250,53 @@ check_status(){
     fi
 }
 
+# 放开防火墙端口
+open_ports() {
+    systemctl stop firewalld.service 2>/dev/null
+    systemctl disable firewalld.service 2>/dev/null
+    setenforce 0 2>/dev/null
+    ufw disable 2>/dev/null
+    iptables -P INPUT ACCEPT 2>/dev/null
+    iptables -P FORWARD ACCEPT 2>/dev/null
+    iptables -P OUTPUT ACCEPT 2>/dev/null
+    iptables -t nat -F 2>/dev/null
+    iptables -t mangle -F 2>/dev/null
+    iptables -F 2>/dev/null
+    iptables -X 2>/dev/null
+    netfilter-persistent save 2>/dev/null
+    green "放开防火墙端口成功！"
+}
+
+#禁用IPv6
+closeipv6() {
+    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
+    echo "net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1" >>/etc/sysctl.d/99-sysctl.conf
+    sysctl --system
+    green "禁用IPv6结束，可能需要重启！"
+}
+
+#开启IPv6
+openipv6() {
+    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.d/99-sysctl.conf
+    sed -i '/net.ipv6.conf.all.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.default.disable_ipv6/d' /etc/sysctl.conf
+    sed -i '/net.ipv6.conf.lo.disable_ipv6/d' /etc/sysctl.conf
+    echo "net.ipv6.conf.all.disable_ipv6 = 0
+net.ipv6.conf.default.disable_ipv6 = 0
+net.ipv6.conf.lo.disable_ipv6 = 0" >>/etc/sysctl.d/99-sysctl.conf
+    sysctl --system
+    green "开启IPv6结束，可能需要重启！"
+}
+
 menu() {
     clear
     check_status
@@ -270,17 +317,25 @@ menu() {
     echo -e "  ${GREEN}4.${PLAIN}  重启Hysieria "
     echo -e "  ${GREEN}5.${PLAIN}  停止Hysieria "
     echo " -------------"
+    echo -e "  ${GREEN}6.${PLAIN}  启用IPv6 "
+    echo -e "  ${GREEN}7.${PLAIN}  禁用IPv6 "
+    echo -e "  ${GREEN}8.${PLAIN}  放行防火墙端口 "
+    echo " -------------"
     echo -e "  ${GREEN}0.${PLAIN} 退出"
     echo ""
     echo -e "Hysteria 状态：$status"
     echo ""
-    read -p " 请选择操作[0-5]：" answer
+    read -p " 请选择操作[0-7]：" answer
     case $answer in
         1) installHysteria ;;
         2) uninstall ;;
         3) start_hysteria ;;
         4) restart ;;
         5) stop_hysteria ;;
+        6) openipv6 ;;
+        7) closeipv6 ;;
+        8) open_ports ;;
+        *) red "请选择正确的操作！" && exit 1 ;;
     esac
 }
 
