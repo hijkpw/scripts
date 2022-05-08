@@ -115,6 +115,7 @@ makeConfig() {
     [[ -z $PORT ]] && PORT=40000
     read -p "请输入 Hysteria 的连接混淆密码（默认随机生成）：" OBFS
     [[ -z $OBFS ]] && OBFS=$(date +%s%N | md5sum | cut -c 1-32)
+    sysctl -w net.core.rmem_max=4000000
     openssl ecparam -genkey -name prime256v1 -out /root/Hysteria/private.key
     openssl req -new -x509 -days 36500 -key /root/Hysteria/private.key -out /root/Hysteria/cert.crt -subj "/CN=www.bilibili.com"
     cat <<EOF > /root/Hysteria/server.json
