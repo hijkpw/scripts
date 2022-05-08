@@ -305,7 +305,7 @@ menu() {
     echo -e "#                 ${RED} Hysteria  一键安装脚本${PLAIN}                   #"
     echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
     echo -e "# ${GREEN}网址${PLAIN}: https://owo.misaka.rest                             #"
-    echo -e "# ${GREEN}论坛${PLAIN}: https://owo.misaka.rest                             #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://vpsgo.co                                    #"
     echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
     echo "#############################################################"
     echo ""
