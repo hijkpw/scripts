@@ -308,11 +308,11 @@ getData() {
 		yellow "请选择伪装站类型:"
 		echo "   1) 静态网站(位于/usr/share/nginx/html)"
 		echo "   2) 小说站(随机选择)"
-		echo "   3) 高清壁纸站(https://bing.ioliu.cn)"
+		echo "   3) 高清壁纸站(https://bing.wallpaper.pics)"
 		echo "   4) 自定义反代站点(需以http或者https开头)"
 		read -p "请选择伪装网站类型 [默认:高清壁纸站]：" answer
 		if [[ -z "$answer" ]]; then
-			PROXY_URL="https://bing.ioliu.cn"
+			PROXY_URL="https://bing.wallpaper.pics"
 		else
 			case $answer in
 				1) PROXY_URL="" ;;
@@ -331,7 +331,7 @@ getData() {
 						fi
 					done
 					;;
-				3) PROXY_URL="https://bing.ioliu.cn" ;;
+				3) PROXY_URL="https://bing.wallpaper.pics" ;;
 				4)
 					read -p "请输入反代站点(以http或者https开头)：" PROXY_URL
 					if [[ -z "$PROXY_URL" ]]; then
