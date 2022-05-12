@@ -116,6 +116,7 @@ makeConfig() {
     read -p "请输入 Hysteria 的连接混淆密码（默认随机生成）：" OBFS
     [[ -z $OBFS ]] && OBFS=$(date +%s%N | md5sum | cut -c 1-32)
     sysctl -w net.core.rmem_max=4000000
+    ulimit -n 1048576 && ulimit -u unlimited
     openssl ecparam -genkey -name prime256v1 -out /root/Hysteria/private.key
     openssl req -new -x509 -days 36500 -key /root/Hysteria/private.key -out /root/Hysteria/cert.crt -subj "/CN=www.bilibili.com"
     cat <<EOF > /root/Hysteria/server.json
@@ -130,8 +131,8 @@ EOF
 {
     "server": "$IP:$PORT",
     "obfs": "$OBFS",
-    "up_mbps": 20,
-    "down_mbps": 100,
+    "up_mbps": 200,
+    "down_mbps": 1000,
     "insecure": true,
     "socks5": {
         "listen": "127.0.0.1:1080"
@@ -339,4 +340,14 @@ menu() {
     esac
 }
 
-menu
+if [[ $# > 0 ]]; then
+    case $1 in
+        install ) installHysteria ;;
+        uninstall ) uninstall ;;
+        start ) start_hysteria ;;
+        restart ) restart ;;
+        stop ) stop_hysteria ;;
+    esac
+else
+    menu
+fi
