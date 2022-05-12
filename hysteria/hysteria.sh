@@ -203,7 +203,8 @@ installHysteria() {
     checkCentOS8
     install_base
     downloadHysteria
-    installBBR
+    read -p "是否安装BBR（y/n，默认n）：" INSTALL_BBR
+    [[ $INSTALL_BBR =~ "y"|"Y" ]] && INSTALL_BBR
     makeConfig
     systemctl enable hysteria
     systemctl start hysteria
