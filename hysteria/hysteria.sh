@@ -347,6 +347,7 @@ if [[ $# > 0 ]]; then
         start ) start_hysteria ;;
         restart ) restart ;;
         stop ) stop_hysteria ;;
+        * ) menu ;;
     esac
 else
     menu
