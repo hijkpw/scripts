@@ -585,6 +585,28 @@ install_warpcli(){
     yellow "WARP-Cli代理模式的IP为：$socks5IP"
 }
 
+change_warpcli_port() {
+    if [[ $(warp-cli --accept-tos status) =~ Connected ]]; then
+        warp-cli --accept-tos disconnect
+    fi
+    read -p "请输入WARP Cli使用的代理端口（默认40000）：" WARPCliPort
+    [[ -z $WARPCliPort ]] && WARPCliPort=40000
+    warp-cli --accept-tos set-proxy-port "$WARPCliPort" >/dev/null 2>&1
+    yellow "正在启动Warp-Cli代理模式"
+    warp-cli --accept-tos connect >/dev/null 2>&1
+    socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+    until [[ $socks5Status =~ on|plus ]]; do
+        red "启动Warp-Cli代理模式失败，正在尝试重启"
+        warp-cli --accept-tos disconnect >/dev/null 2>&1
+        warp-cli --accept-tos connect >/dev/null 2>&1
+        socks5Status=$(curl -sx socks5h://localhost:$WARPCliPort https://www.cloudflare.com/cdn-cgi/trace -k --connect-timeout 2 | grep warp | cut -d= -f2)
+        sleep 5
+    done
+    warp-cli --accept-tos enable-always-on >/dev/null 2>&1
+    green "WARP-Cli代理模式已启动成功并成功修改代理端口！"
+    yellow "本地Socks5代理为： 127.0.0.1:$WARPCliPort"
+}
+
 uninstall_warpcli(){
     warp-cli --accept-tos disconnect >/dev/null 2>&1
     warp-cli --accept-tos disable-always-on >/dev/null 2>&1
@@ -621,7 +643,8 @@ menu0(){
     echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}5.${PLAIN} 安装 WARP-Cli 代理模式 ${YELLOW}(Socks5 WARP)${PLAIN} ${RED}(仅支持IPv4或原生双栈VPS)${PLAIN}"
-    echo -e " ${GREEN}6.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
+    echo -e " ${GREEN}6.${PLAIN} 修改 WARP-Cli 代理模式连接端口"
+    echo -e " ${GREEN}7.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
@@ -651,7 +674,8 @@ menu1(){
     echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}5.${PLAIN} 安装 WARP-Cli 代理模式 ${YELLOW}(Socks5 WARP)${PLAIN} ${RED}(仅支持IPv4或原生双栈VPS)${PLAIN}"
-    echo -e " ${GREEN}6.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
+    echo -e " ${GREEN}6.${PLAIN} 修改 WARP-Cli 代理模式连接端口"
+    echo -e " ${GREEN}7.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
@@ -664,7 +688,8 @@ menu1(){
         3 ) wgcfmode=2 && install_wgcf ;;
         4 ) uninstall_wgcf ;;
         5 ) install_warpcli ;;
-        6 ) uninstall_warpcli ;;
+        6 ) change_warpcli_port ;;
+        7 ) uninstall_warpcli ;;
     esac
 }
 
@@ -683,7 +708,8 @@ menu2(){
     echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}5.${PLAIN} 安装 WARP-Cli 代理模式 ${YELLOW}(Socks5 WARP)${PLAIN} ${RED}(仅支持IPv4或原生双栈VPS)${PLAIN}"
-    echo -e " ${GREEN}6.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
+    echo -e " ${GREEN}6.${PLAIN} 修改 WARP-Cli 代理模式连接端口"
+    echo -e " ${GREEN}7.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
@@ -696,7 +722,8 @@ menu2(){
         3 ) wgcfmode=2 && install_wgcf ;;
         4 ) uninstall_wgcf ;;
         5 ) install_warpcli ;;
-        6 ) uninstall_warpcli ;;
+        6 ) change_warpcli_port ;;
+        7 ) uninstall_warpcli ;;
     esac
 }
 
