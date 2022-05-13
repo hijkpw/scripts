@@ -202,9 +202,9 @@ wgcfd(){
     if [[ ! -d "/etc/wireguard" ]]; then
         mkdir /etc/wireguard
     fi
-    
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
+    
     yellow "正在启动 Wgcf-WARP"
     wg-quick up wgcf >/dev/null 2>&1
     WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
