@@ -30,8 +30,6 @@ done
 
 [[ $EUID -ne 0 ]] && red "注意：请在root用户下运行脚本" && exit 1
 
-vpsvirt=$(systemd-detect-virt)
-
 archAffix(){
     case "$(uname -m)" in
         x86_64|amd64) echo 'amd64' ;;
@@ -101,6 +99,7 @@ install_wgcf(){
         ${PACKAGE_INSTALL[int]} sudo curl wget
         ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
     fi
+    vpsvirt=$(systemd-detect-virt)
     if [[ $vpsvirt =~ lxc|openvz ]]; then
         wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
@@ -109,11 +108,11 @@ install_wgcf(){
         wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go-s390x -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
     fi
-    wgcf_last_version=$(curl -Ls "https://api.github.com/repos/ViRb3/wgcf/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    wgcf_last_version=$(curl -Ls "https://api.github.com/repos/ViRb3/wgcf/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | sed "s/v//g")
     if [[ -z $wgcf_last_version ]]; then
         wgcf_last_version="v2.2.14"
     fi
-    wget -N --no-check-certificate https://github.com/ViRb3/wgcf/releases/download/v2.2.13/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf || wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf
+    wget -N --no-check-certificate https://github.com/ViRb3/wgcf/releases/download/latest/wgcf_"$last_version"_linux_$(archAffix) -O /usr/local/bin/wgcf || wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf
 }
 
 menu0(){
