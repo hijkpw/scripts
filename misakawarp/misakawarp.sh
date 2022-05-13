@@ -91,7 +91,7 @@ install_wgcf(){
         if [ "$main" -lt 5 ] || [ "$minor" -lt 6 ]; then
             if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
                 ${PACKAGE_INSTALL[int]} --no-install-recommends linux-headers-$(uname -r)
-                ${PACKAGE_INSTALL[int]} --no-install-recommends install wireguard-dkms
+                ${PACKAGE_INSTALL[int]} --no-install-recommends wireguard-dkms
             fi
         fi
     else
