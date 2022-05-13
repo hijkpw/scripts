@@ -392,10 +392,16 @@ install_wgcf(){
         if [[ $wgcfmode == 0 ]]; then
             wgcf64
         fi
+        if [[ $wgcfmode == 1 ]]; then
+            wgcf66
+        fi
         if [[ $wgcfmode == 2 ]]; then
             wgcf6d
         fi
     elif [[ $VPSIP == 1 ]]; then
+        if [[ $wgcfmode == 0 ]]; then
+            wgcf44
+        fi
         if [[ $wgcfmode == 1 ]]; then
             wgcf46
         fi
