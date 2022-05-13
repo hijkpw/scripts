@@ -113,6 +113,7 @@ install_wgcf(){
     if [[ -z $wgcf_last_version ]]; then
         wgcf_last_version="v2.2.14"
     fi
+    wget -N --no-check-certificate https://github.com/ViRb3/wgcf/releases/download/v2.2.13/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf || wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf
 }
 
 menu0(){
