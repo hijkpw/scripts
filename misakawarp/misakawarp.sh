@@ -605,6 +605,7 @@ change_warpcli_port() {
     warp-cli --accept-tos enable-always-on >/dev/null 2>&1
     green "WARP-Cli代理模式已启动成功并成功修改代理端口！"
     yellow "本地Socks5代理为： 127.0.0.1:$WARPCliPort"
+    yellow "WARP-Cli代理模式的IP为：$socks5IP"
 }
 
 uninstall_warpcli(){
