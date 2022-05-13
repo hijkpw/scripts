@@ -194,10 +194,11 @@ install_wgcf(){
             if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
                 vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
                 curl -Lo /etc/yum.repos.d/wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-$vsid/jdoss-wireguard-epel-$vsid.repo
-                yum -y install epel-release wireguard-dkms
+                ${PACKAGE_INSTALL[int]} wireguard-dkms
             fi
         fi
-    elif [[ $SYSTEM == "Debian" ]]; then
+    fi
+    if [[ $SYSTEM == "Debian" ]]; then
         main=`uname  -r | awk -F . '{print $1}'`
         minor=`uname -r | awk -F . '{print $2}'`
         ${PACKAGE_UPDATE[int]}
@@ -279,7 +280,7 @@ install_wgcf(){
         fi
     done
     MTU=$((${MTUy} - 80))
-    green "MTU最佳值=$MTU 已设置完毕"
+    green "MTU 最佳值=$MTU 已设置完毕"
     sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
     if [[ $VPSIP == 0 ]]; then
         if [[ $wgcfmode == 0 ]]; then
