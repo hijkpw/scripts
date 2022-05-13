@@ -238,7 +238,7 @@ install_wgcf(){
     if [[ -z $wgcf_last_version ]]; then
         wgcf_last_version="2.2.14"
     fi
-    wget -N --no-check-certificate https://github.com/ViRb3/wgcf/releases/download/latest/wgcf_"$last_version"_linux_$(archAffix) -O /usr/local/bin/wgcf || wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.14_linux_$(archAffix) -O /usr/local/bin/wgcf
+    wget -N --no-check-certificate https://github.com/ViRb3/wgcf/releases/download/latest/wgcf_"$wgcf_last_version"_linux_$(archAffix) -O /usr/local/bin/wgcf || wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.14_linux_$(archAffix) -O /usr/local/bin/wgcf
     chmod +x /usr/local/bin/wgcf
 
     until [[ -a wgcf-account.toml ]]; do
@@ -294,7 +294,7 @@ install_wgcf(){
     MTU=$((${MTUy} - 80))
     green "MTU 最佳值=$MTU 已设置完毕"
     sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
-    
+
     if [[ $VPSIP == 0 ]]; then
         if [[ $wgcfmode == 0 ]]; then
             warp64
