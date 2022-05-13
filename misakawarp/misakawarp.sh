@@ -184,6 +184,7 @@ warpd(){
 
 install_wgcf(){
     check_tun
+    vpsvirt=$(systemd-detect-virt)
     if [[ $SYSTEM == "CentOS" ]]; then
         main=`uname  -r | awk -F . '{print $1}'`
         minor=`uname -r | awk -F . '{print $2}'`
@@ -215,7 +216,6 @@ install_wgcf(){
         ${PACKAGE_INSTALL[int]} sudo curl wget
         ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
     fi
-    vpsvirt=$(systemd-detect-virt)
     if [[ $vpsvirt =~ lxc|openvz ]]; then
         wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
