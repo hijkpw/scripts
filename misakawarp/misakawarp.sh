@@ -30,6 +30,8 @@ done
 
 [[ $EUID -ne 0 ]] && red "注意：请在root用户下运行脚本" && exit 1
 
+vpsvirt=$(systemd-detect-virt)
+
 archAffix(){
     case "$(uname -m)" in
         x86_64|amd64) echo 'amd64' ;;
