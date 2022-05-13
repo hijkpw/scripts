@@ -512,7 +512,6 @@ uninstall_wgcf(){
         sed -i '/^precedence[ ]*::ffff:0:0\/96[ ]*100/d' /etc/gai.conf
     fi
     green "Wgcf-WARP 已彻底卸载成功！"
-    rm -f uninstall.sh
 }
 
 menu(){
