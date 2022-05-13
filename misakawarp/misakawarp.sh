@@ -470,7 +470,10 @@ install_wgcf(){
         fi
     elif [[ $VPSIP == 2 ]]; then
         if [[ $wgcfmode == 0 ]]; then
-            echo ""
+            wgcfd4
+        fi
+        if [[ $wgcfmode == 1 ]]; then
+            wgcfd6
         fi
         if [[ $wgcfmode == 2 ]]; then
             wgcfd
