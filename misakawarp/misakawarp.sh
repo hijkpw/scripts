@@ -185,9 +185,9 @@ warpd(){
 install_wgcf(){
     check_tun
     vpsvirt=$(systemd-detect-virt)
-    if [[ $SYSTEM == "CentOS" ]]; then
-        main=`uname  -r | awk -F . '{print $1}'`
-        minor=`uname -r | awk -F . '{print $2}'`
+    main=`uname  -r | awk -F . '{print $1}'`
+    minor=`uname -r | awk -F . '{print $2}'`
+    if [[ $SYSTEM == "CentOS" ]]; then        
         ${PACKAGE_INSTALL[int]} epel-release
         ${PACKAGE_INSTALL[int]} sudo curl wget net-tools wireguard-tools iptables
         if [ "$main" -lt 5 ] || [ "$minor" -lt 6 ]; then 
@@ -199,8 +199,6 @@ install_wgcf(){
         fi
     fi
     if [[ $SYSTEM == "Debian" ]]; then
-        main=`uname  -r | awk -F . '{print $1}'`
-        minor=`uname -r | awk -F . '{print $2}'`
         ${PACKAGE_UPDATE[int]}
         ${PACKAGE_INSTALL[int]} sudo wget curllsb-release
         echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" | tee /etc/apt/sources.list.d/backports.list
