@@ -218,7 +218,8 @@ install_wgcf(){
                 ${PACKAGE_INSTALL[int]} --no-install-recommends wireguard-dkms
             fi
         fi
-    else
+    fi
+    if [[ $SYSTEM == "Ubuntu" ]]; then
         ${PACKAGE_UPDATE[int]}
         ${PACKAGE_INSTALL[int]} sudo curl wget
         ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
@@ -341,7 +342,7 @@ menu0(){
     echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv4 + 原生IPv6)${PLAIN}"
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
     read -p " 请输入选项 [0-]:" menu0Input
-    case $menu0Input in
+    case "$menu0Input" in
         1 ) wgcfmode=1 && install_wgcf ;;
         2 ) wgcfmode=2 && install_wgcf ;;
     esac
@@ -359,7 +360,7 @@ menu1(){
     echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(原生 IPv4 + WARP IPv6)${PLAIN}"
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
     read -p " 请输入选项 [0-]:" menu1Input
-    case $menu1Input in
+    case "$menu1Input" in
 
     esac
 }
@@ -377,7 +378,7 @@ menu2(){
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv4 + 原生IPv6)${PLAIN}"
     echo -e " ${GREEN}3.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
     read -p " 请输入选项 [0-]:" menu2Input
-    case $menu2Input in
+    case "$menu2Input" in
 
     esac
 }
