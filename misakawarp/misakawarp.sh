@@ -78,11 +78,13 @@ wgcf46(){
     sed -i '/0\.\0\/0/d' wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/162.159.193.10/g' wgcf-profile.conf
     sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
+    
     if [[ ! -d "/etc/wireguard" ]]; then
         mkdir /etc/wireguard
     fi
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
+    
     yellow "正在启动 Wgcf-WARP"
     wg-quick up wgcf >/dev/null 2>&1
     WgcfWARPStatus=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
@@ -104,11 +106,13 @@ wgcf4d(){
     sed -i "8 s/^/PostDown = ip -4 rule delete from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/162.159.193.10/g' wgcf-profile.conf
     sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
+    
     if [[ ! -d "/etc/wireguard" ]]; then
         mkdir /etc/wireguard
     fi
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
+    
     yellow "正在启动 Wgcf-WARP"
     wg-quick up wgcf >/dev/null 2>&1
     WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
@@ -133,11 +137,13 @@ wgcf64(){
     sed -i '/\:\:\/0/d' wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
     sed -i 's/1.1.1.1/2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844,1.1.1.1,8.8.8.8,8.8.4.4/g' wgcf-profile.conf
+    
     if [[ ! -d "/etc/wireguard" ]]; then
         mkdir /etc/wireguard
     fi
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
+    
     yellow "正在启动 Wgcf-WARP"
     wg-quick up wgcf >/dev/null 2>&1
     WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
@@ -159,11 +165,13 @@ wgcf6d(){
     sed -i "8 s/^/PostDown = ip -6 rule delete from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
     sed -i 's/1.1.1.1/2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844,1.1.1.1,8.8.8.8,8.8.4.4/g' wgcf-profile.conf
+    
     if [[ ! -d "/etc/wireguard" ]]; then
         mkdir /etc/wireguard
     fi
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
+
     yellow "正在启动 Wgcf-WARP"
     wg-quick up wgcf >/dev/null 2>&1
     WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
@@ -190,9 +198,11 @@ wgcfd(){
     sed -i "9 s/^/PostUp = ip -6 rule add from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i "10 s/^/PostDown = ip -6 rule delete from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
+    
     if [[ ! -d "/etc/wireguard" ]]; then
         mkdir /etc/wireguard
     fi
+    
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
     mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
     yellow "正在启动 Wgcf-WARP"
