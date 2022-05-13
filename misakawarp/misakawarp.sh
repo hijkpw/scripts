@@ -224,6 +224,7 @@ install_wgcf(){
         ${PACKAGE_INSTALL[int]} sudo curl wget
         ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
     fi
+
     if [[ $vpsvirt =~ lxc|openvz ]]; then
         wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
@@ -232,18 +233,21 @@ install_wgcf(){
         wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go-s390x -O /usr/bin/wireguard-go
         chmod +x /usr/bin/wireguard-go
     fi
+
     wgcf_last_version=$(curl -Ls "https://api.github.com/repos/ViRb3/wgcf/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | sed "s/v//g")
     if [[ -z $wgcf_last_version ]]; then
         wgcf_last_version="2.2.14"
     fi
     wget -N --no-check-certificate https://github.com/ViRb3/wgcf/releases/download/latest/wgcf_"$last_version"_linux_$(archAffix) -O /usr/local/bin/wgcf || wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.14_linux_$(archAffix) -O /usr/local/bin/wgcf
     chmod +x /usr/local/bin/wgcf
+
     until [[ -a wgcf-account.toml ]]; do
         yellow "正在向CloudFlare WARP申请账号，如提示429 Too Many Requests错误请耐心等待即可"
         yes | wgcf register
         sleep 5
     done
     chmod +x wgcf-account.toml
+
     yellow "使用WARP免费版账户请按回车跳过 \n启用WARP+账户，请复制WARP+的许可证密钥(26个字符)后回车"
     read -p "按键许可证密钥(26个字符):" WPPlusKey
     if [[ -n $WPPlusKey ]]; then
@@ -258,6 +262,7 @@ install_wgcf(){
     fi
     wgcf generate
     chmod +x wgcf-profile.conf
+
     v66=`curl -s6m8 https://ip.gs -k`
     v44=`curl -s4m8 https://ip.gs -k`
     MTUy=1500
@@ -289,6 +294,7 @@ install_wgcf(){
     MTU=$((${MTUy} - 80))
     green "MTU 最佳值=$MTU 已设置完毕"
     sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
+    
     if [[ $VPSIP == 0 ]]; then
         if [[ $wgcfmode == 0 ]]; then
             warp64
