@@ -168,7 +168,64 @@ install_wgcf(){
     fi
     wgcf generate
     chmod +x wgcf-profile.conf
-
+    if [[ $VPSIP == 0 ]]; then
+        if [[ $wgcfmode == 0 ]]; then
+            warp64
+        fi
+        if [[ $wgcfmode == 1 ]]; then
+            warp6d
+        fi
+    elif [[ $VPSIP == 1 ]]; then
+        if [[ $wgcfmode == 0 ]]; then
+            warp46
+        fi
+        if [[ $wgcfmode == 1 ]]; then
+            warp4d
+        fi
+    elif [[ $VPSIP == 2 ]]; then
+        if [[ $wgcfmode == 0 ]]; then
+            
+        fi
+        if [[ $wgcfmode == 1 ]]; then
+            warpd
+        fi
+    fi
+    v66=`curl -s6m8 https://ip.gs -k`
+    v44=`curl -s4m8 https://ip.gs -k`
+    MTUy=1500
+    MTUc=10
+    if [[ -n ${v66} && -z ${v44} ]]; then
+        ping='ping6'
+        IP1='2606:4700:4700::1001'
+        IP2='2001:4860:4860::8888'
+    else
+        ping='ping'
+        IP1='1.1.1.1'
+        IP2='8.8.8.8'
+    fi
+    while true; do
+        if ${ping} -c1 -W1 -s$((${MTUy} - 28)) -Mdo ${IP1} >/dev/null 2>&1 || ${ping} -c1 -W1 -s$((${MTUy} - 28)) -Mdo ${IP2} >/dev/null 2>&1; then
+            MTUc=1
+            MTUy=$((${MTUy} + ${MTUc}))
+        else
+            MTUy=$((${MTUy} - ${MTUc}))
+            if [[ ${MTUc} = 1 ]]; then
+                break
+            fi
+        fi
+        if [[ ${MTUy} -le 1360 ]]; then
+            MTUy='1360'
+            break
+        fi
+    done
+    MTU=$((${MTUy} - 80))
+    green "MTU最佳值=$MTU 已设置完毕"
+    sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
+    if [[ ! -f /etc/wireguard ]]; then
+        mkdir /etc/wireguard
+    fi
+    mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
+    mv -f wgcf-account.toml /etc/wireguard/wgcf-account.toml
 }
 
 menu(){
