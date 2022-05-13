@@ -72,7 +72,7 @@ install_wgcf(){
         main=`uname  -r | awk -F . '{print $1}'`
         minor=`uname -r | awk -F . '{print $2}'`
         ${PACKAGE_INSTALL[int]} epel-release
-        ${PACKAGE_INSTALL[int]} net-tools wireguard-tools iptables
+        ${PACKAGE_INSTALL[int]} sudo curl wget net-tools wireguard-tools iptables
         if [ "$main" -lt 5 ] || [ "$minor" -lt 6 ]; then 
             if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
                 vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
@@ -84,7 +84,7 @@ install_wgcf(){
         main=`uname  -r | awk -F . '{print $1}'`
         minor=`uname -r | awk -F . '{print $2}'`
         ${PACKAGE_UPDATE[int]}
-        ${PACKAGE_INSTALL[int]} lsb-release
+        ${PACKAGE_INSTALL[int]} sudo wget curllsb-release
         echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" | tee /etc/apt/sources.list.d/backports.list
         ${PACKAGE_UPDATE[int]}
         ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
@@ -96,7 +96,16 @@ install_wgcf(){
         fi
     else
         ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} sudo curl wget
         ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
+    fi
+    if [[ $vpsvirt =~ lxc|openvz ]]; then
+        wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go -O /usr/bin/wireguard-go
+        chmod +x /usr/bin/wireguard-go
+    fi
+    if [[ $vpsvirt == zvm ]]; then
+        wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wireguard-go-s390x -O /usr/bin/wireguard-go
+        chmod +x /usr/bin/wireguard-go
     fi
 }
 
