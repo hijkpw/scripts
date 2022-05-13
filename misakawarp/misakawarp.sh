@@ -66,23 +66,69 @@ check_tun(){
     fi
 }
 
+wgcf46(){
+    sed -i '/0\.\0\/0/d' wgcf-profile.conf
+    sed -i 's/engage.cloudflareclient.com/162.159.193.10/g' wgcf-profile.conf
+    sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
+    yellow "正在启动 Wgcf-WARP"
+    wg-quick up wgcf >/dev/null 2>&1
+    WgcfWARPStatus=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    until [[ $WgcfWARPStatus =~ "on"|"plus" ]]; do
+        red "无法启动Wgcf-WARP，正在尝试重启"
+        wg-quick down wgcf >/dev/null 2>&1
+        wg-quick up wgcf >/dev/null 2>&1
+        WgcfWARPStatus=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        sleep 8
+    done
+    systemctl enable wg-quick@wgcf >/dev/null 2>&1
+    WgcfIPv6=$(curl -s6m8 https://ip.gs -k)
+    green "Wgcf-WARP 已启动成功"
+    yellow "Wgcf-WARP的IPv6 IP为：$WgcfIPv6"
+}
+
 wgcf4d(){
     sed -i "7 s/^/PostUp = ip -4 rule add from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i "8 s/^/PostDown = ip -4 rule delete from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/162.159.193.10/g' wgcf-profile.conf
     sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
-}
-
-wgcf46(){
-    sed -i '/0\.\0\/0/d' wgcf-profile.conf
-    sed -i 's/engage.cloudflareclient.com/162.159.193.10/g' wgcf-profile.conf
-    sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
+    yellow "正在启动 Wgcf-WARP"
+    wg-quick up wgcf >/dev/null 2>&1
+    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    until [[ $WgcfWARP4Status =~ on|plus ]] && [[ $WgcfWARP6Status =~ on|plus ]]; do
+        red "无法启动Wgcf-WARP，正在尝试重启"
+        wg-quick down wgcf >/dev/null 2>&1
+        wg-quick up wgcf >/dev/null 2>&1
+        WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        sleep 8
+    done
+    systemctl enable wg-quick@wgcf >/dev/null 2>&1
+    WgcfIPv4=$(curl -s4m8 https://ip.gs -k)
+    WgcfIPv6=$(curl -s6m8 https://ip.gs -k)
+    green "Wgcf-WARP 已启动成功"
+    yellow "Wgcf-WARP的IPv4 IP为：$WgcfIPv4"
+    yellow "Wgcf-WARP的IPv6 IP为：$WgcfIPv6"
 }
 
 warp64(){
     sed -i '/\:\:\/0/d' wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
     sed -i 's/1.1.1.1/2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844,1.1.1.1,8.8.8.8,8.8.4.4/g' wgcf-profile.conf
+    yellow "正在启动 Wgcf-WARP"
+    wg-quick up wgcf >/dev/null 2>&1
+    WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    until [[ $WgcfWARPStatus =~ on|plus ]]; do
+        red "无法启动Wgcf-WARP，正在尝试重启"
+        wg-quick down wgcf >/dev/null 2>&1
+        wg-quick up wgcf >/dev/null 2>&1
+        WgcfWARPStatus=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        sleep 8
+    done
+    systemctl enable wg-quick@wgcf >/dev/null 2>&1
+    WgcfIPv4=$(curl -s4m8 https://ip.gs -k)
+    green "Wgcf-WARP 已启动成功"
+    yellow "Wgcf-WARP的IPv4 IP为：$WgcfIPv4"
 }
 
 warp6d(){
@@ -90,6 +136,24 @@ warp6d(){
     sed -i "8 s/^/PostDown = ip -6 rule delete from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
     sed -i 's/1.1.1.1/2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844,1.1.1.1,8.8.8.8,8.8.4.4/g' wgcf-profile.conf
+    yellow "正在启动 Wgcf-WARP"
+    wg-quick up wgcf >/dev/null 2>&1
+    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    until [[ $WgcfWARP4Status =~ on|plus ]] && [[ $WgcfWARP6Status =~ on|plus ]]; do
+        red "无法启动Wgcf-WARP，正在尝试重启"
+        wg-quick down wgcf >/dev/null 2>&1
+        wg-quick up wgcf >/dev/null 2>&1
+        WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        sleep 8
+    done
+    systemctl enable wg-quick@wgcf >/dev/null 2>&1
+    WgcfIPv4=$(curl -s4m8 https://ip.gs -k)
+    WgcfIPv6=$(curl -s6m8 https://ip.gs -k)
+    green "Wgcf-WARP 已启动成功"
+    yellow "Wgcf-WARP的IPv4 IP为：$WgcfIPv4"
+    yellow "Wgcf-WARP的IPv6 IP为：$WgcfIPv6"
 }
 
 warpd(){
@@ -98,6 +162,24 @@ warpd(){
     sed -i "9 s/^/PostUp = ip -6 rule add from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i "10 s/^/PostDown = ip -6 rule delete from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i 's/1.1.1.1/1.1.1.1,8.8.8.8,8.8.4.4,2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844/g' wgcf-profile.conf
+    yellow "正在启动 Wgcf-WARP"
+    wg-quick up wgcf >/dev/null 2>&1
+    WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    until [[ $WgcfWARP4Status =~ on|plus ]] && [[ $WgcfWARP6Status =~ on|plus ]]; do
+        red "无法启动Wgcf-WARP，正在尝试重启"
+        wg-quick down wgcf >/dev/null 2>&1
+        wg-quick up wgcf >/dev/null 2>&1
+        WgcfWARP4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        WgcfWARP6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+        sleep 8
+    done
+    systemctl enable wg-quick@wgcf >/dev/null 2>&1
+    WgcfIPv4=$(curl -s4m8 https://ip.gs -k)
+    WgcfIPv6=$(curl -s6m8 https://ip.gs -k)
+    green "Wgcf-WARP 已启动成功"
+    yellow "Wgcf-WARP的IPv4 IP为：$WgcfIPv4"
+    yellow "Wgcf-WARP的IPv6 IP为：$WgcfIPv6"
 }
 
 install_wgcf(){
@@ -168,28 +250,6 @@ install_wgcf(){
     fi
     wgcf generate
     chmod +x wgcf-profile.conf
-    if [[ $VPSIP == 0 ]]; then
-        if [[ $wgcfmode == 0 ]]; then
-            warp64
-        fi
-        if [[ $wgcfmode == 1 ]]; then
-            warp6d
-        fi
-    elif [[ $VPSIP == 1 ]]; then
-        if [[ $wgcfmode == 0 ]]; then
-            warp46
-        fi
-        if [[ $wgcfmode == 1 ]]; then
-            warp4d
-        fi
-    elif [[ $VPSIP == 2 ]]; then
-        if [[ $wgcfmode == 0 ]]; then
-            
-        fi
-        if [[ $wgcfmode == 1 ]]; then
-            warpd
-        fi
-    fi
     v66=`curl -s6m8 https://ip.gs -k`
     v44=`curl -s4m8 https://ip.gs -k`
     MTUy=1500
@@ -221,6 +281,28 @@ install_wgcf(){
     MTU=$((${MTUy} - 80))
     green "MTU最佳值=$MTU 已设置完毕"
     sed -i "s/MTU.*/MTU = $MTU/g" wgcf-profile.conf
+    if [[ $VPSIP == 0 ]]; then
+        if [[ $wgcfmode == 0 ]]; then
+            warp64
+        fi
+        if [[ $wgcfmode == 2 ]]; then
+            warp6d
+        fi
+    elif [[ $VPSIP == 1 ]]; then
+        if [[ $wgcfmode == 0 ]]; then
+            warp46
+        fi
+        if [[ $wgcfmode == 2 ]]; then
+            warp4d
+        fi
+    elif [[ $VPSIP == 2 ]]; then
+        if [[ $wgcfmode == 0 ]]; then
+            
+        fi
+        if [[ $wgcfmode == 2]]; then
+            warpd
+        fi
+    fi
     if [[ ! -f /etc/wireguard ]]; then
         mkdir /etc/wireguard
     fi
