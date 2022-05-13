@@ -119,7 +119,7 @@ wgcf4d(){
     yellow "Wgcf-WARP的IPv6 IP为：$WgcfIPv6"
 }
 
-warp64(){
+wgcf64(){
     sed -i '/\:\:\/0/d' wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
     sed -i 's/1.1.1.1/2606:4700:4700::1001,2606:4700:4700::1111,2001:4860:4860::8888,2001:4860:4860::8844,1.1.1.1,8.8.8.8,8.8.4.4/g' wgcf-profile.conf
@@ -139,7 +139,7 @@ warp64(){
     yellow "Wgcf-WARP的IPv4 IP为：$WgcfIPv4"
 }
 
-warp6d(){
+wgcf6d(){
     sed -i "7 s/^/PostUp = ip -6 rule add from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i "8 s/^/PostDown = ip -6 rule delete from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i 's/engage.cloudflareclient.com/[2606:4700:d0::a29f:c001]/g' wgcf-profile.conf
@@ -164,7 +164,7 @@ warp6d(){
     yellow "Wgcf-WARP的IPv6 IP为：$WgcfIPv6"
 }
 
-warpd(){
+wgcfd(){
     sed -i "7 s/^/PostUp = ip -4 rule add from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i "8 s/^/PostDown = ip -4 rule delete from $(ip route get 114.114.114.114 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
     sed -i "9 s/^/PostUp = ip -6 rule add from $(ip route get 2400:3200::1 | grep -oP 'src \K\S+') lookup main\n/" wgcf-profile.conf
@@ -297,24 +297,24 @@ install_wgcf(){
 
     if [[ $VPSIP == 0 ]]; then
         if [[ $wgcfmode == 0 ]]; then
-            warp64
+            wgcf64
         fi
         if [[ $wgcfmode == 2 ]]; then
-            warp6d
+            wgcf6d
         fi
     elif [[ $VPSIP == 1 ]]; then
         if [[ $wgcfmode == 1 ]]; then
-            warp46
+            wgcf46
         fi
         if [[ $wgcfmode == 2 ]]; then
-            warp4d
+            wgcf4d
         fi
     elif [[ $VPSIP == 2 ]]; then
         if [[ $wgcfmode == 0 ]]; then
             echo ""
         fi
         if [[ $wgcfmode == 2 ]]; then
-            warpd
+            wgcfd
         fi
     fi
     if [[ ! -f /etc/wireguard ]]; then
