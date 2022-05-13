@@ -355,8 +355,8 @@ menu1(){
     echo "#############################################################"
     echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(原生 IPv4 + WARP IPv6)${PLAIN}"
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
-    read -p " 请输入选项 [0-]:" menu0Input
-    case $menu0Input in
+    read -p " 请输入选项 [0-]:" menu1Input
+    case $menu1Input in
 
     esac
 }
@@ -372,8 +372,8 @@ menu2(){
     echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(原生 IPv4 + WARP IPv6)${PLAIN}"
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv4 + 原生IPv6)${PLAIN}"
     echo -e " ${GREEN}3.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
-    read -p " 请输入选项 [0-]:" menu0Input
-    case $menu0Input in
+    read -p " 请输入选项 [0-]:" menu2Input
+    case $menu2Input in
 
     esac
 }
