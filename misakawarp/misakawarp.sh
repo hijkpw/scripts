@@ -110,9 +110,31 @@ install_wgcf(){
     fi
     wgcf_last_version=$(curl -Ls "https://api.github.com/repos/ViRb3/wgcf/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | sed "s/v//g")
     if [[ -z $wgcf_last_version ]]; then
-        wgcf_last_version="v2.2.14"
+        wgcf_last_version="2.2.14"
     fi
-    wget -N --no-check-certificate https://github.com/ViRb3/wgcf/releases/download/latest/wgcf_"$last_version"_linux_$(archAffix) -O /usr/local/bin/wgcf || wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.13_linux_s390x -O /usr/local/bin/wgcf
+    wget -N --no-check-certificate https://github.com/ViRb3/wgcf/releases/download/latest/wgcf_"$last_version"_linux_$(archAffix) -O /usr/local/bin/wgcf || wget -N --no-check-certificate https://cdn.jsdelivr.net/gh/Misaka-blog/Misaka-WARP-Script/files/wgcf_2.2.14_linux_$(archAffix) -O /usr/local/bin/wgcf
+    chmod +x /usr/local/bin/wgcf
+    until [[ -a wgcf-account.toml ]]; do
+        yellow "正在向CloudFlare WARP申请账号，如提示429 Too Many Requests错误请耐心等待即可"
+        yes | wgcf register
+        sleep 5
+    done
+    chmod +x wgcf-account.toml
+    yellow "使用WARP免费版账户请按回车跳过 \n启用WARP+账户，请复制WARP+的许可证密钥(26个字符)后回车"
+    read -p "按键许可证密钥(26个字符):" WPPlusKey
+    if [[ -n $WPPlusKey ]]; then
+        sed -i "s/license_key.*/license_key = \"$WPPlusKey\"/g" wgcf-account.toml
+        read -p "请输入自定义设备名，如未输入则使用默认随机设备名：" WPPlusName
+        green "注册WARP+账户中，如下方显示：400 Bad Request，则使用WARP免费版账户" 
+        if [[ -n $WPPlusName ]]; then
+            wgcf update --name $(echo $WPPlusName | sed s/[[:space:]]/_/g)
+        else
+            wgcf update
+        fi
+    fi
+    wgcf generate
+    chmod +x wgcf-profile.conf
+    
 }
 
 menu0(){
