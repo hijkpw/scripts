@@ -434,11 +434,13 @@ menu0(){
     echo "#############################################################"
     echo -e ""
     echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv4 + 原生IPv6)${PLAIN}"
-    echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
+    echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv6)${PLAIN}"
+    echo -e " ${GREEN}3.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
     read -p " 请输入选项 [0-]:" menu0Input
     case "$menu0Input" in
         1 ) wgcfmode=0 && install_wgcf ;;
-        2 ) wgcfmode=2 && install_wgcf ;;
+        2 ) wgcfmode=1 && install_wgcf ;;
+        3 ) wgcfmode=2 && install_wgcf ;;
     esac
 }
 
@@ -451,12 +453,14 @@ menu1(){
     echo -e "# ${GREEN}论坛${PLAIN}: https://vpsgo.co                                    #"
     echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
     echo "#############################################################"
-    echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(原生 IPv4 + WARP IPv6)${PLAIN}"
-    echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
+    echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv4)${PLAIN}"
+    echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(原生 IPv4 + WARP IPv6)${PLAIN}"
+    echo -e " ${GREEN}3.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
     read -p " 请输入选项 [0-]:" menu1Input
     case "$menu1Input" in
-        1 ) wgcfmode=1 && install_wgcf ;;
-        2 ) wgcfmode=2 && install_wgcf ;;
+        1 ) wgcfmode=0 && install_wgcf ;;
+        2 ) wgcfmode=1 && install_wgcf ;;
+        3 ) wgcfmode=2 && install_wgcf ;;
     esac
 }
 
