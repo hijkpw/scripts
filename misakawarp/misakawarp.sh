@@ -304,7 +304,7 @@ install_wgcf(){
         fi
     elif [[ $VPSIP == 2 ]]; then
         if [[ $wgcfmode == 0 ]]; then
-            
+            echo ""
         fi
         if [[ $wgcfmode == 2 ]]; then
             warpd
