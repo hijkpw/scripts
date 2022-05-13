@@ -500,6 +500,21 @@ install_wgcf(){
     fi
 }
 
+uninstall_wgcf(){
+    wg-quick down wgcf 2>/dev/null
+    systemctl disable wg-quick@wgcf 2>/dev/null
+    ${PACKAGE_UNINSTALL[int]} wireguard-tools wireguard-dkms 2>/dev/null
+    [[ -z $(type -P wireproxy) ]] && rm -f /usr/local/bin/wgcf 
+    rm -f /etc/wireguard/wgcf.conf
+    rm -f /etc/wireguard/wgcf-account.toml
+    rm -f /usr/bin/wireguard-go
+    if [[ -e /etc/gai.conf ]]; then
+        sed -i '/^precedence[ ]*::ffff:0:0\/96[ ]*100/d' /etc/gai.conf
+    fi
+    green "Wgcf-WARP 已彻底卸载成功！"
+    rm -f uninstall.sh
+}
+
 menu(){
     check_status
     if [[ $VPSIP == 0 ]]; then
@@ -524,6 +539,7 @@ menu0(){
     echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv4 + 原生IPv6)${PLAIN}"
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv6)${PLAIN}"
     echo -e " ${GREEN}3.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
+    echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
     echo -e "VPS IP特征：${RED}纯IPv6的VPS${PLAIN}"
@@ -533,6 +549,7 @@ menu0(){
         1 ) wgcfmode=0 && install_wgcf ;;
         2 ) wgcfmode=1 && install_wgcf ;;
         3 ) wgcfmode=2 && install_wgcf ;;
+        4 ) uninstall_wgcf ;;
     esac
 }
 
@@ -548,6 +565,7 @@ menu1(){
     echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv4)${PLAIN}"
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(原生 IPv4 + WARP IPv6)${PLAIN}"
     echo -e " ${GREEN}3.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
+    echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
     echo -e "VPS IP特征：${RED}纯IPv4的VPS${PLAIN}"
@@ -557,6 +575,7 @@ menu1(){
         1 ) wgcfmode=0 && install_wgcf ;;
         2 ) wgcfmode=1 && install_wgcf ;;
         3 ) wgcfmode=2 && install_wgcf ;;
+        4 ) uninstall_wgcf ;;
     esac
 }
 
@@ -572,6 +591,7 @@ menu2(){
     echo -e " ${GREEN}1.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(原生 IPv4 + WARP IPv6)${PLAIN}"
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 单栈模式 ${YELLOW}(WARP IPv4 + 原生IPv6)${PLAIN}"
     echo -e " ${GREEN}3.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
+    echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
     echo -e "VPS IP特征：${RED}原生IP双栈的VPS${PLAIN}"
@@ -581,6 +601,7 @@ menu2(){
         1 ) wgcfmode=0 && install_wgcf ;;
         2 ) wgcfmode=1 && install_wgcf ;;
         3 ) wgcfmode=2 && install_wgcf ;;
+        4 ) uninstall_wgcf ;;
     esac
 }
 
