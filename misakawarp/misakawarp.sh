@@ -621,6 +621,7 @@ menu0(){
     echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}5.${PLAIN} 安装 WARP-Cli 代理模式 ${YELLOW}(Socks5 WARP)${PLAIN} ${RED}(仅支持IPv4或原生双栈VPS)${PLAIN}"
+    echo -e " ${GREEN}6.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
@@ -650,6 +651,7 @@ menu1(){
     echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}5.${PLAIN} 安装 WARP-Cli 代理模式 ${YELLOW}(Socks5 WARP)${PLAIN} ${RED}(仅支持IPv4或原生双栈VPS)${PLAIN}"
+    echo -e " ${GREEN}6.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
@@ -661,6 +663,8 @@ menu1(){
         2 ) wgcfmode=1 && install_wgcf ;;
         3 ) wgcfmode=2 && install_wgcf ;;
         4 ) uninstall_wgcf ;;
+        5 ) install_warpcli ;;
+        6 ) uninstall_warpcli ;;
     esac
 }
 
@@ -679,6 +683,7 @@ menu2(){
     echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Wgcf-WARP${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}5.${PLAIN} 安装 WARP-Cli 代理模式 ${YELLOW}(Socks5 WARP)${PLAIN} ${RED}(仅支持IPv4或原生双栈VPS)${PLAIN}"
+    echo -e " ${GREEN}6.${PLAIN} ${RED}卸载 WARP-Cli 代理模式${PLAIN}"
     echo " -------------"
     echo -e " ${GREEN}0.${PLAIN} 退出脚本"
     echo -e ""
@@ -690,6 +695,8 @@ menu2(){
         2 ) wgcfmode=1 && install_wgcf ;;
         3 ) wgcfmode=2 && install_wgcf ;;
         4 ) uninstall_wgcf ;;
+        5 ) install_warpcli ;;
+        6 ) uninstall_warpcli ;;
     esac
 }
 
