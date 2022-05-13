@@ -514,6 +514,42 @@ uninstall_wgcf(){
     green "Wgcf-WARP 已彻底卸载成功！"
 }
 
+install_warpcli(){
+    check_tun
+    if [[ $(archAffix) != "amd64" ]]; then
+        red "不支持的CPU架构，请使用amd64架构的VPS"
+        exit 1
+    fi
+
+    vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
+    [[ $SYSTEM == "CentOS" ]] && [[ ! ${vsid} =~ 8 ]] && yellow "当前系统版本：Centos $vsid \nWARP-Cli代理模式仅支持Centos 8系统"
+    [[ $SYSTEM == "Debian" ]] && [[ ! ${vsid} =~ 9|10|11 ]] && yellow "当前系统版本：Debian $vsid \nWARP-Cli代理模式仅支持Debian 9-11系统"
+    [[ $SYSTEM == "Ubuntu" ]] && [[ ! ${vsid} =~ 16|18|20|22 ]] && yellow "当前系统版本：Ubuntu $vsid \nWARP-Cli代理模式仅支持Ubuntu 16.04/18.04/20.04/22.04系统"
+
+    if [[ $SYSTEM == "CentOS" ]]; then
+        ${PACKAGE_INSTALL[int]} epel-release
+        ${PACKAGE_INSTALL[int]} net-tools
+        rpm -ivh http://pkg.cloudflareclient.com/cloudflare-release-el$vsid.rpm
+        ${PACKAGE_INSTALL[int]} cloudflare-warp
+    fi
+    if [[ $SYSTEM == "Debian" ]]; then
+        ${PACKAGE_INSTALL[int]} lsb-release
+        [[ -z $(type -P gpg 2>/dev/null) ]] && ${PACKAGE_INSTALL[int]} gnupg
+        [[ -z $(apt list 2>/dev/null | grep apt-transport-https | grep installed) ]] && ${PACKAGE_INSTALL[int]} apt-transport-https
+        curl https://pkg.cloudflareclient.com/pubkey.gpg | apt-key add -
+        echo "deb http://pkg.cloudflareclient.com/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/cloudflare-client.list
+        ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} cloudflare-warp
+    fi
+    if [[ $SYSTEM == "Ubuntu" ]]; then
+        ${PACKAGE_INSTALL[int]} lsb-release
+        curl https://pkg.cloudflareclient.com/pubkey.gpg | apt-key add -
+        echo "deb http://pkg.cloudflareclient.com/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/cloudflare-client.list
+        ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} cloudflare-warp
+    fi
+}
+
 menu(){
     check_status
     if [[ $VPSIP == 0 ]]; then
