@@ -299,7 +299,7 @@ install_wgcf(){
         if [[ $wgcfmode == 0 ]]; then
             
         fi
-        if [[ $wgcfmode == 2]]; then
+        if [[ $wgcfmode == 2 ]]; then
             warpd
         fi
     fi
