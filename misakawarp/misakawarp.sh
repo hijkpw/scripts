@@ -53,3 +53,33 @@ check_status(){
         VPSIP=2
     fi
 }
+
+menu0(){
+    echo "#############################################################"
+    echo -e "#                  ${RED} WARP  一键安装脚本${PLAIN}                      #"
+    echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://owo.misaka.rest                             #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://vpsgo.co                                    #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
+    echo "#############################################################"
+}
+
+menu1(){
+    echo "#############################################################"
+    echo -e "#                  ${RED} WARP  一键安装脚本${PLAIN}                      #"
+    echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://owo.misaka.rest                             #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://vpsgo.co                                    #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
+    echo "#############################################################"
+}
+
+menu2(){
+    echo "#############################################################"
+    echo -e "#                  ${RED} WARP  一键安装脚本${PLAIN}                      #"
+    echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
+    echo -e "# ${GREEN}网址${PLAIN}: https://owo.misaka.rest                             #"
+    echo -e "# ${GREEN}论坛${PLAIN}: https://vpsgo.co                                    #"
+    echo -e "# ${GREEN}TG群${PLAIN}: https://t.me/misakanetcn                            #"
+    echo "#############################################################"
+}
