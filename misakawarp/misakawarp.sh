@@ -68,7 +68,36 @@ check_tun(){
 
 install_wgcf(){
     check_tun
-    
+    if [[ $SYSTEM == "CentOS" ]]; then
+        main=`uname  -r | awk -F . '{print $1}'`
+        minor=`uname -r | awk -F . '{print $2}'`
+        ${PACKAGE_INSTALL[int]} epel-release
+        ${PACKAGE_INSTALL[int]} net-tools wireguard-tools iptables
+        if [ "$main" -lt 5 ] || [ "$minor" -lt 6 ]; then 
+            if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
+                vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
+                curl -Lo /etc/yum.repos.d/wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-$vsid/jdoss-wireguard-epel-$vsid.repo
+                yum -y install epel-release wireguard-dkms
+            fi
+        fi
+    elif [[ $SYSTEM == "Debian" ]]; then
+        main=`uname  -r | awk -F . '{print $1}'`
+        minor=`uname -r | awk -F . '{print $2}'`
+        ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} lsb-release
+        echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" | tee /etc/apt/sources.list.d/backports.list
+        ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
+        if [ "$main" -lt 5 ] || [ "$minor" -lt 6 ]; then
+            if [[ ${vpsvirt} == "kvm" || ${vpsvirt} == "xen" || ${vpsvirt} == "microsoft" ]]; then
+                ${PACKAGE_INSTALL[int]} --no-install-recommends linux-headers-$(uname -r)
+                ${PACKAGE_INSTALL[int]} --no-install-recommends install wireguard-dkms
+            fi
+        fi
+    else
+        ${PACKAGE_UPDATE[int]}
+        ${PACKAGE_INSTALL[int]} --no-install-recommends net-tools iproute2 openresolv dnsutils wireguard-tools iptables
+    fi
 }
 
 menu0(){
