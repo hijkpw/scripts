@@ -296,7 +296,7 @@ install_wgcf(){
             warp6d
         fi
     elif [[ $VPSIP == 1 ]]; then
-        if [[ $wgcfmode == 0 ]]; then
+        if [[ $wgcfmode == 1 ]]; then
             warp46
         fi
         if [[ $wgcfmode == 2 ]]; then
@@ -329,6 +329,7 @@ menu(){
 }
 
 menu0(){
+    clear
     echo "#############################################################"
     echo -e "#                  ${RED} WARP  一键安装脚本${PLAIN}                      #"
     echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
@@ -341,11 +342,13 @@ menu0(){
     echo -e " ${GREEN}2.${PLAIN} 安装 Wgcf-WARP 双栈模式 ${YELLOW}(WARP IPV4 + WARP IPv6)${PLAIN}"
     read -p " 请输入选项 [0-]:" menu0Input
     case $menu0Input in
-
+        1 ) wgcfmode=1 && install_wgcf ;;
+        2 ) wgcfmode=2 && install_wgcf ;;
     esac
 }
 
 menu1(){
+    clear
     echo "#############################################################"
     echo -e "#                  ${RED} WARP  一键安装脚本${PLAIN}                      #"
     echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
@@ -362,6 +365,7 @@ menu1(){
 }
 
 menu2(){
+    clear
     echo "#############################################################"
     echo -e "#                  ${RED} WARP  一键安装脚本${PLAIN}                      #"
     echo -e "# ${GREEN}作者${PLAIN}: Misaka No                                           #"
