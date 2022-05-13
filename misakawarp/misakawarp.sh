@@ -171,6 +171,17 @@ install_wgcf(){
 
 }
 
+menu(){
+    check_status
+    if [[ $VPSIP == 0 ]]; then
+        menu0
+    elif [[ $VPSIP == 1 ]]; then
+        menu1
+    elif [[ $VPSIP == 2 ]]; then
+        menu2
+    fi
+}
+
 menu0(){
     echo "#############################################################"
     echo -e "#                  ${RED} WARP  一键安装脚本${PLAIN}                      #"
