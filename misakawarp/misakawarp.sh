@@ -317,7 +317,7 @@ install_wgcf(){
             wgcfd
         fi
     fi
-    if [[ ! -f /etc/wireguard ]]; then
+    if [[ ! -d "/etc/wireguard" ]]; then
         mkdir /etc/wireguard
     fi
     mv -f wgcf-profile.conf /etc/wireguard/wgcf.conf
